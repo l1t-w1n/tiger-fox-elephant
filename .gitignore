@@ -27,7 +27,7 @@ env/
 .env/
 
 # Data files
-
+data/raw/*
 data/processed/*
 data/generated/*
 !data/raw/.gitkeep
@@ -100,3 +100,5 @@ wheels/
 .Trashes
 ehthumbs.db
 Thumbs.db
+
+setup-script.sh
