@@ -1,6 +1,12 @@
 import matplotlib.pyplot as plt
 import seaborn as sns
 import cv2
+import sys
+from pathlib import Path
+project_root = Path.cwd().parent 
+sys.path.append(str(project_root))
+from config.config import Config
+
 
 def plot_curves_confusion (history,confusion_matrix,class_names):
   plt.figure(1,figsize=(16,6))
@@ -64,14 +70,14 @@ def plot_curves(histories):
         plt.legend(['Training accuracy', 'Validation accuracy'], loc='upper left')
         plt.show()
         
-    def plot_examples(X,y):
-        plt.figure(figsize=(15,15))
-        for i in range(Config.COLUMNS):
-            plt.subplot(5,5,i+1)
-            plt.xticks([])
-            plt.yticks([])
-            plt.grid(False)
-            # cv2 lit met les images en BGR et matplotlib lit du RGB
-            X[i] = cv2.cvtColor(X[i], cv2.COLOR_BGR2RGB)
-            plt.imshow(X[i]/255.,cmap=plt.cm.binary)
-            plt.xlabel('classe ' + str(y[i]))
+def plot_examples(X,y):
+    plt.figure(figsize=(15,15))
+    for i in range(Config.COLUMNS):
+        plt.subplot(5,5,i+1)
+        plt.xticks([])
+        plt.yticks([])
+        plt.grid(False)
+        # cv2 lit met les images en BGR et matplotlib lit du RGB
+        X[i] = cv2.cvtColor(X[i], cv2.COLOR_BGR2RGB)
+        plt.imshow(X[i]/255.,cmap=plt.cm.binary)
+        plt.xlabel(str(y[i]))

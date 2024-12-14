@@ -2,8 +2,11 @@ import numpy as np
 import random
 import os
 import cv2
-from ..config.config import Config
-
+import sys
+from pathlib import Path
+project_root = Path.cwd().parent 
+sys.path.append(str(project_root))
+from config.config import Config
 
 def create_training_data(path_data, list_classes):
   training_data=[]
