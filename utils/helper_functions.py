@@ -10,18 +10,40 @@ sys.path.append(str(project_root))
 from config.config import Config
 
 def create_training_data(list_classes):
-  training_data=[]
-  for classes in list_classes:
-      path=os.path.join(Config.PROCESSED_DATA_DIR, classes)
-      class_num=list_classes.index(classes)
-      for img in os.listdir(path):
-        try:
-          img_array = cv2.imread(os.path.join(path,img), cv2.IMREAD_UNCHANGED)
-          new_array = cv2.resize(img_array, (Config.IMG_SIZE, Config.IMG_SIZE))
-          training_data.append([new_array, class_num])
-        except Exception as e:
-          pass
-  return training_data
+    """
+    Creates training data by reading images and assigning binary labels.
+    Label 0 is assigned to any class containing 'negative', label 1 to others.
+    
+    Args:
+        list_classes: List of class directory names (e.g., ['tiger', 'tiger_negative'])
+    
+    Returns:
+        List of [image_array, label] pairs where label is 0 for negative classes
+        and 1 for positive classes
+    """
+    training_data = []
+    for classes in list_classes:
+        # Determine class label based on whether 'negative' appears in the class name
+        # The .lower() ensures we catch 'Negative', 'NEGATIVE', etc.
+        class_num = 0 if 'negative' in classes.lower() else 1
+        
+        # Construct full path to class directory
+        path = os.path.join(Config.PROCESSED_DATA_DIR, classes)
+        
+        # Process each image in the directory
+        for img in os.listdir(path):
+            try:
+                # Read and resize the image
+                img_array = cv2.imread(os.path.join(path, img), cv2.IMREAD_UNCHANGED)
+                new_array = cv2.resize(img_array, (Config.IMG_SIZE, Config.IMG_SIZE))
+                
+                # Add the image and its label to our dataset
+                training_data.append([new_array, class_num])
+            except Exception as e:
+                # Skip any problematic images
+                pass
+    
+    return training_data
 
 def create_X_y (list_classes):
       # récupération des données

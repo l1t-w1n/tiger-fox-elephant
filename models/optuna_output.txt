@@ -1,0 +1,47 @@
+Optimization finished for tiger:
+Best trial value: 92.31%
+Best parameters:
+    batch_size: 42
+    lr: 2.5868972971292134e-05
+    weight_decay: 5.183617813762396e-05
+    n_layers: 2
+    n_channels_l0: 108
+    n_channels_l1: 22
+    dropout_l0: 0.33437833350401747
+    dropout_l1: 0.38473381150080915
+    n_fc_layers: 1
+    n_fc_units_l0: 434
+    fc_dropout_l0: 0.2260000036956811
+    n_epochs: 40
+
+Optimization finished for elephant:
+Best trial value: 100.00%
+Best parameters:
+    batch_size: 44
+    lr: 4.707489846497084e-05
+    weight_decay: 0.0003605984199756961
+    n_layers: 2
+    n_channels_l0: 94
+    n_channels_l1: 88
+    dropout_l0: 0.1706381816861283
+    dropout_l1: 0.3029197744318907
+    n_fc_layers: 1
+    n_fc_units_l0: 210
+    fc_dropout_l0: 0.1537288053113789
+    n_epochs: 41
+    
+Optimization finished for fox:
+Best trial value: 100.00%
+Best parameters:
+    batch_size: 39
+    lr: 3.8204563468507654e-05
+    weight_decay: 1.771607427297915e-05
+    n_layers: 2
+    n_channels_l0: 65
+    n_channels_l1: 62
+    dropout_l0: 0.32052513227864154
+    dropout_l1: 0.15647822621024182
+    n_fc_layers: 1
+    n_fc_units_l0: 273
+    fc_dropout_l0: 0.46858815052636377
+    n_epochs: 25

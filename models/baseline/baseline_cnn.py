@@ -18,7 +18,7 @@ class AnimalDataset(Dataset):
     """Custom Dataset class for binary classification"""
     def __init__(self, X, y):
         self.X = torch.FloatTensor(X).permute(0, 3, 1, 2) / 255.0  # Change to (N, C, H, W) format and normalize
-        self.y = torch.FloatTensor(y)  # Changed to FloatTensor for binary classification
+        self.y = torch.FloatTensor(y) 
         
     def __len__(self):
         return len(self.y)
@@ -128,9 +128,6 @@ def train_animal_classifier(X, y, animal_classes):
     print(f"Number of samples: {X.shape[0]}")
     print(f"Image size: {X[0].shape}")
     
-    # Plot some examples before training
-    plot_examples(X[:25], y[:25])
-    
     # Split data into train and validation sets
     train_size = int(0.8 * len(X))
     indices = np.random.permutation(len(X))
@@ -167,7 +164,6 @@ def train_animal_classifier(X, y, animal_classes):
     return model, history
 
 def main():
-    my_path = "../../data/processed/"
     # Define the classes
     tiger = ['tiger', 'Tiger_negative_class']
     elephant = ['elephant', 'Elephant_negative_class']
@@ -180,11 +176,30 @@ def main():
     # Train a classifier for each animal
     for animal_class in my_classes:
         print(f"\nProcessing {animal_class[0]} classification...")
-        X, y = create_X_y(my_path, animal_class)
+        X, y = create_X_y(animal_class)
+        plot_examples(X, y)
         model, history = train_animal_classifier(X, y, animal_class)
-        models[animal_class[0]] = (model, history)  
+        models[animal_class[0]] = (model, history)
+        plt.figure(figsize=(12, 4))
+        
+        plt.subplot(1, 2, 1)
+        plt.plot(history[0], label='Train Loss')
+        plt.plot(history[1], label='Val Loss')
+        plt.title(f'{animal_class[0]} - Loss')
+        plt.legend()
+        
+        plt.subplot(1, 2, 2)
+        plt.plot(history[2], label='Train Acc')
+        plt.plot(history[3], label='Val Acc')
+        plt.title(f'{animal_class[0]} - Accuracy')
+        plt.legend()
+        
+        plt.tight_layout()
+        plt.show()
 
     return models
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     models = main()
+    print(models)
+    print("Done!")
