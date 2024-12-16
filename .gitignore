@@ -46,6 +46,7 @@ results/generated_images/*
 !results/figures/.gitkeep
 !results/metrics/.gitkeep
 !results/generated_images/.gitkeep
+weights/
 
 # Jupyter Notebook
 .ipynb_checkpoints

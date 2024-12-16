@@ -3,19 +3,22 @@ import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import Dataset, DataLoader
 import numpy as np
+import matplotlib.pyplot as plt
+from pathlib import Path
 import sys
 from pathlib import Path
-
-project_root = Path.cwd().parent 
+project_root = Path.cwd()
 sys.path.append(str(project_root))
+
 from config.config import Config
-from utils.data_preparation import create_X_y
+from utils.helper_functions import create_X_y
+from utils.visualization import plot_examples
 
 class AnimalDataset(Dataset):
-    """Custom Dataset class to handle our animal images"""
+    """Custom Dataset class for binary classification"""
     def __init__(self, X, y):
-        self.X = torch.FloatTensor(X) / 255.0  # Normalize pixel values to [0,1]
-        self.y = torch.IntTensor(y)
+        self.X = torch.FloatTensor(X).permute(0, 3, 1, 2) / 255.0  # Change to (N, C, H, W) format and normalize
+        self.y = torch.FloatTensor(y)  # Changed to FloatTensor for binary classification
         
     def __len__(self):
         return len(self.y)
@@ -23,10 +26,10 @@ class AnimalDataset(Dataset):
     def __getitem__(self, idx):
         return self.X[idx], self.y[idx]
 
-class BasicCNN(nn.Module):
-    """Simple CNN architecture with a single convolutional layer"""
-    def __init__(self, num_classes):
-        super(BasicCNN, self).__init__()
+class BinaryCNN(nn.Module):
+    """CNN architecture for binary classification"""
+    def __init__(self):
+        super(BinaryCNN, self).__init__()
         
         # First convolutional block
         self.conv1 = nn.Sequential(
@@ -36,25 +39,25 @@ class BasicCNN(nn.Module):
         )
         
         # Calculate the size of flattened features
-        # After one maxpool layer, the image size is halved
-        flattened_size = 16 * (Config.IMG_SIZE[0]//2) * (Config.IMG_SIZE[0]//2)
+        flattened_size = 16 * (Config.IMG_SIZE//2) * (Config.IMG_SIZE//2)
         
-        # Fully connected layers
+        # Fully connected layers with single output for binary classification
         self.fc = nn.Sequential(
             nn.Flatten(),
             nn.Linear(flattened_size, 128),
             nn.ReLU(),
             nn.Dropout(0.5),
-            nn.Linear(128, num_classes)
+            nn.Linear(128, 1),
+            nn.Sigmoid()
         )
     
     def forward(self, x):
         x = self.conv1(x)
         x = self.fc(x)
-        return x
+        return x.squeeze()
 
-def train_model(model, train_loader, val_loader, criterion, optimizer, num_epochs, device):
-    """Training function with validation"""
+def train_binary_model(model, train_loader, val_loader, criterion, optimizer, num_epochs, device):
+    """Training function for binary classification"""
     train_losses = []
     val_losses = []
     train_accuracies = []
@@ -77,7 +80,7 @@ def train_model(model, train_loader, val_loader, criterion, optimizer, num_epoch
             optimizer.step()
             
             running_loss += loss.item()
-            _, predicted = torch.max(outputs.data, 1)
+            predicted = (outputs > 0.5).float()
             total += labels.size(0)
             correct += (predicted == labels).sum().item()
         
@@ -99,7 +102,7 @@ def train_model(model, train_loader, val_loader, criterion, optimizer, num_epoch
                 loss = criterion(outputs, labels)
                 
                 val_loss += loss.item()
-                _, predicted = torch.max(outputs.data, 1)
+                predicted = (outputs > 0.5).float()
                 total += labels.size(0)
                 correct += (predicted == labels).sum().item()
         
@@ -115,13 +118,18 @@ def train_model(model, train_loader, val_loader, criterion, optimizer, num_epoch
     
     return train_losses, val_losses, train_accuracies, val_accuracies
 
-# Main training setup and execution
-def main():
-    # Set device
+def train_animal_classifier(X, y, animal_classes):
+    """Function to train a binary classifier for a specific animal"""
     device = torch.device(Config.device)
     
-    # Load and prepare data using your existing functions
-    X, y = create_X_y(path_data="path/to/your/data", list_classes=["tiger", "fox", "elephant"])
+    # Print dataset information
+    print(f"Training classifier for {animal_classes[0]} vs {animal_classes[1]}")
+    print(f"Dataset shape - X: {X.shape}, y: {y.shape}")
+    print(f"Number of samples: {X.shape[0]}")
+    print(f"Image size: {X[0].shape}")
+    
+    # Plot some examples before training
+    plot_examples(X[:25], y[:25])
     
     # Split data into train and validation sets
     train_size = int(0.8 * len(X))
@@ -141,12 +149,12 @@ def main():
     val_loader = DataLoader(val_dataset, batch_size=32, shuffle=False)
     
     # Initialize model, loss function, and optimizer
-    model = BasicCNN(num_classes=3).to(device)
-    criterion = nn.CrossEntropyLoss()
+    model = BinaryCNN().to(device)
+    criterion = nn.BCELoss()
     optimizer = optim.Adam(model.parameters(), lr=0.001)
     
     # Train the model
-    history = train_model(
+    history = train_binary_model(
         model=model,
         train_loader=train_loader,
         val_loader=val_loader,
@@ -158,5 +166,25 @@ def main():
     
     return model, history
 
+def main():
+    my_path = "../../data/processed/"
+    # Define the classes
+    tiger = ['tiger', 'Tiger_negative_class']
+    elephant = ['elephant', 'Elephant_negative_class']
+    fox = ['fox', 'Fox_negative_class']
+    my_classes = [tiger, elephant, fox]
+    
+    # Dictionary to store models and their histories
+    models = {}
+    
+    # Train a classifier for each animal
+    for animal_class in my_classes:
+        print(f"\nProcessing {animal_class[0]} classification...")
+        X, y = create_X_y(my_path, animal_class)
+        model, history = train_animal_classifier(X, y, animal_class)
+        models[animal_class[0]] = (model, history)  
+
+    return models
+
 if __name__ == "__main__":
-    model, history = main()
+    models = main()
