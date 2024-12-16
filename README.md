@@ -11,11 +11,10 @@ Our project tackles the challenge of animal classification through a systematic 
 We implement several key approaches to image classification:
 
 1. **Baseline Classification**: A foundational CNN architecture establishing our performance baseline
-2. **Specialized Models**: Custom architectures optimized for each animal category
-3. **Data Augmentation**: Enhanced training through artificially expanded datasets
-4. **Transfer Learning**: Leveraging pre-trained models (ResNet, VGG) for improved performance
-5. **GAN Implementation**: Generating synthetic fox images and evaluating their quality
-6. **Feature Visualization**: Understanding model decision-making through feature map analysis
+2. **Data Augmentation**: Enhanced training through artificially expanded datasets
+3. **Transfer Learning**: Leveraging pre-trained models (ResNet, VGG) for improved performance
+4. **GAN Implementation**: Generating synthetic fox images and evaluating their quality
+5. **Feature Visualization**: Understanding model decision-making through feature map analysis
 
 ## Project Structure
 
@@ -43,7 +42,7 @@ tiger-fox-elephant/
 1. Clone the repository:
 
    ```bash
-   git clone https://github.com/yourusername/tiger-fox-elephant.git
+   git clone https://github.com/l1t-w1n/tiger-fox-elephant.git
    cd tiger-fox-elephant
    ```
 
@@ -76,60 +75,6 @@ Each dataset is balanced and preprocessed to ensure consistent image dimensions 
 - Single CNN layer architecture
 - Configurable hyperparameters
 - Serves as a performance benchmark
-
-### Specialized Models
-
-- `modeleTiger`: Optimized for tiger classification
-- `modeleFox`: Specialized for fox detection
-- `modeleElephant`: Customized for elephant recognition
-
-### Advanced Implementations
-
-- Data Augmentation Models (IDG variants)
-- Transfer Learning Models (TL variants)
-- GAN for Fox Image Generation
-
-## Usage
-
-### Training Models
-
-```python
-from models.baseline import BaselineModel
-from utils.data_preparation import prepare_data
-
-# Load and prepare data
-train_data, test_data = prepare_data()
-
-# Initialize and train model
-model = BaselineModel()
-model.train(train_data, epochs=50)
-```
-
-### Evaluating Models
-
-```python
-# Evaluate on test data
-results = model.evaluate(test_data)
-```
-
-### Generating Images (GAN)
-
-```python
-from models.gan import FoxGAN
-
-gan = FoxGAN()
-gan.generate_images(num_images=10)
-```
-
-## Results and Model Performance
-
-Model performance metrics and comparisons will be documented in the `results/` directory, including:
-
-- Classification accuracy
-- Confusion matrices
-- Learning curves
-- Generated image samples
-- Feature map visualizations
 
 ## Optional Extensions
 
