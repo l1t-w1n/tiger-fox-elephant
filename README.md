@@ -97,10 +97,10 @@ This project is opensource
 
 ## Authors
 
-Maksym Lytvynenko
-Léonard Rivals
-Léo Quenette
-Matis Bazireau
+- Maksym Lytvynenko
+- Léonard Rivals
+- Léo Quenette
+- Matis Bazireau
 
 ## Acknowledgments
 

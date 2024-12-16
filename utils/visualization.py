@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
-import seaborn as sns
 import cv2
 import numpy as np
+import torch
 import sys
 from pathlib import Path
 project_root = Path.cwd().parent 
@@ -9,70 +9,7 @@ sys.path.append(str(project_root))
 from config.config import Config
 from utils.helper_functions import evaluate_model
 
-
-def plot_curves_confusion (history,confusion_matrix,class_names):
-  plt.figure(1,figsize=(16,6))
-  plt.gcf().subplots_adjust(left = 0.125, bottom = 0.2, right = 1,
-                          top = 0.9, wspace = 0.25, hspace = 0)
-
-  # division de la fenêtre graphique en 1 ligne, 3 colonnes,
-  # graphique en position 1 - loss fonction
-
-  plt.subplot(1,3,1)
-  plt.plot(history.history['loss'])
-  plt.plot(history.history['val_loss'])
-  plt.title('model loss')
-  plt.ylabel('loss')
-  plt.xlabel('epoch')
-  plt.legend(['Training loss', 'Validation loss'], loc='upper left')
-  # graphique en position 2 - accuracy
-  plt.subplot(1,3,2)
-  plt.plot(history.history['accuracy'])
-  plt.plot(history.history['val_accuracy'])
-  plt.title('model accuracy')
-  plt.ylabel('accuracy')
-  plt.xlabel('epoch')
-  plt.legend(['Training accuracy', 'Validation accuracy'], loc='upper left')
-
-  # matrice de correlation
-  plt.subplot(1,3,3)
-  sns.heatmap(conf,annot=True,fmt="d",cmap='Blues',xticklabels=class_names, yticklabels=class_names)# label=class_names)
-  # labels, title and ticks
-  plt.xlabel('Predicted', fontsize=12)
-  #plt.set_label_position('top')
-  #plt.set_ticklabels(class_names, fontsize = 8)
-  #plt.tick_top()
-  plt.title("Correlation matrix")
-  plt.ylabel('True', fontsize=12)
-  #plt.set_ticklabels(class_names, fontsize = 8)
-  plt.show()
-
-
-def plot_curves(histories):
-    plt.figure(1,figsize=(16,6))
-    plt.gcf().subplots_adjust(left = 0.125, bottom = 0.2, right = 1,
-                          top = 0.9, wspace = 0.25, hspace = 0)
-    for i in range(len(histories)):
-    	# plot loss
-        plt.subplot(121)
-        plt.title('Cross Entropy Loss')
-        plt.plot(histories[i].history['loss'], color='blue', label='train')
-        plt.plot(histories[i].history['val_loss'], color='red', label='test')
-        plt.ylabel('loss')
-        plt.xlabel('epoch')
-        plt.legend(['Training loss', 'Validation loss'], loc='upper left')
-        # plot accuracy
-        plt.subplot(122)
-        plt.title('Classification Accuracy')
-        plt.ylabel('accuracy')
-        plt.xlabel('epoch')
-        plt.plot(histories[i].history['accuracy'], color='blue', label='train')
-        plt.plot(histories[i].history['val_accuracy'], color='red',
-                  label='test')
-        plt.legend(['Training accuracy', 'Validation accuracy'], loc='upper left')
-        plt.show()
-        
-def plot_examples(X,y):
+def plot_examples(X,y, columns=Config.COLUMNS):
     plt.figure(figsize=(15,15))
     for i in range(Config.COLUMNS):
         plt.subplot(5,5,i+1)
@@ -83,6 +20,37 @@ def plot_examples(X,y):
         X[i] = cv2.cvtColor(X[i], cv2.COLOR_BGR2RGB)
         plt.imshow(X[i]/255.,cmap=plt.cm.binary)
         plt.xlabel(str(y[i]))
+def plot_all_examples(X, y):
+    """
+    Plots all images in the dataset using the same style as plot_examples.
+    Automatically calculates the grid size based on the number of images.
+    """
+    # Calculate number of columns similar to original (5x5 grid)
+    columns = 5
+    
+    # Calculate number of rows needed to show all images
+    n_images = len(X)
+    rows = (n_images + columns - 1) // columns  # Ceiling division
+    
+    # Create figure with appropriate size
+    # Keep same size ratio as original (15x15 for 25 images)
+    figure_size = 15 * (rows / 5)  # Scale figure height based on number of rows
+    plt.figure(figsize=(15, figure_size))
+    
+    # Plot each image
+    for i in range(n_images):
+        plt.subplot(rows, columns, i + 1)
+        plt.xticks([])
+        plt.yticks([])
+        plt.grid(False)
+        
+        # Convert color space from BGR to RGB, same as original
+        img_rgb = cv2.cvtColor(X[i], cv2.COLOR_BGR2RGB)
+        plt.imshow(img_rgb/255., cmap=plt.cm.binary)
+        plt.xlabel(str(y[i]))
+    
+    # Adjust layout to prevent overlap
+    plt.tight_layout()
 
 def plot_model_performance(model, test_loader, animal_name, device):
     """
@@ -133,3 +101,107 @@ def plot_model_performance(model, test_loader, animal_name, device):
     
     plt.tight_layout()
     plt.show()
+    
+def visualize_misclassified(model, test_loader, animal_name, device, num_images=25):
+    """
+    Visualizes images that the model misclassified, showing both predicted and true labels.
+    
+    This implementation follows the same color handling approach as plot_examples:
+    1. Convert from tensor to numpy array
+    2. Use cv2.cvtColor for proper BGR to RGB conversion
+    3. Normalize the image values before display
+    
+    Parameters:
+        model: The trained PyTorch model
+        test_loader: DataLoader containing test images
+        animal_name: Name of the animal being classified
+        device: Device to run inference on
+        num_images: Maximum number of misclassified images to show
+    """
+    model.eval()
+    misclassified_images = []
+    misclassified_preds = []
+    misclassified_labels = []
+    misclassified_probs = []
+    
+    with torch.no_grad():
+        for images, labels in test_loader:
+            images, labels = images.to(device), labels.to(device)
+            outputs = model(images)
+            probabilities = outputs.cpu().numpy()
+            predictions = (outputs > 0.5).float()
+            
+            # Find misclassified images in this batch
+            incorrect_mask = predictions != labels
+            if incorrect_mask.any():
+                batch_incorrect = images[incorrect_mask].cpu()
+                batch_probs = probabilities[incorrect_mask.cpu()]
+                batch_preds = predictions[incorrect_mask].cpu()
+                batch_labels = labels[incorrect_mask].cpu()
+                
+                # Add to our collection
+                misclassified_images.extend(batch_incorrect)
+                misclassified_preds.extend(batch_preds)
+                misclassified_labels.extend(batch_labels)
+                misclassified_probs.extend(batch_probs)
+            
+            if len(misclassified_images) >= num_images:
+                break
+    
+    # Limit to requested number of images
+    misclassified_images = misclassified_images[:num_images]
+    misclassified_preds = misclassified_preds[:num_images]
+    misclassified_labels = misclassified_labels[:num_images]
+    misclassified_probs = misclassified_probs[:num_images]
+    
+    # Calculate grid dimensions
+    n_images = len(misclassified_images)
+    if n_images == 0:
+        print("No misclassified images found!")
+        return
+    
+    cols = min(5, n_images)
+    rows = (n_images + cols - 1) // cols
+    
+    plt.figure(figsize=(15, 3 * rows))
+    
+    for idx in range(n_images):
+        # Convert tensor to numpy array in BGR format
+        # We need to permute to (H,W,C) format first
+        img = misclassified_images[idx].permute(1, 2, 0).numpy()
+        
+        # Scale back to 0-255 range for cv2.cvtColor
+        img = (img * 255).astype(np.uint8)
+        
+        # Convert from BGR to RGB using cv2.cvtColor
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+        
+        # Normalize back to 0-1 range for plotting
+        img = img / 255.0
+        
+        pred = bool(misclassified_preds[idx])
+        true_label = bool(misclassified_labels[idx])
+        prob = misclassified_probs[idx]
+        
+        plt.subplot(rows, cols, idx + 1)
+        plt.imshow(img)
+        plt.axis('off')
+        
+        title = f'True: {"" if true_label else "Not "}{animal_name}\n'
+        title += f'Pred: {"" if pred else "Not "}{animal_name}\n'
+        title += f'Conf: {prob:.2%}'
+        
+        plt.title(title, color='red', fontsize=10)
+    
+    plt.suptitle(f'Misclassified {animal_name} Images', fontsize=16, y=1.02)
+    plt.tight_layout()
+    plt.show()
+    
+    # Print summary statistics about errors
+    false_positives = sum((np.array(misclassified_preds) == 1) & (np.array(misclassified_labels) == 0))
+    false_negatives = sum((np.array(misclassified_preds) == 0) & (np.array(misclassified_labels) == 1))
+    
+    print("\nError Analysis Summary:")
+    print(f"Total misclassified images shown: {n_images}")
+    print(f"False Positives (incorrectly predicted as {animal_name}): {false_positives}")
+    print(f"False Negatives (incorrectly predicted as not {animal_name}): {false_negatives}")
