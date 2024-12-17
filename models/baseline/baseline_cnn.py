@@ -11,7 +11,7 @@ project_root = Path.cwd()
 sys.path.append(str(project_root))
 
 from config.config import Config
-from utils.helper_functions import create_X_y
+from utils.helper_functions import create_X_y, save_model
 from utils.visualization import plot_examples
 
 class AnimalDataset(Dataset):
@@ -203,3 +203,6 @@ if __name__ == '__main__':
     models = main()
     print(models)
     print("Done!")
+    for animal, (model, history) in models.items():
+        save_model(model, history, f"{animal}_baseline")
+        print(f"Model for {animal}_baseline saved successfully!")
