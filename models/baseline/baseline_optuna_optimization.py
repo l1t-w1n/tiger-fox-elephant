@@ -17,7 +17,6 @@ class OptimizedCNN(nn.Module):
     def __init__(self, trial):
         super(OptimizedCNN, self).__init__()
         
-        # Let Optuna suggest hyperparameters for the network architecture
         n_layers = trial.suggest_int('n_layers', 1, 3)
         n_channels = [3]
         
@@ -26,7 +25,6 @@ class OptimizedCNN(nn.Module):
             out_channels = trial.suggest_int(f'n_channels_l{i}', 16, 128)
             n_channels.append(out_channels)
         
-        # Create convolutional layers dynamically
         self.conv_layers = nn.ModuleList()
         curr_size = Config.IMG_SIZE
         
@@ -46,14 +44,14 @@ class OptimizedCNN(nn.Module):
         
         # Build fully connected layers
         n_fc_layers = trial.suggest_int('n_fc_layers', 1, 2)
-        fc_layers = []
+        self.fc_layers = nn.ModuleList()
         prev_size = flattened_size
         
         for i in range(n_fc_layers):
             fc_size = trial.suggest_int(f'n_fc_units_l{i}', 64, 512)
             fc_dropout = trial.suggest_float(f'fc_dropout_l{i}', 0.1, 0.5)
             
-            fc_layers.extend([
+            self.fc_layers.extend([
                 nn.Linear(prev_size, fc_size),
                 nn.ReLU(),
                 nn.Dropout(fc_dropout)
@@ -61,8 +59,7 @@ class OptimizedCNN(nn.Module):
             prev_size = fc_size
         
         # Output layer without sigmoid (using BCEWithLogitsLoss)
-        fc_layers.append(nn.Linear(prev_size, 1))
-        self.fc = nn.Sequential(*fc_layers)
+        self.fc_layers.append(nn.Linear(prev_size, 1))
     
     def forward(self, x):
         # Input validation
@@ -75,16 +72,20 @@ class OptimizedCNN(nn.Module):
         
         # Flatten and pass through fully connected layers
         x = x.view(x.size(0), -1)
-        return self.fc(x)
+        
+        for fc_layer in self.fc_layers:
+            x = fc_layer(x)
+        
+        return x
 
 def objective(trial, X, y, device):
-    """Balanced objective function optimizing for both speed and memory"""
-    # Use moderate batch sizes that work well for most GPU configurations
+    """Objective function for Optuna optimization"""
+    
     batch_size = trial.suggest_int('batch_size', 32, 64)
     lr = trial.suggest_float('lr', 1e-5, 1e-2, log=True)
     weight_decay = trial.suggest_float('weight_decay', 1e-5, 1e-2, log=True)
     
-    # Split data efficiently
+    # Split data
     train_size = int(0.8 * len(X))
     indices = np.random.permutation(len(X))
     
@@ -102,8 +103,11 @@ def objective(trial, X, y, device):
     
     # Initialize model and training components
     model = OptimizedCNN(trial).to(device)
+    
+    # Calculate class weights for imbalanced dataset
     pos_weight = torch.tensor([(y_train == 0).sum() / (y_train == 1).sum()]).to(device)
     criterion = nn.BCEWithLogitsLoss(pos_weight=pos_weight)
+    
     optimizer = optim.AdamW(model.parameters(), lr=lr, weight_decay=weight_decay)
     
     n_epochs = trial.suggest_int('n_epochs', 20, 50)
@@ -122,13 +126,13 @@ def objective(trial, X, y, device):
                 inputs, labels = inputs.to(device), labels.to(device)
                 labels = labels.view(-1, 1)
                 
-                optimizer.zero_grad(set_to_none=True)  # More efficient than just zero_grad()
+                optimizer.zero_grad(set_to_none=True)  # for memory efficiency
                 outputs = model(inputs)
                 loss = criterion(outputs, labels)
                 loss.backward()
                 optimizer.step()
                 
-                with torch.no_grad():
+                with torch.inference_mode():
                     predicted = (torch.sigmoid(outputs) > 0.5).float()
                     train_total += labels.size(0)
                     train_correct += (predicted == labels).sum().item()
@@ -138,7 +142,7 @@ def objective(trial, X, y, device):
             val_correct = 0
             val_total = 0
             
-            with torch.no_grad():
+            with torch.inference_mode():
                 for inputs, labels in val_loader:
                     inputs, labels = inputs.to(device), labels.to(device)
                     labels = labels.view(-1, 1)
@@ -163,7 +167,7 @@ def objective(trial, X, y, device):
             if trial.should_prune():
                 raise optuna.TrialPruned()
         
-        # Clear memory only once per trial
+        # Clear memory
         if hasattr(torch.cuda, 'empty_cache'):
             torch.cuda.empty_cache()
             
@@ -249,7 +253,7 @@ def train_final_model(trial, X, y, device):
         val_correct = 0
         val_total = 0
         
-        with torch.no_grad():
+        with torch.inference_mode():
             for inputs, labels in val_loader:
                 inputs, labels = inputs.to(device), labels.to(device)
                 labels = labels.view(-1, 1)
