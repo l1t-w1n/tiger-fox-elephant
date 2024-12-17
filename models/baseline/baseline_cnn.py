@@ -95,7 +95,7 @@ def train_binary_model(model, train_loader, val_loader, criterion, optimizer, nu
         correct = 0
         total = 0
         
-        with torch.no_grad():
+        with torch.inference_mode():
             for inputs, labels in val_loader:
                 inputs, labels = inputs.to(device), labels.to(device)
                 outputs = model(inputs)

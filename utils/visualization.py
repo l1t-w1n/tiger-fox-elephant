@@ -52,12 +52,12 @@ def plot_all_examples(X, y):
     # Adjust layout to prevent overlap
     plt.tight_layout()
 
-def plot_model_performance(model, test_loader, animal_name, device, evaluator=evaluate_model):
+def plot_model_performance(model, test_loader, animal_name, device, optimized=False):
     """
     Creates a clear visualization of the confusion matrix with key performance metrics.
     """
     # Get model predictions and true labels
-    predictions, true_labels, probabilities = evaluator(model, test_loader, device)
+    predictions, true_labels, probabilities = evaluate_model(model, test_loader, device, optimized)
     
     # Calculate confusion matrix elements
     true_negatives = np.sum((predictions == 0) & (true_labels == 0))
