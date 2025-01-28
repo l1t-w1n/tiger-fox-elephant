@@ -52,86 +52,71 @@ def plot_all_examples(X, y):
     # Adjust layout to prevent overlap
     plt.tight_layout()
 
-def plot_model_performance(model, test_loader, animal_name, device):
+def plot_model_performance(model, test_loader, animal_name, device, optimized=False):
     """
-    Confusion matrix and prediction distribution.
+    Creates a clear visualization of the confusion matrix with key performance metrics.
     """
-    predictions, true_labels, probabilities = evaluate_model(model, test_loader, device)
-    print(f"Predictions: {predictions}")
-    print(f"True Labels: {true_labels}")
-    print(f"Probabilities: {probabilities}")
+    # Get model predictions and true labels
+    predictions, true_labels, probabilities = evaluate_model(model, test_loader, device, optimized)
     
-    # Create figure with subplots
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(15, 5))
+    # Calculate confusion matrix elements
+    true_negatives = np.sum((predictions == 0) & (true_labels == 0))
+    false_positives = np.sum((predictions == 1) & (true_labels == 0))
+    false_negatives = np.sum((predictions == 0) & (true_labels == 1))
+    true_positives = np.sum((predictions == 1) & (true_labels == 1))
     
-    # Calculate confusion matrix
-    # Now explicitly calculating each category for clarity
-    true_negatives = sum((predictions == 0) & (true_labels == 0))
-    false_positives = sum((predictions == 1) & (true_labels == 0))
-    false_negatives = sum((predictions == 0) & (true_labels == 1))
-    true_positives = sum((predictions == 1) & (true_labels == 1))
-    
+    # Create confusion matrix
     confusion = np.array([[true_negatives, false_positives],
                          [false_negatives, true_positives]])
     
-    # Plot confusion matrix
-    im = ax1.imshow(confusion, interpolation='nearest', cmap='Blues')
-    ax1.set_title(f'Confusion Matrix - {animal_name}')
-    
-    # Add text annotations
-    thresh = confusion.max() / 2
-    for i in range(2):
-        for j in range(2):
-            ax1.text(j, i, f'{int(confusion[i, j])}\n({confusion[i, j]/len(true_labels):.1%})',
-                    ha="center", va="center",
-                    color="white" if confusion[i, j] > thresh else "black")
-    
-    class_names = [f'Not {animal_name}', animal_name]
-    ax1.set_xticks([0, 1])
-    ax1.set_yticks([0, 1])
-    ax1.set_xticklabels(class_names)
-    ax1.set_yticklabels(class_names)
-    ax1.set_xlabel('Predicted')
-    ax1.set_ylabel('True')
-    plt.colorbar(im, ax=ax1)
-    
-    # Add overall metrics
-    accuracy = (true_positives + true_negatives) / len(true_labels)
+    # Calculate performance metrics
+    total_samples = len(true_labels)
+    accuracy = (true_positives + true_negatives) / total_samples
     precision = true_positives / (true_positives + false_positives) if (true_positives + false_positives) > 0 else 0
     recall = true_positives / (true_positives + false_negatives) if (true_positives + false_negatives) > 0 else 0
     
-    metrics_text = f'Accuracy: {accuracy:.2%}\n'
-    metrics_text += f'Precision: {precision:.2%}\n'
-    metrics_text += f'Recall: {recall:.2%}'
-    ax1.text(1.5, 0.5, metrics_text, transform=ax1.transAxes)
+    # Create figure for confusion matrix
+    plt.figure(figsize=(8, 6))
+    im = plt.imshow(confusion, interpolation='nearest', cmap='Blues')
+    plt.title(f'Confusion Matrix - {animal_name}\nAccuracy: {accuracy:.1%}')
     
-    # Plot probability distribution 
-    positive_probs = probabilities[true_labels == 1]
-    negative_probs = probabilities[true_labels == 0]
+    # Add text annotations to matrix
+    thresh = confusion.max() / 2
+    for i in range(2):
+        for j in range(2):
+            plt.text(j, i, f'{int(confusion[i, j])}\n({confusion[i, j]/total_samples:.1%})',
+                    ha="center", va="center",
+                    color="white" if confusion[i, j] > thresh else "black")
     
-    ax2.hist(negative_probs, bins=20, alpha=0.6, label=f'Not {animal_name}', color='red', density=True)
-    ax2.hist(positive_probs, bins=20, alpha=0.6, label=animal_name, color='blue', density=True)
-    ax2.axvline(x=0.5, color='black', linestyle='--', label='Decision Threshold')
-    ax2.set_title('Prediction Probability Distribution')
-    ax2.set_xlabel('Predicted Probability')
-    ax2.set_ylabel('Density')
-    ax2.legend()
+    # Set axis labels
+    class_names = [f'Not {animal_name}', animal_name]
+    plt.xticks([0, 1], class_names)
+    plt.yticks([0, 1], class_names)
+    plt.xlabel('Predicted Label')
+    plt.ylabel('True Label')
+    
+    # Add colorbar
+    plt.colorbar(im)
+    
+    # Add metrics text box
+    metrics_text = (f'Total samples: {total_samples}\n'
+                   f'Precision: {precision:.1%}\n'
+                   f'Recall: {recall:.1%}')
+    plt.text(1.5, 0.5, metrics_text, transform=plt.gca().transAxes)
     
     plt.tight_layout()
     plt.show()
     
-    # Print detailed metrics
-    print(f"\nDetailed Performance Metrics for {animal_name} classifier:")
-    print(f"Total samples: {len(true_labels)}")
-    print(f"True Negatives: {true_negatives} ({true_negatives/len(true_labels):.1%})")
-    print(f"False Positives: {false_positives} ({false_positives/len(true_labels):.1%})")
-    print(f"False Negatives: {false_negatives} ({false_negatives/len(true_labels):.1%})")
-    print(f"True Positives: {true_positives} ({true_positives/len(true_labels):.1%})")
-    print(f"Accuracy: {accuracy:.2%}")
-    print(f"Precision: {precision:.2%}")
-    print(f"Recall: {recall:.2%}")
-    
-def visualize_misclassified(model, test_loader, animal_name, device, num_images=25):
+    # Print verification data
+    print(f"\nModel Predictions Shape: {predictions.shape}")
+    print(f"True Labels Shape: {true_labels.shape}")
+    print("\nDetailed Metrics:")
+    print(f"True Negatives: {true_negatives} ({true_negatives/total_samples:.1%})")
+    print(f"False Positives: {false_positives} ({false_positives/total_samples:.1%})")
+    print(f"False Negatives: {false_negatives} ({false_negatives/total_samples:.1%})")
+    print(f"True Positives: {true_positives} ({true_positives/total_samples:.1%})")
+ 
+def visualize_misclassified(model, test_loader, animal_name, device, num_images=25, optimized=False):
     """
     Visualizes images that the model misclassified
     """
@@ -141,20 +126,30 @@ def visualize_misclassified(model, test_loader, animal_name, device, num_images=
     misclassified_labels = []
     misclassified_probs = []
     
-    with torch.no_grad():
+    with torch.inference_mode():
         for images, labels in test_loader:
             images, labels = images.to(device), labels.to(device)
             outputs = model(images)
-            probabilities = outputs.cpu().numpy()
-            predictions = (outputs > 0.5).float()
+            if optimized:
+                probabilities = torch.sigmoid(outputs).squeeze().cpu().numpy()
+            else:
+                probabilities = outputs.cpu().numpy()
+                
+            labels = labels.cpu().numpy()            
+            predictions = (probabilities > 0.5).astype(float)
+                        
+            """ print("Predictions: ", predictions)
+            print("Probabilities: ", probabilities)
+            print("Labels: ", labels) """
             
             # Find misclassified images in this batch
             incorrect_mask = predictions != labels
+            
             if incorrect_mask.any():
-                batch_incorrect = images[incorrect_mask].cpu()
-                batch_probs = probabilities[incorrect_mask.cpu()]
-                batch_preds = predictions[incorrect_mask].cpu()
-                batch_labels = labels[incorrect_mask].cpu()
+                batch_incorrect = images[incorrect_mask]
+                batch_probs = probabilities[incorrect_mask]
+                batch_preds = predictions[incorrect_mask]
+                batch_labels = labels[incorrect_mask]
                 
                 # Add to our collection
                 misclassified_images.extend(batch_incorrect)
@@ -185,7 +180,7 @@ def visualize_misclassified(model, test_loader, animal_name, device, num_images=
     for idx in range(n_images):
         # Convert tensor to numpy array in BGR format
         # We need to permute to (H,W,C) format first
-        img = misclassified_images[idx].permute(1, 2, 0).numpy()
+        img = misclassified_images[idx].cpu().permute(1, 2, 0).numpy()
         
         # Scale back to 0-255 range for cv2.cvtColor
         img = (img * 255).astype(np.uint8)

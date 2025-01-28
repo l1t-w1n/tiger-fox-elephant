@@ -16,21 +16,14 @@ def create_training_data(list_classes):
     
     Args:
         list_classes: List of class directory names (e.g., ['tiger', 'tiger_negative'])
-    
-    Returns:
-        List of [image_array, label] pairs where label is 0 for negative classes
-        and 1 for positive classes
     """
     training_data = []
     for classes in list_classes:
-        # Determine class label based on whether 'negative' appears in the class name
-        # The .lower() ensures we catch 'Negative', 'NEGATIVE', etc.
         class_num = 0 if 'negative' in classes.lower() else 1
         
         # Construct full path to class directory
         path = os.path.join(Config.PROCESSED_DATA_DIR, classes)
         
-        # Process each image in the directory
         for img in os.listdir(path):
             try:
                 # Read and resize the image
@@ -40,17 +33,13 @@ def create_training_data(list_classes):
                 # Add the image and its label to our dataset
                 training_data.append([new_array, class_num])
             except Exception as e:
-                # Skip any problematic images
                 pass
     
     return training_data
 
 def create_X_y (list_classes):
-      # récupération des données
       training_data=create_training_data(list_classes)
-      # tri des données
       random.shuffle(training_data)
-      # création de X et y
       X=[]
       y=[]
       for features, label in training_data:
@@ -86,7 +75,7 @@ def save_model(model, history, model_name, save_dir=Config.WEIGHTS_DIR):
     )
     print(f"Model and history saved for {model_name}")
 
-def load_model(model_class, model_name, save_dir=Config.WEIGHTS_DIR, device='cuda'):
+def load_model(model_class, model_name, save_dir=Config.WEIGHTS_DIR, device=Config.device):
     """
     Load a previously saved model and its training history.
     Returns both the model and the training history for analysis.
@@ -105,7 +94,7 @@ def load_model(model_class, model_name, save_dir=Config.WEIGHTS_DIR, device='cud
     
     return model, history
 
-def evaluate_model(model, test_loader, device):
+def evaluate_model(model, test_loader, device, optimized=False):
     """
     Evaluate model performance on a test dataset.
     Returns predictions, true labels, and probabilities for analysis.
@@ -115,15 +104,20 @@ def evaluate_model(model, test_loader, device):
     all_labels = []
     all_probs = []
     
-    with torch.no_grad():
+    with torch.inference_mode():
         for inputs, labels in test_loader:
             inputs, labels = inputs.to(device), labels.to(device)
-            outputs = model(inputs)
-            probs = outputs.cpu().numpy()
-            preds = (outputs > 0.5).float()
+            outputs = model(inputs)            
+            if optimized:
+                probs = torch.sigmoid(outputs).squeeze().cpu().numpy()
+                preds = (probs > 0.5).astype(float)
+            else:
+                probs = outputs.cpu().numpy()
+                preds = (outputs > 0.5).float().cpu().numpy()
             
+            labels = labels.squeeze().cpu().numpy()
             all_probs.extend(probs)
-            all_preds.extend(preds.cpu().numpy())
-            all_labels.extend(labels.cpu().numpy())
+            all_preds.extend(preds)
+            all_labels.extend(labels)
     
     return np.array(all_preds), np.array(all_labels), np.array(all_probs)

@@ -11,7 +11,7 @@ project_root = Path.cwd()
 sys.path.append(str(project_root))
 
 from config.config import Config
-from utils.helper_functions import create_X_y
+from utils.helper_functions import create_X_y, save_model
 from utils.visualization import plot_examples
 
 class AnimalDataset(Dataset):
@@ -95,7 +95,7 @@ def train_binary_model(model, train_loader, val_loader, criterion, optimizer, nu
         correct = 0
         total = 0
         
-        with torch.no_grad():
+        with torch.inference_mode():
             for inputs, labels in val_loader:
                 inputs, labels = inputs.to(device), labels.to(device)
                 outputs = model(inputs)
@@ -203,3 +203,6 @@ if __name__ == '__main__':
     models = main()
     print(models)
     print("Done!")
+    for animal, (model, history) in models.items():
+        save_model(model, history, f"{animal}_baseline")
+        print(f"Model for {animal}_baseline saved successfully!")

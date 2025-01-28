@@ -28,9 +28,6 @@ env/
 .env/
 
 # Data files
-data/raw/*
-data/processed/*
-data/generated/*
 !data/raw/.gitkeep
 !data/processed/.gitkeep
 !data/generated/.gitkeep
@@ -46,7 +43,7 @@ results/generated_images/*
 !results/figures/.gitkeep
 !results/metrics/.gitkeep
 !results/generated_images/.gitkeep
-weights/
+/models/gan/gan_results/
 
 # Jupyter Notebook
 .ipynb_checkpoints
@@ -102,3 +99,4 @@ wheels/
 .Trashes
 ehthumbs.db
 Thumbs.db
+*.pth
