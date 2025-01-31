@@ -156,3 +156,199 @@ ImprovedBinaryCNN(
 --- K-Fold Cross Validation Summary ---
 2025-01-31 22:32:56,636 INFO: Average Train Loss: 0.5579 | Average Val Loss: 0.5575
 2025-01-31 22:32:56,637 INFO: Average Train Acc: 0.7284  | Average Val Acc: 0.7293
+2025-01-31 23:16:25,283 INFO: Configuration:
+2025-01-31 23:16:25,283 INFO: IMG_SIZE: 224, BATCH_SIZE: 64, LR: 0.001, EPOCHS: 20, KFOLDS: 2
+2025-01-31 23:16:25,284 INFO: Device: cuda
+2025-01-31 23:16:37,645 INFO: --- Fold 1/2 ---
+2025-01-31 23:16:37,836 INFO: Model architecture for fold 1:
+ImprovedBinaryCNN(
+  (conv1): Conv2d(3, 32, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+  (bn1): BatchNorm2d(32, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+  (act1): LeakyReLU(negative_slope=0.1)
+  (conv2): Conv2d(32, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+  (bn2): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+  (act2): LeakyReLU(negative_slope=0.1)
+  (pool1): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+  (conv3): Conv2d(64, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+  (bn3): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+  (act3): LeakyReLU(negative_slope=0.1)
+  (pool2): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+  (global_pool): AdaptiveAvgPool2d(output_size=(1, 1))
+  (dropout): Dropout(p=0.5, inplace=False)
+  (fc): Linear(in_features=128, out_features=1, bias=True)
+)
+2025-01-31 23:16:54,971 INFO: Epoch [1/20] Train Loss: 0.5639, Train Acc: 0.7170 | Val Loss: 0.6064, Val Acc: 0.6865
+2025-01-31 23:17:10,646 INFO: Epoch [2/20] Train Loss: 0.5317, Train Acc: 0.7295 | Val Loss: 0.5341, Val Acc: 0.7381
+2025-01-31 23:17:27,154 INFO: Epoch [3/20] Train Loss: 0.5011, Train Acc: 0.7645 | Val Loss: 0.5070, Val Acc: 0.7373
+2025-01-31 23:17:43,586 INFO: Epoch [4/20] Train Loss: 0.4741, Train Acc: 0.7741 | Val Loss: 0.4573, Val Acc: 0.7948
+2025-01-31 23:17:59,937 INFO: Epoch [5/20] Train Loss: 0.4653, Train Acc: 0.7868 | Val Loss: 0.4549, Val Acc: 0.7968
+2025-01-31 23:18:16,448 INFO: Epoch [6/20] Train Loss: 0.4621, Train Acc: 0.7884 | Val Loss: 0.4443, Val Acc: 0.8018
+2025-01-31 23:18:33,078 INFO: Epoch [7/20] Train Loss: 0.4540, Train Acc: 0.7889 | Val Loss: 0.4415, Val Acc: 0.8075
+2025-01-31 23:18:49,728 INFO: Epoch [8/20] Train Loss: 0.4531, Train Acc: 0.7936 | Val Loss: 0.4415, Val Acc: 0.8083
+2025-01-31 23:19:06,081 INFO: Epoch [9/20] Train Loss: 0.4533, Train Acc: 0.7923 | Val Loss: 0.4391, Val Acc: 0.8083
+2025-01-31 23:19:22,620 INFO: Epoch [10/20] Train Loss: 0.4506, Train Acc: 0.7973 | Val Loss: 0.4384, Val Acc: 0.8085
+2025-01-31 23:19:39,778 INFO: Epoch [11/20] Train Loss: 0.4417, Train Acc: 0.7999 | Val Loss: 0.4391, Val Acc: 0.8063
+2025-01-31 23:19:56,484 INFO: Epoch [12/20] Train Loss: 0.4456, Train Acc: 0.7942 | Val Loss: 0.4398, Val Acc: 0.8085
+2025-01-31 23:20:12,712 INFO: Epoch [13/20] Train Loss: 0.4488, Train Acc: 0.7923 | Val Loss: 0.4398, Val Acc: 0.8083
+2025-01-31 23:20:29,493 INFO: Epoch [14/20] Train Loss: 0.4483, Train Acc: 0.7979 | Val Loss: 0.4425, Val Acc: 0.8069
+2025-01-31 23:34:13,066 INFO: Configuration:
+2025-01-31 23:34:13,066 INFO: IMG_SIZE: 224, BATCH_SIZE: 64, LR: 0.001, EPOCHS: 20, KFOLDS: 2
+2025-01-31 23:34:13,066 INFO: Device: cuda
+2025-01-31 23:34:13,167 INFO: Train samples: 9766, Val samples: 2790
+2025-01-31 23:34:13,268 INFO: Model architecture:
+ImprovedBinaryCNN(
+  (conv1): Conv2d(3, 32, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+  (bn1): BatchNorm2d(32, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+  (act1): LeakyReLU(negative_slope=0.1)
+  (conv2): Conv2d(32, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+  (bn2): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+  (act2): LeakyReLU(negative_slope=0.1)
+  (pool1): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+  (conv3): Conv2d(64, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+  (bn3): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+  (act3): LeakyReLU(negative_slope=0.1)
+  (pool2): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+  (global_pool): AdaptiveAvgPool2d(output_size=(1, 1))
+  (dropout): Dropout(p=0.5, inplace=False)
+  (fc): Linear(in_features=128, out_features=1, bias=True)
+)
+2025-01-31 23:34:35,917 INFO: Configuration:
+2025-01-31 23:34:35,918 INFO: IMG_SIZE: 224, BATCH_SIZE: 64, LR: 0.001, EPOCHS: 15, KFOLDS: 2
+2025-01-31 23:34:35,918 INFO: Device: cuda
+2025-01-31 23:34:36,017 INFO: Train samples: 9766, Val samples: 2790
+2025-01-31 23:34:36,020 INFO: Model architecture:
+ImprovedBinaryCNN(
+  (conv1): Conv2d(3, 32, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+  (bn1): BatchNorm2d(32, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+  (act1): LeakyReLU(negative_slope=0.1)
+  (conv2): Conv2d(32, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+  (bn2): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+  (act2): LeakyReLU(negative_slope=0.1)
+  (pool1): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+  (conv3): Conv2d(64, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+  (bn3): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+  (act3): LeakyReLU(negative_slope=0.1)
+  (pool2): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+  (global_pool): AdaptiveAvgPool2d(output_size=(1, 1))
+  (dropout): Dropout(p=0.5, inplace=False)
+  (fc): Linear(in_features=128, out_features=1, bias=True)
+)
+2025-01-31 23:35:03,281 INFO: Epoch [1/15] Train Loss: 0.5488, Train Acc: 0.7218 | Val Loss: 0.5147, Val Acc: 0.7498
+2025-01-31 23:35:29,668 INFO: Epoch [2/15] Train Loss: 0.5130, Train Acc: 0.7528 | Val Loss: 0.5129, Val Acc: 0.7505
+2025-01-31 23:36:02,626 INFO: Configuration:
+2025-01-31 23:36:02,627 INFO: IMG_SIZE: 224, BATCH_SIZE: 64, LR: 0.001, EPOCHS: 15, KFOLDS: 2
+2025-01-31 23:36:02,627 INFO: Device: cuda
+2025-01-31 23:36:02,759 INFO: Train samples: 9766, Val samples: 2790
+2025-01-31 23:36:02,850 INFO: Model architecture:
+ImprovedBinaryCNN(
+  (conv1): Conv2d(3, 32, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+  (bn1): BatchNorm2d(32, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+  (act1): LeakyReLU(negative_slope=0.1)
+  (conv2): Conv2d(32, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+  (bn2): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+  (act2): LeakyReLU(negative_slope=0.1)
+  (pool1): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+  (conv3): Conv2d(64, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+  (bn3): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+  (act3): LeakyReLU(negative_slope=0.1)
+  (pool2): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+  (global_pool): AdaptiveAvgPool2d(output_size=(1, 1))
+  (dropout): Dropout(p=0.5, inplace=False)
+  (fc): Linear(in_features=128, out_features=1, bias=True)
+)
+2025-01-31 23:36:30,162 INFO: Epoch [1/15] Train Loss: 0.5485, Train Acc: 0.7221 | Val Loss: 0.5237, Val Acc: 0.7645
+2025-01-31 23:36:57,090 INFO: Epoch [2/15] Train Loss: 0.5131, Train Acc: 0.7538 | Val Loss: 0.5674, Val Acc: 0.7215
+2025-01-31 23:37:23,438 INFO: Epoch [3/15] Train Loss: 0.4785, Train Acc: 0.7743 | Val Loss: 0.4500, Val Acc: 0.7964
+2025-01-31 23:37:49,854 INFO: Epoch [4/15] Train Loss: 0.4270, Train Acc: 0.8138 | Val Loss: 0.4141, Val Acc: 0.8222
+2025-01-31 23:38:16,276 INFO: Epoch [5/15] Train Loss: 0.4135, Train Acc: 0.8163 | Val Loss: 0.3971, Val Acc: 0.8287
+2025-01-31 23:38:42,524 INFO: Epoch [6/15] Train Loss: 0.4031, Train Acc: 0.8245 | Val Loss: 0.3884, Val Acc: 0.8412
+2025-01-31 23:39:08,761 INFO: Epoch [7/15] Train Loss: 0.3909, Train Acc: 0.8368 | Val Loss: 0.3795, Val Acc: 0.8452
+2025-01-31 23:39:34,995 INFO: Epoch [8/15] Train Loss: 0.3908, Train Acc: 0.8311 | Val Loss: 0.3780, Val Acc: 0.8477
+2025-01-31 23:40:01,204 INFO: Epoch [9/15] Train Loss: 0.3869, Train Acc: 0.8328 | Val Loss: 0.3766, Val Acc: 0.8487
+2025-01-31 23:40:27,421 INFO: Epoch [10/15] Train Loss: 0.3855, Train Acc: 0.8371 | Val Loss: 0.3764, Val Acc: 0.8473
+2025-01-31 23:40:53,704 INFO: Epoch [11/15] Train Loss: 0.3868, Train Acc: 0.8352 | Val Loss: 0.3761, Val Acc: 0.8459
+2025-01-31 23:41:20,729 INFO: Epoch [12/15] Train Loss: 0.3879, Train Acc: 0.8340 | Val Loss: 0.3759, Val Acc: 0.8487
+2025-01-31 23:41:47,250 INFO: Epoch [13/15] Train Loss: 0.3899, Train Acc: 0.8311 | Val Loss: 0.3778, Val Acc: 0.8452
+2025-01-31 23:42:13,677 INFO: Epoch [14/15] Train Loss: 0.3877, Train Acc: 0.8371 | Val Loss: 0.3773, Val Acc: 0.8470
+2025-01-31 23:42:40,049 INFO: Epoch [15/15] Train Loss: 0.3873, Train Acc: 0.8363 | Val Loss: 0.3769, Val Acc: 0.8430
+2025-01-31 23:42:40,056 INFO: Saved model and history to:
+/media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/tiger_simple_model.pth
+/media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/tiger_simple_history.npz
+2025-01-31 23:44:08,076 INFO: Configuration:
+2025-01-31 23:44:08,076 INFO: IMG_SIZE: 224, BATCH_SIZE: 64, LR: 0.001, EPOCHS: 15, KFOLDS: 2
+2025-01-31 23:44:08,077 INFO: Device: cuda
+2025-01-31 23:44:08,178 INFO: Train samples: 9098, Val samples: 2600
+2025-01-31 23:44:08,280 INFO: Model architecture:
+ImprovedBinaryCNN(
+  (conv1): Conv2d(3, 32, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+  (bn1): BatchNorm2d(32, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+  (act1): LeakyReLU(negative_slope=0.1)
+  (conv2): Conv2d(32, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+  (bn2): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+  (act2): LeakyReLU(negative_slope=0.1)
+  (pool1): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+  (conv3): Conv2d(64, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+  (bn3): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+  (act3): LeakyReLU(negative_slope=0.1)
+  (pool2): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+  (global_pool): AdaptiveAvgPool2d(output_size=(1, 1))
+  (dropout): Dropout(p=0.5, inplace=False)
+  (fc): Linear(in_features=128, out_features=1, bias=True)
+)
+2025-01-31 23:44:33,576 INFO: Epoch [1/15] Train Loss: 0.6619, Train Acc: 0.6102 | Val Loss: 0.6505, Val Acc: 0.6173
+2025-01-31 23:44:58,660 INFO: Epoch [2/15] Train Loss: 0.6239, Train Acc: 0.6618 | Val Loss: 0.5896, Val Acc: 0.6908
+2025-01-31 23:45:23,790 INFO: Epoch [3/15] Train Loss: 0.5715, Train Acc: 0.7093 | Val Loss: 0.5360, Val Acc: 0.7308
+2025-01-31 23:45:48,470 INFO: Epoch [4/15] Train Loss: 0.5158, Train Acc: 0.7580 | Val Loss: 0.5020, Val Acc: 0.7562
+2025-01-31 23:46:13,745 INFO: Epoch [5/15] Train Loss: 0.5025, Train Acc: 0.7665 | Val Loss: 0.4897, Val Acc: 0.7658
+2025-01-31 23:46:39,268 INFO: Epoch [6/15] Train Loss: 0.4948, Train Acc: 0.7726 | Val Loss: 0.4813, Val Acc: 0.7719
+2025-01-31 23:47:04,331 INFO: Epoch [7/15] Train Loss: 0.4872, Train Acc: 0.7751 | Val Loss: 0.4774, Val Acc: 0.7808
+2025-01-31 23:47:28,778 INFO: Epoch [8/15] Train Loss: 0.4804, Train Acc: 0.7813 | Val Loss: 0.4759, Val Acc: 0.7788
+2025-01-31 23:47:53,381 INFO: Epoch [9/15] Train Loss: 0.4768, Train Acc: 0.7802 | Val Loss: 0.4750, Val Acc: 0.7815
+2025-01-31 23:48:17,396 INFO: Epoch [10/15] Train Loss: 0.4839, Train Acc: 0.7774 | Val Loss: 0.4752, Val Acc: 0.7808
+2025-01-31 23:48:40,924 INFO: Epoch [11/15] Train Loss: 0.4820, Train Acc: 0.7746 | Val Loss: 0.4754, Val Acc: 0.7796
+2025-01-31 23:49:06,257 INFO: Epoch [12/15] Train Loss: 0.4826, Train Acc: 0.7814 | Val Loss: 0.4760, Val Acc: 0.7788
+2025-01-31 23:49:31,379 INFO: Epoch [13/15] Train Loss: 0.4841, Train Acc: 0.7849 | Val Loss: 0.4753, Val Acc: 0.7819
+2025-01-31 23:49:56,231 INFO: Epoch [14/15] Train Loss: 0.4789, Train Acc: 0.7806 | Val Loss: 0.4747, Val Acc: 0.7800
+2025-01-31 23:50:21,272 INFO: Epoch [15/15] Train Loss: 0.4773, Train Acc: 0.7867 | Val Loss: 0.4765, Val Acc: 0.7758
+2025-01-31 23:50:21,276 INFO: Saved model and history to:
+/media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/fox_simple_model.pth
+/media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/fox_simple_history.npz
+2025-01-31 23:52:10,664 INFO: Configuration:
+2025-01-31 23:52:10,664 INFO: IMG_SIZE: 224, BATCH_SIZE: 64, LR: 0.001, EPOCHS: 15, KFOLDS: 2
+2025-01-31 23:52:10,665 INFO: Device: cuda
+2025-01-31 23:52:10,919 INFO: Train samples: 16852, Val samples: 4814
+2025-01-31 23:52:11,051 INFO: Model architecture:
+ImprovedBinaryCNN(
+  (conv1): Conv2d(3, 32, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+  (bn1): BatchNorm2d(32, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+  (act1): LeakyReLU(negative_slope=0.1)
+  (conv2): Conv2d(32, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+  (bn2): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+  (act2): LeakyReLU(negative_slope=0.1)
+  (pool1): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+  (conv3): Conv2d(64, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+  (bn3): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+  (act3): LeakyReLU(negative_slope=0.1)
+  (pool2): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+  (global_pool): AdaptiveAvgPool2d(output_size=(1, 1))
+  (dropout): Dropout(p=0.5, inplace=False)
+  (fc): Linear(in_features=128, out_features=1, bias=True)
+)
+2025-01-31 23:52:57,497 INFO: Epoch [1/15] Train Loss: 0.6321, Train Acc: 0.6498 | Val Loss: 0.6036, Val Acc: 0.6824
+2025-01-31 23:53:42,565 INFO: Epoch [2/15] Train Loss: 0.5515, Train Acc: 0.7321 | Val Loss: 0.5140, Val Acc: 0.7526
+2025-01-31 23:54:27,770 INFO: Epoch [3/15] Train Loss: 0.5038, Train Acc: 0.7683 | Val Loss: 0.4593, Val Acc: 0.7964
+2025-01-31 23:55:12,781 INFO: Epoch [4/15] Train Loss: 0.4554, Train Acc: 0.7982 | Val Loss: 0.4280, Val Acc: 0.8211
+2025-01-31 23:55:57,939 INFO: Epoch [5/15] Train Loss: 0.4427, Train Acc: 0.8085 | Val Loss: 0.4289, Val Acc: 0.8137
+2025-01-31 23:56:43,342 INFO: Epoch [6/15] Train Loss: 0.4367, Train Acc: 0.8086 | Val Loss: 0.4109, Val Acc: 0.8328
+2025-01-31 23:57:28,753 INFO: Epoch [7/15] Train Loss: 0.4232, Train Acc: 0.8210 | Val Loss: 0.4033, Val Acc: 0.8346
+2025-01-31 23:58:14,205 INFO: Epoch [8/15] Train Loss: 0.4226, Train Acc: 0.8195 | Val Loss: 0.4015, Val Acc: 0.8363
+2025-01-31 23:58:59,361 INFO: Epoch [9/15] Train Loss: 0.4203, Train Acc: 0.8206 | Val Loss: 0.3999, Val Acc: 0.8361
+2025-01-31 23:59:44,751 INFO: Epoch [10/15] Train Loss: 0.4249, Train Acc: 0.8180 | Val Loss: 0.4015, Val Acc: 0.8351
+2025-02-01 00:00:29,860 INFO: Epoch [11/15] Train Loss: 0.4232, Train Acc: 0.8216 | Val Loss: 0.4011, Val Acc: 0.8336
+2025-02-01 00:01:15,383 INFO: Epoch [12/15] Train Loss: 0.4213, Train Acc: 0.8222 | Val Loss: 0.4000, Val Acc: 0.8388
+2025-02-01 00:02:01,176 INFO: Epoch [13/15] Train Loss: 0.4229, Train Acc: 0.8178 | Val Loss: 0.4005, Val Acc: 0.8344
+2025-02-01 00:02:47,061 INFO: Epoch [14/15] Train Loss: 0.4223, Train Acc: 0.8182 | Val Loss: 0.4002, Val Acc: 0.8359
+2025-02-01 00:03:32,817 INFO: Epoch [15/15] Train Loss: 0.4213, Train Acc: 0.8181 | Val Loss: 0.3998, Val Acc: 0.8363
+2025-02-01 00:03:32,824 INFO: Saved model and history to:
+/media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/elephant_simple_model.pth
+/media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/elephant_simple_history.npz
