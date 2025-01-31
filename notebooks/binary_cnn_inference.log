@@ -119,3 +119,36 @@
 2025-01-31 23:13:08,140 INFO: Model loaded and set to evaluation mode.
 2025-01-31 23:13:08,170 INFO: Subset Test Loss: 0.4677, Subset Test Accuracy: 0.9375
 2025-01-31 23:13:08,634 INFO: Inference and visualization completed.
+2025-02-01 00:31:16,756 INFO: Loading test dataset from /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/data/resized_and_split/fox/test
+2025-02-01 00:31:16,760 INFO: Total test samples loaded: 1300
+2025-02-01 00:31:18,103 INFO: Loading model weights from /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/fox_simple_model.pth
+2025-02-01 00:31:18,107 INFO: Model loaded and set to evaluation mode.
+2025-02-01 00:31:18,787 INFO: Fold 1: Loss = 0.4653, Accuracy = 0.7654
+2025-02-01 00:31:19,446 INFO: Fold 2: Loss = 0.4832, Accuracy = 0.7654
+2025-02-01 00:31:20,022 INFO: Fold 3: Loss = 0.4392, Accuracy = 0.8192
+2025-02-01 00:31:20,590 INFO: Fold 4: Loss = 0.4644, Accuracy = 0.7923
+2025-02-01 00:31:21,234 INFO: Fold 5: Loss = 0.4880, Accuracy = 0.7731
+2025-02-01 00:31:21,396 INFO: Visualizing 16 samples from the first fold for inference.
+2025-02-01 00:31:21,969 INFO: K-fold inference and visualization completed.
+2025-02-01 00:31:53,068 INFO: Loading test dataset from /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/data/resized_and_split/elephant/test
+2025-02-01 00:31:53,072 INFO: Total test samples loaded: 2408
+2025-02-01 00:31:56,074 INFO: Loading model weights from /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/elephant_simple_model.pth
+2025-02-01 00:31:56,077 INFO: Model loaded and set to evaluation mode.
+2025-02-01 00:31:56,862 INFO: Fold 1: Loss = 0.3580, Accuracy = 0.8672
+2025-02-01 00:31:57,706 INFO: Fold 2: Loss = 0.4085, Accuracy = 0.8382
+2025-02-01 00:31:58,455 INFO: Fold 3: Loss = 0.4020, Accuracy = 0.8320
+2025-02-01 00:31:59,219 INFO: Fold 4: Loss = 0.3738, Accuracy = 0.8358
+2025-02-01 00:31:59,897 INFO: Fold 5: Loss = 0.3889, Accuracy = 0.8524
+2025-02-01 00:32:00,055 INFO: Visualizing 16 samples from the first fold for inference.
+2025-02-01 00:32:00,497 INFO: K-fold inference and visualization completed.
+2025-02-01 00:32:23,316 INFO: Loading test dataset from /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/data/resized_and_split/tiger/test
+2025-02-01 00:32:23,319 INFO: Total test samples loaded: 1396
+2025-02-01 00:32:25,222 INFO: Loading model weights from /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/tiger_simple_model.pth
+2025-02-01 00:32:25,225 INFO: Model loaded and set to evaluation mode.
+2025-02-01 00:32:25,932 INFO: Fold 1: Loss = 0.3631, Accuracy = 0.8393
+2025-02-01 00:32:26,546 INFO: Fold 2: Loss = 0.3713, Accuracy = 0.8602
+2025-02-01 00:32:27,115 INFO: Fold 3: Loss = 0.4008, Accuracy = 0.8172
+2025-02-01 00:32:27,687 INFO: Fold 4: Loss = 0.3579, Accuracy = 0.8602
+2025-02-01 00:32:28,284 INFO: Fold 5: Loss = 0.3935, Accuracy = 0.8351
+2025-02-01 00:32:28,440 INFO: Visualizing 16 samples from the first fold for inference.
+2025-02-01 00:32:29,159 INFO: K-fold inference and visualization completed.

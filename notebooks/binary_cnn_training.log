@@ -352,3 +352,6 @@ ImprovedBinaryCNN(
 2025-02-01 00:03:32,824 INFO: Saved model and history to:
 /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/elephant_simple_model.pth
 /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/elephant_simple_history.npz
+2025-02-01 00:33:42,506 INFO: Configuration:
+2025-02-01 00:33:42,507 INFO: IMG_SIZE: 224, BATCH_SIZE: 64, LR: 0.001, EPOCHS: 15, KFOLDS: 2
+2025-02-01 00:33:42,507 INFO: Device: cuda
