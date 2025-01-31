@@ -1,0 +1,121 @@
+2025-01-31 22:49:44,614 INFO: Inference Configuration:
+2025-01-31 22:49:44,615 INFO: IMG_SIZE: 224, BATCH_SIZE: 64
+2025-01-31 22:49:44,615 INFO: Device: cuda
+2025-01-31 22:51:27,122 INFO: Inference Configuration:
+2025-01-31 22:51:27,122 INFO: IMG_SIZE: 224, BATCH_SIZE: 64
+2025-01-31 22:51:27,122 INFO: Device: cuda
+2025-01-31 22:51:27,145 INFO: Loading test dataset from /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/data/resized_and_split/fox/test
+2025-01-31 22:51:27,148 INFO: Test dataset loaded with 1300 samples.
+2025-01-31 22:51:27,249 INFO: Loading model weights from /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/fox_fold1_model.pth
+2025-01-31 22:51:27,253 INFO: Model loaded and set to evaluation mode.
+2025-01-31 22:51:27,253 INFO: Starting inference on test dataset...
+2025-01-31 22:52:16,516 INFO: Inference Configuration:
+2025-01-31 22:52:16,517 INFO: IMG_SIZE: 224, BATCH_SIZE: 64
+2025-01-31 22:52:16,517 INFO: Device: cuda
+2025-01-31 22:52:16,543 INFO: Loading test dataset from /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/data/resized_and_split/fox/test
+2025-01-31 22:52:16,545 INFO: Test dataset loaded with 1300 samples.
+2025-01-31 22:52:16,637 INFO: Loading model weights from /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/fox_fold1_model.pth
+2025-01-31 22:52:16,640 INFO: Model loaded and set to evaluation mode.
+2025-01-31 22:52:16,641 INFO: Starting inference on test dataset...
+2025-01-31 22:52:18,308 INFO: Test Loss: 0.5599, Test Accuracy: 0.7285
+2025-01-31 22:52:18,309 INFO: Visualizing sample predictions...
+2025-01-31 22:54:45,637 INFO: Inference Configuration:
+2025-01-31 22:54:45,637 INFO: IMG_SIZE: 224, BATCH_SIZE: 64
+2025-01-31 22:54:45,637 INFO: Device: cuda
+2025-01-31 22:54:45,669 INFO: Loading test dataset from /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/data/resized_and_split/fox/test
+2025-01-31 22:54:45,671 INFO: Test dataset loaded with 1300 samples.
+2025-01-31 22:54:45,755 INFO: Loading model weights from /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/fox_fold1_model.pth
+2025-01-31 22:54:45,759 INFO: Model loaded and set to evaluation mode.
+2025-01-31 22:54:45,759 INFO: Starting inference on test dataset...
+2025-01-31 22:54:47,187 INFO: Test Loss: 0.5599, Test Accuracy: 0.7285
+2025-01-31 22:54:47,188 INFO: Visualizing sample predictions (16 images)...
+2025-01-31 22:57:49,663 INFO: Inference Configuration:
+2025-01-31 22:57:49,664 INFO: IMG_SIZE: 224, BATCH_SIZE: 64
+2025-01-31 22:57:49,664 INFO: Device: cuda
+2025-01-31 22:57:49,695 INFO: Loading test dataset from /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/data/resized_and_split/fox/test
+2025-01-31 22:57:49,697 INFO: Test dataset loaded with 1300 samples.
+2025-01-31 22:57:49,787 INFO: Loading model weights from /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/fox_fold1_model.pth
+2025-01-31 22:57:49,790 INFO: Model loaded and set to evaluation mode.
+2025-01-31 22:57:49,791 INFO: Starting inference on test dataset...
+2025-01-31 22:57:51,279 INFO: Test Loss: 0.5599, Test Accuracy: 0.7285
+2025-01-31 22:57:51,279 INFO: Visualizing sample predictions (16 images)...
+2025-01-31 22:58:58,854 INFO: Inference Configuration:
+2025-01-31 22:58:58,854 INFO: IMG_SIZE: 224, BATCH_SIZE: 64
+2025-01-31 22:58:58,855 INFO: Device: cuda
+2025-01-31 22:59:14,005 INFO: Inference Configuration:
+2025-01-31 22:59:14,005 INFO: IMG_SIZE: 224, BATCH_SIZE: 64
+2025-01-31 22:59:14,005 INFO: Device: cuda
+2025-01-31 22:59:14,052 INFO: Loading test dataset from /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/data/resized_and_split/fox/test
+2025-01-31 22:59:14,054 INFO: Total test samples loaded: 1300
+2025-01-31 22:59:16,608 INFO: Found 650 positive samples and 650 negative samples in the test set.
+2025-01-31 22:59:16,609 INFO: Selected 8 positive and 8 negative samples for visualization.
+2025-01-31 22:59:46,160 INFO: Inference Configuration:
+2025-01-31 22:59:46,161 INFO: IMG_SIZE: 224, BATCH_SIZE: 64
+2025-01-31 22:59:46,161 INFO: Device: cuda
+2025-01-31 22:59:46,206 INFO: Loading test dataset from /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/data/resized_and_split/fox/test
+2025-01-31 22:59:46,210 INFO: Total test samples loaded: 1300
+2025-01-31 22:59:48,729 INFO: Found 650 positive samples and 650 negative samples in the test set.
+2025-01-31 22:59:48,729 INFO: Selected 8 positive and 8 negative samples for visualization.
+2025-01-31 22:59:48,876 INFO: Loading model weights from /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/fox_fold1_model.pth
+2025-01-31 22:59:48,880 INFO: Model loaded and set to evaluation mode.
+2025-01-31 22:59:49,038 INFO: Subset Test Loss: 0.5637, Subset Test Accuracy: 0.8125
+2025-01-31 22:59:49,580 INFO: Inference and visualization completed.
+2025-01-31 23:01:25,155 INFO: Loading test dataset from /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/data/resized_and_split/fox/test
+2025-01-31 23:01:25,157 INFO: Total test samples loaded: 1300
+2025-01-31 23:01:27,599 INFO: Found 650 positive samples and 650 negative samples in the test set.
+2025-01-31 23:01:27,600 INFO: Selected 8 positive and 8 negative samples for visualization.
+2025-01-31 23:01:27,606 INFO: Loading model weights from /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/fox_fold2_model.pth
+2025-01-31 23:01:27,609 INFO: Model loaded and set to evaluation mode.
+2025-01-31 23:01:27,636 INFO: Subset Test Loss: 0.5981, Subset Test Accuracy: 0.6875
+2025-01-31 23:01:28,089 INFO: Inference and visualization completed.
+2025-01-31 23:04:18,362 INFO: Inference Configuration:
+2025-01-31 23:04:18,363 INFO: IMG_SIZE: 224, BATCH_SIZE: 64
+2025-01-31 23:04:18,363 INFO: Device: cuda
+2025-01-31 23:04:18,396 INFO: Loading test dataset from /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/data/resized_and_split/fox/test
+2025-01-31 23:04:18,399 INFO: Total test samples loaded: 1300
+2025-01-31 23:04:21,110 INFO: Found 650 positive samples and 650 negative samples in the test set.
+2025-01-31 23:04:21,110 INFO: Selected 8 positive and 8 negative samples for visualization.
+2025-01-31 23:04:21,201 INFO: Loading model weights from /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/fox_fold1_model.pth
+2025-01-31 23:04:21,205 INFO: Model loaded and set to evaluation mode.
+2025-01-31 23:04:21,367 INFO: Subset Test Loss: 0.5327, Subset Test Accuracy: 0.8750
+2025-01-31 23:04:22,103 INFO: Inference and visualization completed.
+2025-01-31 23:04:22,129 INFO: Loading test dataset from /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/data/resized_and_split/fox/test
+2025-01-31 23:04:22,134 INFO: Total test samples loaded: 1300
+2025-01-31 23:04:24,671 INFO: Found 650 positive samples and 650 negative samples in the test set.
+2025-01-31 23:04:24,672 INFO: Selected 8 positive and 8 negative samples for visualization.
+2025-01-31 23:04:24,673 INFO: Loading model weights from /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/fox_fold2_model.pth
+2025-01-31 23:04:24,676 INFO: Model loaded and set to evaluation mode.
+2025-01-31 23:04:24,706 INFO: Subset Test Loss: 0.5782, Subset Test Accuracy: 0.7500
+2025-01-31 23:04:25,177 INFO: Inference and visualization completed.
+2025-01-31 23:12:17,167 INFO: Loading test dataset from /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/data/resized_and_split/fox/test
+2025-01-31 23:12:17,171 INFO: Total test samples loaded: 1300
+2025-01-31 23:12:19,714 INFO: Found 650 positive samples and 650 negative samples in the test set.
+2025-01-31 23:12:19,715 INFO: Selected 8 positive and 8 negative samples for visualization.
+2025-01-31 23:12:19,812 INFO: Loading model weights from /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/fox_fold1_model.pth
+2025-01-31 23:12:19,815 INFO: Model loaded and set to evaluation mode.
+2025-01-31 23:12:19,989 INFO: Subset Test Loss: 0.7069, Subset Test Accuracy: 0.6250
+2025-01-31 23:12:20,513 INFO: Inference and visualization completed.
+2025-01-31 23:12:20,543 INFO: Loading test dataset from /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/data/resized_and_split/fox/test
+2025-01-31 23:12:20,546 INFO: Total test samples loaded: 1300
+2025-01-31 23:12:23,173 INFO: Found 650 positive samples and 650 negative samples in the test set.
+2025-01-31 23:12:23,174 INFO: Selected 8 positive and 8 negative samples for visualization.
+2025-01-31 23:12:23,176 INFO: Loading model weights from /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/fox_fold2_model.pth
+2025-01-31 23:12:23,178 INFO: Model loaded and set to evaluation mode.
+2025-01-31 23:12:23,208 INFO: Subset Test Loss: 0.5768, Subset Test Accuracy: 0.5625
+2025-01-31 23:12:23,667 INFO: Inference and visualization completed.
+2025-01-31 23:13:02,210 INFO: Loading test dataset from /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/data/resized_and_split/fox/test
+2025-01-31 23:13:02,212 INFO: Total test samples loaded: 1300
+2025-01-31 23:13:04,740 INFO: Found 650 positive samples and 650 negative samples in the test set.
+2025-01-31 23:13:04,740 INFO: Selected 8 positive and 8 negative samples for visualization.
+2025-01-31 23:13:04,844 INFO: Loading model weights from /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/fox_fold1_model.pth
+2025-01-31 23:13:04,849 INFO: Model loaded and set to evaluation mode.
+2025-01-31 23:13:05,006 INFO: Subset Test Loss: 0.6938, Subset Test Accuracy: 0.5625
+2025-01-31 23:13:05,546 INFO: Inference and visualization completed.
+2025-01-31 23:13:05,576 INFO: Loading test dataset from /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/data/resized_and_split/fox/test
+2025-01-31 23:13:05,581 INFO: Total test samples loaded: 1300
+2025-01-31 23:13:08,135 INFO: Found 650 positive samples and 650 negative samples in the test set.
+2025-01-31 23:13:08,135 INFO: Selected 8 positive and 8 negative samples for visualization.
+2025-01-31 23:13:08,137 INFO: Loading model weights from /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/fox_fold2_model.pth
+2025-01-31 23:13:08,140 INFO: Model loaded and set to evaluation mode.
+2025-01-31 23:13:08,170 INFO: Subset Test Loss: 0.4677, Subset Test Accuracy: 0.9375
+2025-01-31 23:13:08,634 INFO: Inference and visualization completed.

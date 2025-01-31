@@ -87,7 +87,6 @@ wheels/
 .idea_modules/
 
 # Logs and databases
-*.log
 *.sqlite
 *.db
 

@@ -3,19 +3,26 @@ from pathlib import Path
 
 class Config:
     # Project structure
-    PROJECT_ROOT = Path(__file__).parent.parent # This will point to the project root directory
-    DATA_DIR = PROJECT_ROOT / "data"
-    PROCESSED_DATA_DIR = DATA_DIR / "processed"
-    RAW_DATA_DIR = DATA_DIR / "raw"
-    MODELS_DIR = PROJECT_ROOT / "models"
-    RESULTS_DIR = PROJECT_ROOT / "results"
-    WEIGHTS_DIR = MODELS_DIR / "weights"
+    project_root = Path(__file__).parent.parent # This will point to the project root directory
+    DATA_DIR = project_root / "data/resized_and_split/"
+    WEIGHTS_DIR = project_root / "weights"
     
-    # Model parameters
-    IMG_SIZE = 128
-    COLUMNS = 25
-    RANDOM_SEED = 42
+    # Image parameters
+    IMG_SIZE = 224
+    
+    # Training hyperparameters
+    BATCH_SIZE = 64
+    LR = 1e-3
+    EPOCHS = 20
+    KFOLDS = 2
+    
+    # Device
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
+    num_workers = 20
+    
+    # Random seed for reproducibility
+    RANDOM_SEED = 42
+
 
 if __name__ == '__main__':
     # Print paths for verification

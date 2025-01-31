@@ -10,7 +10,7 @@ project_root = Path.cwd()
 sys.path.append(str(project_root))
 from config.config import Config
 from utils.helper_functions import create_X_y, save_model 
-from models.baseline.baseline_cnn import AnimalDataset
+from models.binary_cnn_old.baseline_cnn import AnimalDataset
 
 class OptimizedCNN(nn.Module):
     """CNN architecture with hyperparameters determined by Optuna"""
