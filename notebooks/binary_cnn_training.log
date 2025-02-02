@@ -355,3 +355,46 @@ ImprovedBinaryCNN(
 2025-02-01 00:33:42,506 INFO: Configuration:
 2025-02-01 00:33:42,507 INFO: IMG_SIZE: 224, BATCH_SIZE: 64, LR: 0.001, EPOCHS: 15, KFOLDS: 2
 2025-02-01 00:33:42,507 INFO: Device: cuda
+2025-02-01 22:27:19,318 INFO: Configuration:
+2025-02-01 22:27:19,319 INFO: IMG_SIZE: 224, BATCH_SIZE: 64, LR: 0.001, EPOCHS: 15
+2025-02-01 22:27:19,319 INFO: Device: cuda
+2025-02-01 22:27:19,450 INFO: Train samples: 9098, Val samples: 2600
+2025-02-01 22:27:19,659 INFO: Model architecture:
+ImprovedBinaryCNN(
+  (conv1): Conv2d(3, 32, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+  (bn1): BatchNorm2d(32, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+  (act1): LeakyReLU(negative_slope=0.1)
+  (conv2): Conv2d(32, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+  (bn2): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+  (act2): LeakyReLU(negative_slope=0.1)
+  (pool1): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+  (conv3): Conv2d(64, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+  (bn3): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+  (act3): LeakyReLU(negative_slope=0.1)
+  (pool2): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+  (global_pool): AdaptiveAvgPool2d(output_size=(1, 1))
+  (dropout): Dropout(p=0.5, inplace=False)
+  (fc): Linear(in_features=128, out_features=1, bias=True)
+)
+2025-02-01 22:32:20,828 INFO: Configuration:
+2025-02-01 22:32:20,828 INFO: IMG_SIZE: 224, BATCH_SIZE: 64, LR: 0.001, EPOCHS: 15
+2025-02-01 22:32:20,828 INFO: Device: cuda
+2025-02-01 22:32:20,950 INFO: Train samples: 9098, Val samples: 2600
+2025-02-01 22:32:21,120 INFO: Model architecture:
+ImprovedBinaryCNN(
+  (conv1): Conv2d(3, 32, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+  (bn1): BatchNorm2d(32, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+  (act1): LeakyReLU(negative_slope=0.1)
+  (conv2): Conv2d(32, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+  (bn2): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+  (act2): LeakyReLU(negative_slope=0.1)
+  (pool1): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+  (conv3): Conv2d(64, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+  (bn3): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+  (act3): LeakyReLU(negative_slope=0.1)
+  (pool2): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+  (global_pool): AdaptiveAvgPool2d(output_size=(1, 1))
+  (dropout): Dropout(p=0.5, inplace=False)
+  (fc): Linear(in_features=128, out_features=1, bias=True)
+)
+2025-02-01 22:32:46,701 INFO: Epoch [1/15] Train Loss: 0.6764, Train Acc: 0.5832 | Val Loss: 0.6776, Val Acc: 0.5738 | LR: 0.001
