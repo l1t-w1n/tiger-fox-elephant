@@ -1056,3 +1056,7 @@ ImprovedBinaryCNN(
 2025-02-10 18:07:13,589 INFO: Saved model and history to:
 /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/elephant_with_augmentation_model.pth
 /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/elephant_with_augmentation_history.npz
+2025-02-11 12:41:23,980 INFO: Configuration:
+2025-02-11 12:41:23,980 INFO: IMG_SIZE: 224, BATCH_SIZE: 70, LR: 0.001, EPOCHS: 70
+2025-02-11 12:41:23,981 INFO: Device: cuda
+2025-02-11 12:41:50,963 WARNING: Clipping input data to the valid range for imshow with RGB data ([0..1] for floats or [0..255] for integers). Got range [-0.1793944..1.1413122].

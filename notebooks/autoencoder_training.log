@@ -1,0 +1,67 @@
+2025-02-11 14:05:16,502 INFO: Configuration:
+2025-02-11 14:05:16,503 INFO: IMG_SIZE: 224, BATCH_SIZE: 32, LR: 0.001, EPOCHS: 20
+2025-02-11 14:05:16,503 INFO: Device: cuda
+2025-02-11 14:08:52,763 INFO: Configuration:
+2025-02-11 14:08:52,764 INFO: IMG_SIZE: 224, BATCH_SIZE: 32, LR: 0.001, EPOCHS: 20
+2025-02-11 14:08:52,764 INFO: Device: cuda
+2025-02-11 14:08:53,043 INFO: Target class: fox, Train samples: 0, Val samples: 0
+2025-02-11 14:08:53,044 INFO: Input (grayscale) transform pipeline:
+2025-02-11 14:08:53,044 INFO: ToPILImage()
+2025-02-11 14:08:53,045 INFO: Resize(size=(224, 224), interpolation=bilinear, max_size=None, antialias=True)
+2025-02-11 14:08:53,045 INFO: Grayscale(num_output_channels=1)
+2025-02-11 14:08:53,045 INFO: ToTensor()
+2025-02-11 14:08:53,046 INFO: Target (color) transform pipeline:
+2025-02-11 14:08:53,046 INFO: ToPILImage()
+2025-02-11 14:08:53,046 INFO: Resize(size=(224, 224), interpolation=bilinear, max_size=None, antialias=True)
+2025-02-11 14:08:53,046 INFO: ToTensor()
+2025-02-11 14:31:30,902 INFO: Configuration:
+2025-02-11 14:31:30,902 INFO: IMG_SIZE: 224, BATCH_SIZE: 32, LR: 0.001, EPOCHS: 20
+2025-02-11 14:31:30,903 INFO: Device: cuda
+2025-02-11 14:32:21,773 INFO: Configuration:
+2025-02-11 14:32:21,774 INFO: IMG_SIZE: 224, BATCH_SIZE: 32, LR: 0.001, EPOCHS: 20
+2025-02-11 14:32:21,774 INFO: Device: cuda
+2025-02-11 14:32:22,086 INFO: Target class: fox, Train samples: 4549, Val samples: 1299
+2025-02-11 14:32:22,087 INFO: Input (grayscale) transform pipeline:
+2025-02-11 14:32:22,087 INFO: ToPILImage()
+2025-02-11 14:32:22,087 INFO: Resize(size=(224, 224), interpolation=bilinear, max_size=None, antialias=True)
+2025-02-11 14:32:22,088 INFO: Grayscale(num_output_channels=1)
+2025-02-11 14:32:22,088 INFO: ToTensor()
+2025-02-11 14:32:22,088 INFO: Target (color) transform pipeline:
+2025-02-11 14:32:22,088 INFO: ToPILImage()
+2025-02-11 14:32:22,089 INFO: Resize(size=(224, 224), interpolation=bilinear, max_size=None, antialias=True)
+2025-02-11 14:32:22,089 INFO: ToTensor()
+2025-02-11 14:32:22,388 INFO: Model architecture:
+ColorizationVAE(
+  (encoder): Sequential(
+    (0): Conv2d(1, 64, kernel_size=(4, 4), stride=(2, 2), padding=(1, 1))
+    (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    (2): ReLU()
+    (3): Conv2d(64, 128, kernel_size=(4, 4), stride=(2, 2), padding=(1, 1))
+    (4): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    (5): ReLU()
+    (6): Conv2d(128, 256, kernel_size=(4, 4), stride=(2, 2), padding=(1, 1))
+    (7): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    (8): ReLU()
+    (9): Conv2d(256, 512, kernel_size=(4, 4), stride=(2, 2), padding=(1, 1))
+    (10): BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    (11): ReLU()
+  )
+  (fc_mu): Linear(in_features=100352, out_features=128, bias=True)
+  (fc_logvar): Linear(in_features=100352, out_features=128, bias=True)
+  (decoder_input): Linear(in_features=128, out_features=100352, bias=True)
+  (decoder): Sequential(
+    (0): ConvTranspose2d(512, 256, kernel_size=(4, 4), stride=(2, 2), padding=(1, 1))
+    (1): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    (2): ReLU()
+    (3): ConvTranspose2d(256, 128, kernel_size=(4, 4), stride=(2, 2), padding=(1, 1))
+    (4): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    (5): ReLU()
+    (6): ConvTranspose2d(128, 64, kernel_size=(4, 4), stride=(2, 2), padding=(1, 1))
+    (7): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    (8): ReLU()
+    (9): ConvTranspose2d(64, 3, kernel_size=(4, 4), stride=(2, 2), padding=(1, 1))
+    (10): Sigmoid()
+  )
+)
+2025-02-11 14:32:56,160 INFO: Epoch 1/20: Train Loss = nan, Val Loss = nan
+2025-02-11 14:33:29,429 INFO: Epoch 2/20: Train Loss = nan, Val Loss = nan
