@@ -4227,3 +4227,337 @@ ColorizationNet(
 2025-02-17 17:34:48,072 INFO: Saved model and history to:
 /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/fox_koalarization_model.pth
 /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/fox_koalarization_history.npz
+2025-02-17 17:40:56,440 INFO: Configuration:
+2025-02-17 17:40:56,441 INFO: IMG_SIZE: 224, BATCH_SIZE: 64, LR: 0.001, EPOCHS: 60
+2025-02-17 17:40:56,441 INFO: Device: cuda
+2025-02-17 17:40:56,589 INFO: Target class: tiger, Train samples: 4883, Val samples: 1395
+2025-02-17 17:40:57,007 INFO: Model architecture:
+ColorizationNet(
+  (encoder): Encoder(
+    (conv1): Conv2d(1, 64, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1))
+    (conv2): Conv2d(64, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (conv3): Conv2d(128, 128, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1))
+    (conv4): Conv2d(128, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (conv5): Conv2d(256, 256, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1))
+    (conv6): Conv2d(256, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (conv7): Conv2d(512, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (conv8): Conv2d(512, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+  )
+  (feature_extractor): ResNetExtractor(
+    (features): Sequential(
+      (0): Conv2d(3, 64, kernel_size=(7, 7), stride=(2, 2), padding=(3, 3), bias=False)
+      (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (2): ReLU(inplace=True)
+      (3): MaxPool2d(kernel_size=3, stride=2, padding=1, dilation=1, ceil_mode=False)
+      (4): Sequential(
+        (0): Bottleneck(
+          (conv1): Conv2d(64, 64, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv2): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+          (bn2): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv3): Conv2d(64, 256, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn3): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (relu): ReLU(inplace=True)
+          (downsample): Sequential(
+            (0): Conv2d(64, 256, kernel_size=(1, 1), stride=(1, 1), bias=False)
+            (1): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          )
+        )
+        (1): Bottleneck(
+          (conv1): Conv2d(256, 64, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv2): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+          (bn2): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv3): Conv2d(64, 256, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn3): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (relu): ReLU(inplace=True)
+        )
+        (2): Bottleneck(
+          (conv1): Conv2d(256, 64, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv2): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+          (bn2): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv3): Conv2d(64, 256, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn3): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (relu): ReLU(inplace=True)
+        )
+      )
+      (5): Sequential(
+        (0): Bottleneck(
+          (conv1): Conv2d(256, 128, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn1): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv2): Conv2d(128, 128, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1), bias=False)
+          (bn2): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv3): Conv2d(128, 512, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn3): BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (relu): ReLU(inplace=True)
+          (downsample): Sequential(
+            (0): Conv2d(256, 512, kernel_size=(1, 1), stride=(2, 2), bias=False)
+            (1): BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          )
+        )
+        (1): Bottleneck(
+          (conv1): Conv2d(512, 128, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn1): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv2): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+          (bn2): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv3): Conv2d(128, 512, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn3): BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (relu): ReLU(inplace=True)
+        )
+        (2): Bottleneck(
+          (conv1): Conv2d(512, 128, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn1): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv2): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+          (bn2): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv3): Conv2d(128, 512, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn3): BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (relu): ReLU(inplace=True)
+        )
+        (3): Bottleneck(
+          (conv1): Conv2d(512, 128, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn1): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv2): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+          (bn2): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv3): Conv2d(128, 512, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn3): BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (relu): ReLU(inplace=True)
+        )
+      )
+      (6): Sequential(
+        (0): Bottleneck(
+          (conv1): Conv2d(512, 256, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn1): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv2): Conv2d(256, 256, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1), bias=False)
+          (bn2): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv3): Conv2d(256, 1024, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn3): BatchNorm2d(1024, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (relu): ReLU(inplace=True)
+          (downsample): Sequential(
+            (0): Conv2d(512, 1024, kernel_size=(1, 1), stride=(2, 2), bias=False)
+            (1): BatchNorm2d(1024, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          )
+        )
+        (1): Bottleneck(
+          (conv1): Conv2d(1024, 256, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn1): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv2): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+          (bn2): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv3): Conv2d(256, 1024, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn3): BatchNorm2d(1024, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (relu): ReLU(inplace=True)
+        )
+        (2): Bottleneck(
+          (conv1): Conv2d(1024, 256, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn1): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv2): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+          (bn2): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv3): Conv2d(256, 1024, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn3): BatchNorm2d(1024, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (relu): ReLU(inplace=True)
+        )
+        (3): Bottleneck(
+          (conv1): Conv2d(1024, 256, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn1): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv2): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+          (bn2): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv3): Conv2d(256, 1024, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn3): BatchNorm2d(1024, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (relu): ReLU(inplace=True)
+        )
+        (4): Bottleneck(
+          (conv1): Conv2d(1024, 256, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn1): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv2): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+          (bn2): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv3): Conv2d(256, 1024, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn3): BatchNorm2d(1024, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (relu): ReLU(inplace=True)
+        )
+        (5): Bottleneck(
+          (conv1): Conv2d(1024, 256, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn1): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv2): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+          (bn2): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv3): Conv2d(256, 1024, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn3): BatchNorm2d(1024, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (relu): ReLU(inplace=True)
+        )
+      )
+      (7): Sequential(
+        (0): Bottleneck(
+          (conv1): Conv2d(1024, 512, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn1): BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv2): Conv2d(512, 512, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1), bias=False)
+          (bn2): BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv3): Conv2d(512, 2048, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn3): BatchNorm2d(2048, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (relu): ReLU(inplace=True)
+          (downsample): Sequential(
+            (0): Conv2d(1024, 2048, kernel_size=(1, 1), stride=(2, 2), bias=False)
+            (1): BatchNorm2d(2048, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          )
+        )
+        (1): Bottleneck(
+          (conv1): Conv2d(2048, 512, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn1): BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv2): Conv2d(512, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+          (bn2): BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv3): Conv2d(512, 2048, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn3): BatchNorm2d(2048, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (relu): ReLU(inplace=True)
+        )
+        (2): Bottleneck(
+          (conv1): Conv2d(2048, 512, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn1): BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv2): Conv2d(512, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+          (bn2): BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (conv3): Conv2d(512, 2048, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn3): BatchNorm2d(2048, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (relu): ReLU(inplace=True)
+        )
+      )
+      (8): AdaptiveAvgPool2d(output_size=(1, 1))
+    )
+  )
+  (fusion): Fusion(
+    (conv1x1): Conv2d(2304, 256, kernel_size=(1, 1), stride=(1, 1))
+  )
+  (decoder): Decoder(
+    (conv1): Conv2d(256, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (up1): Upsample(scale_factor=2.0, mode='nearest')
+    (conv2): Conv2d(128, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (conv3): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (up2): Upsample(scale_factor=2.0, mode='nearest')
+    (conv4): Conv2d(64, 32, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (conv5): Conv2d(32, 2, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (up3): Upsample(scale_factor=2.0, mode='nearest')
+  )
+)
+2025-02-17 17:41:34,816 INFO: Epoch 1/60: Train Loss = 0.00712024, Val Loss = 0.00549227
+2025-02-17 17:41:35,222 INFO: Saved model and history to:
+/media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/tiger_koalarization_best_model.pth
+/media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/tiger_koalarization_best_history.npz
+2025-02-17 17:41:35,222 INFO: Saved best model at epoch 1 with Val Loss = 0.00549227
+2025-02-17 17:42:11,458 INFO: Epoch 2/60: Train Loss = 0.00522965, Val Loss = 0.00490733
+2025-02-17 17:42:11,891 INFO: Saved model and history to:
+/media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/tiger_koalarization_best_model.pth
+/media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/tiger_koalarization_best_history.npz
+2025-02-17 17:42:11,891 INFO: Saved best model at epoch 2 with Val Loss = 0.00490733
+2025-02-17 17:42:47,625 INFO: Epoch 3/60: Train Loss = 0.00502168, Val Loss = 0.00517184
+2025-02-17 17:43:23,516 INFO: Epoch 4/60: Train Loss = 0.00475691, Val Loss = 0.00493199
+2025-02-17 17:43:59,114 INFO: Epoch 5/60: Train Loss = 0.00459199, Val Loss = 0.00547861
+2025-02-17 17:44:34,652 INFO: Epoch 6/60: Train Loss = 0.00428585, Val Loss = 0.00468250
+2025-02-17 17:44:35,046 INFO: Saved model and history to:
+/media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/tiger_koalarization_best_model.pth
+/media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/tiger_koalarization_best_history.npz
+2025-02-17 17:44:35,046 INFO: Saved best model at epoch 6 with Val Loss = 0.00468250
+2025-02-17 17:45:09,800 INFO: Epoch 7/60: Train Loss = 0.00410848, Val Loss = 0.00559614
+2025-02-17 17:45:46,042 INFO: Epoch 8/60: Train Loss = 0.00412113, Val Loss = 0.00465475
+2025-02-17 17:45:46,419 INFO: Saved model and history to:
+/media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/tiger_koalarization_best_model.pth
+/media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/tiger_koalarization_best_history.npz
+2025-02-17 17:45:46,419 INFO: Saved best model at epoch 8 with Val Loss = 0.00465475
+2025-02-17 17:46:21,665 INFO: Epoch 9/60: Train Loss = 0.00370476, Val Loss = 0.00421355
+2025-02-17 17:46:22,027 INFO: Saved model and history to:
+/media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/tiger_koalarization_best_model.pth
+/media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/tiger_koalarization_best_history.npz
+2025-02-17 17:46:22,028 INFO: Saved best model at epoch 9 with Val Loss = 0.00421355
+2025-02-17 17:46:57,487 INFO: Epoch 10/60: Train Loss = 0.00346772, Val Loss = 0.00435928
+2025-02-17 17:47:33,058 INFO: Epoch 11/60: Train Loss = 0.00346478, Val Loss = 0.00423917
+2025-02-17 17:48:08,924 INFO: Epoch 12/60: Train Loss = 0.00335308, Val Loss = 0.00416894
+2025-02-17 17:48:09,314 INFO: Saved model and history to:
+/media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/tiger_koalarization_best_model.pth
+/media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/tiger_koalarization_best_history.npz
+2025-02-17 17:48:09,314 INFO: Saved best model at epoch 12 with Val Loss = 0.00416894
+2025-02-17 17:48:44,802 INFO: Epoch 13/60: Train Loss = 0.00318407, Val Loss = 0.00401752
+2025-02-17 17:48:45,169 INFO: Saved model and history to:
+/media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/tiger_koalarization_best_model.pth
+/media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/tiger_koalarization_best_history.npz
+2025-02-17 17:48:45,169 INFO: Saved best model at epoch 13 with Val Loss = 0.00401752
+2025-02-17 17:49:20,744 INFO: Epoch 14/60: Train Loss = 0.00307146, Val Loss = 0.00403053
+2025-02-17 17:49:55,759 INFO: Epoch 15/60: Train Loss = 0.00290428, Val Loss = 0.00410931
+2025-02-17 17:50:30,147 INFO: Epoch 16/60: Train Loss = 0.00284676, Val Loss = 0.00389874
+2025-02-17 17:50:30,612 INFO: Saved model and history to:
+/media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/tiger_koalarization_best_model.pth
+/media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/tiger_koalarization_best_history.npz
+2025-02-17 17:50:30,612 INFO: Saved best model at epoch 16 with Val Loss = 0.00389874
+2025-02-17 17:51:06,647 INFO: Epoch 17/60: Train Loss = 0.00286120, Val Loss = 0.00411022
+2025-02-17 17:51:41,787 INFO: Epoch 18/60: Train Loss = 0.00274358, Val Loss = 0.00411927
+2025-02-17 17:52:17,329 INFO: Epoch 19/60: Train Loss = 0.00278942, Val Loss = 0.00383328
+2025-02-17 17:52:17,681 INFO: Saved model and history to:
+/media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/tiger_koalarization_best_model.pth
+/media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/tiger_koalarization_best_history.npz
+2025-02-17 17:52:17,682 INFO: Saved best model at epoch 19 with Val Loss = 0.00383328
+2025-02-17 17:52:52,816 INFO: Epoch 20/60: Train Loss = 0.00260781, Val Loss = 0.00387499
+2025-02-17 17:53:28,363 INFO: Epoch 21/60: Train Loss = 0.00263877, Val Loss = 0.00404204
+2025-02-17 17:54:03,692 INFO: Epoch 22/60: Train Loss = 0.00265316, Val Loss = 0.00416135
+2025-02-17 17:54:39,380 INFO: Epoch 23/60: Train Loss = 0.00252848, Val Loss = 0.00368059
+2025-02-17 17:54:39,836 INFO: Saved model and history to:
+/media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/tiger_koalarization_best_model.pth
+/media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/tiger_koalarization_best_history.npz
+2025-02-17 17:54:39,837 INFO: Saved best model at epoch 23 with Val Loss = 0.00368059
+2025-02-17 17:55:15,188 INFO: Epoch 24/60: Train Loss = 0.00254569, Val Loss = 0.00385479
+2025-02-17 17:55:50,783 INFO: Epoch 25/60: Train Loss = 0.00249050, Val Loss = 0.00379826
+2025-02-17 17:56:26,349 INFO: Epoch 26/60: Train Loss = 0.00246433, Val Loss = 0.00417180
+2025-02-17 17:57:01,598 INFO: Epoch 27/60: Train Loss = 0.00239679, Val Loss = 0.00375017
+2025-02-17 17:57:37,684 INFO: Epoch 28/60: Train Loss = 0.00235889, Val Loss = 0.00361740
+2025-02-17 17:57:38,082 INFO: Saved model and history to:
+/media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/tiger_koalarization_best_model.pth
+/media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/tiger_koalarization_best_history.npz
+2025-02-17 17:57:38,083 INFO: Saved best model at epoch 28 with Val Loss = 0.00361740
+2025-02-17 17:58:14,262 INFO: Epoch 29/60: Train Loss = 0.00231338, Val Loss = 0.00364185
+2025-02-17 17:58:50,505 INFO: Epoch 30/60: Train Loss = 0.00218364, Val Loss = 0.00355501
+2025-02-17 17:58:50,918 INFO: Saved model and history to:
+/media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/tiger_koalarization_best_model.pth
+/media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/tiger_koalarization_best_history.npz
+2025-02-17 17:58:50,919 INFO: Saved best model at epoch 30 with Val Loss = 0.00355501
+2025-02-17 17:58:50,919 INFO: Reduced learning rate by 10 at epoch 30
+2025-02-17 17:59:26,745 INFO: Epoch 31/60: Train Loss = 0.00197746, Val Loss = 0.00344289
+2025-02-17 17:59:27,150 INFO: Saved model and history to:
+/media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/tiger_koalarization_best_model.pth
+/media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/tiger_koalarization_best_history.npz
+2025-02-17 17:59:27,150 INFO: Saved best model at epoch 31 with Val Loss = 0.00344289
+2025-02-17 18:00:03,224 INFO: Epoch 32/60: Train Loss = 0.00191629, Val Loss = 0.00342340
+2025-02-17 18:00:03,681 INFO: Saved model and history to:
+/media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/tiger_koalarization_best_model.pth
+/media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/tiger_koalarization_best_history.npz
+2025-02-17 18:00:03,681 INFO: Saved best model at epoch 32 with Val Loss = 0.00342340
+2025-02-17 18:00:38,087 INFO: Epoch 33/60: Train Loss = 0.00187421, Val Loss = 0.00343963
+2025-02-17 18:01:12,493 INFO: Epoch 34/60: Train Loss = 0.00185018, Val Loss = 0.00346707
+2025-02-17 18:01:46,353 INFO: Epoch 35/60: Train Loss = 0.00183149, Val Loss = 0.00346340
+2025-02-17 18:02:20,863 INFO: Epoch 36/60: Train Loss = 0.00180295, Val Loss = 0.00344718
+2025-02-17 18:02:54,789 INFO: Epoch 37/60: Train Loss = 0.00178440, Val Loss = 0.00345071
+2025-02-17 18:03:29,128 INFO: Epoch 38/60: Train Loss = 0.00176613, Val Loss = 0.00346013
+2025-02-17 18:04:03,753 INFO: Epoch 39/60: Train Loss = 0.00175933, Val Loss = 0.00345283
+2025-02-17 18:04:37,891 INFO: Epoch 40/60: Train Loss = 0.00173697, Val Loss = 0.00346101
+2025-02-17 18:05:12,263 INFO: Epoch 41/60: Train Loss = 0.00172193, Val Loss = 0.00346251
+2025-02-17 18:05:45,999 INFO: Epoch 42/60: Train Loss = 0.00170691, Val Loss = 0.00348262
+2025-02-17 18:06:20,371 INFO: Epoch 43/60: Train Loss = 0.00169711, Val Loss = 0.00353685
+2025-02-17 18:06:54,481 INFO: Epoch 44/60: Train Loss = 0.00168624, Val Loss = 0.00346285
+2025-02-17 18:07:28,830 INFO: Epoch 45/60: Train Loss = 0.00165680, Val Loss = 0.00347720
+2025-02-17 18:08:02,773 INFO: Epoch 46/60: Train Loss = 0.00164566, Val Loss = 0.00346817
+2025-02-17 18:08:37,255 INFO: Epoch 47/60: Train Loss = 0.00162796, Val Loss = 0.00347453
+2025-02-17 18:09:11,123 INFO: Epoch 48/60: Train Loss = 0.00161595, Val Loss = 0.00348232
+2025-02-17 18:09:45,445 INFO: Epoch 49/60: Train Loss = 0.00160772, Val Loss = 0.00347196
+2025-02-17 18:10:19,724 INFO: Epoch 50/60: Train Loss = 0.00158569, Val Loss = 0.00348896
+2025-02-17 18:10:53,889 INFO: Epoch 51/60: Train Loss = 0.00157232, Val Loss = 0.00349821
+2025-02-17 18:11:28,228 INFO: Epoch 52/60: Train Loss = 0.00156169, Val Loss = 0.00348399
+2025-02-17 18:12:02,155 INFO: Epoch 53/60: Train Loss = 0.00154563, Val Loss = 0.00348186
+2025-02-17 18:12:36,314 INFO: Epoch 54/60: Train Loss = 0.00153350, Val Loss = 0.00348596
+2025-02-17 18:13:10,338 INFO: Epoch 55/60: Train Loss = 0.00152213, Val Loss = 0.00347841
+2025-02-17 18:13:44,613 INFO: Epoch 56/60: Train Loss = 0.00151809, Val Loss = 0.00348091
+2025-02-17 18:14:18,626 INFO: Epoch 57/60: Train Loss = 0.00148866, Val Loss = 0.00349909
+2025-02-17 18:14:53,076 INFO: Epoch 58/60: Train Loss = 0.00148289, Val Loss = 0.00352105
+2025-02-17 18:15:27,378 INFO: Epoch 59/60: Train Loss = 0.00147158, Val Loss = 0.00348160
+2025-02-17 18:16:01,689 INFO: Epoch 60/60: Train Loss = 0.00145503, Val Loss = 0.00350363
+2025-02-17 18:16:02,207 INFO: Saved model and history to:
+/media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/tiger_koalarization_final_model.pth
+/media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/tiger_koalarization_final_history.npz
+2025-02-17 18:16:02,208 INFO: Training complete. Final model and history saved.
+2025-02-17 18:16:02,687 INFO: Saved model and history to:
+/media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/tiger_koalarization_model.pth
+/media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/tiger_koalarization_history.npz
+2025-02-17 18:36:10,797 INFO: Configuration:
+2025-02-17 18:36:10,797 INFO: IMG_SIZE: 224, BATCH_SIZE: 64, LR: 0.0001, EPOCHS: 20
+2025-02-17 18:36:10,797 INFO: Device: cuda
