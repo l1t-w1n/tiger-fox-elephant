@@ -13,6 +13,10 @@ This project is avaliable under MIT licence.
 - Léo Quenette
 - Matis Bazireau
 
+## Special Thanks
+
+- Mykola Nechay
+
 ## Acknowledgments
 
 - Project structure inspired by modern deep learning practices
