@@ -2,6 +2,9 @@ import torch
 import torch.nn as nn 
 import torch.nn.functional as F
 
+##https://arxiv.org/pdf/2208.09392##
+##https://github.com/lucidrains/denoising-diffusion-pytorch?tab=readme-ov-file##
+
 class SelfAttention(nn.Module):
     def __init__(self, num_heads: int, embedding_dim: int, input_bias: bool = True, output_bias: bool = True):
         super(SelfAttention, self).__init__()
