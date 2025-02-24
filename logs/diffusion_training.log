@@ -863,3 +863,141 @@ UNet2DModel(
 2025-02-24 00:48:15,531 INFO: Initializing diffusion model training...
 2025-02-24 00:48:16,213 INFO: Loaded model from /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/diffusion/diffusion_model.pth
 2025-02-24 00:48:16,214 INFO: Training on cuda with 200 epochs
+2025-02-24 00:49:43,390 INFO: Epoch 001/200 | Train Loss: 0.0362 | LR: 1.20e-05
+2025-02-24 00:49:44,267 INFO: Saved model to: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/diffusion/diffusion_model.pth
+2025-02-24 00:49:44,267 INFO: Updated training history at: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/histories/diffusion/diffusion_history.npz
+2025-02-24 00:49:44,268 INFO: Checkpoint saved at epoch 1
+2025-02-24 00:49:44,268 INFO: Epoch 1 - Generating samples...
+2025-02-24 00:51:18,753 INFO: Epoch 002/200 | Train Loss: 0.0370 | LR: 1.20e-05
+2025-02-24 00:51:19,740 INFO: Saved model to: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/diffusion/diffusion_model.pth
+2025-02-24 00:51:19,741 INFO: Updated training history at: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/histories/diffusion/diffusion_history.npz
+2025-02-24 00:51:19,741 INFO: Checkpoint saved at epoch 2
+2025-02-24 01:01:30,654 INFO: Initializing diffusion model training...
+2025-02-24 01:01:31,868 INFO: Loaded model from /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/diffusion/diffusion_model.pth
+2025-02-24 01:01:31,875 INFO: Training on cuda with 200 epochs
+2025-02-24 01:02:59,140 INFO: Initializing diffusion model training...
+2025-02-24 01:02:59,566 INFO: Loaded model from /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/diffusion/diffusion_model.pth
+2025-02-24 01:02:59,567 INFO: Training on cuda with 200 epochs
+2025-02-24 01:03:31,417 INFO: Initializing diffusion model training...
+2025-02-24 01:03:32,088 INFO: Loaded model from /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/diffusion/diffusion_model.pth
+2025-02-24 01:03:32,089 INFO: Training on cuda with 200 epochs
+2025-02-24 01:04:59,410 INFO: Epoch 001/200 | Train Loss: 0.0369 | LR: 1.20e-05
+2025-02-24 01:05:00,503 INFO: Saved model to: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/diffusion/diffusion_model.pth
+2025-02-24 01:05:00,503 INFO: Updated training history at: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/histories/diffusion/diffusion_history.npz
+2025-02-24 01:05:00,504 INFO: Checkpoint saved at epoch 1
+2025-02-24 01:05:00,504 INFO: Epoch 1 - Generating samples...
+2025-02-24 01:06:32,706 INFO: Epoch 002/200 | Train Loss: 0.0365 | LR: 1.20e-05
+2025-02-24 01:06:33,832 INFO: Saved model to: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/diffusion/diffusion_model.pth
+2025-02-24 01:06:33,832 INFO: Updated training history at: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/histories/diffusion/diffusion_history.npz
+2025-02-24 01:06:33,833 INFO: Checkpoint saved at epoch 2
+2025-02-24 01:07:58,565 INFO: Epoch 003/200 | Train Loss: 0.0369 | LR: 1.20e-05
+2025-02-24 01:07:59,633 INFO: Saved model to: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/diffusion/diffusion_model.pth
+2025-02-24 01:07:59,634 INFO: Updated training history at: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/histories/diffusion/diffusion_history.npz
+2025-02-24 01:07:59,634 INFO: Checkpoint saved at epoch 3
+2025-02-24 01:07:59,634 INFO: Epoch 3 - Generating samples...
+2025-02-24 01:09:31,635 INFO: Epoch 004/200 | Train Loss: 0.0359 | LR: 1.20e-05
+2025-02-24 01:09:32,767 INFO: Saved model to: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/diffusion/diffusion_model.pth
+2025-02-24 01:09:32,767 INFO: Updated training history at: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/histories/diffusion/diffusion_history.npz
+2025-02-24 01:09:32,768 INFO: Checkpoint saved at epoch 4
+2025-02-24 01:10:57,356 INFO: Epoch 005/200 | Train Loss: 0.0360 | LR: 1.20e-05
+2025-02-24 01:10:58,439 INFO: Saved model to: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/diffusion/diffusion_model.pth
+2025-02-24 01:10:58,439 INFO: Updated training history at: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/histories/diffusion/diffusion_history.npz
+2025-02-24 01:10:58,439 INFO: Checkpoint saved at epoch 5
+2025-02-24 01:10:58,440 INFO: Epoch 5 - Generating samples...
+2025-02-24 01:12:30,552 INFO: Epoch 006/200 | Train Loss: 0.0359 | LR: 1.20e-05
+2025-02-24 01:12:31,268 INFO: Saved model to: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/diffusion/diffusion_model.pth
+2025-02-24 01:12:31,268 INFO: Updated training history at: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/histories/diffusion/diffusion_history.npz
+2025-02-24 01:12:31,269 INFO: Checkpoint saved at epoch 6
+2025-02-24 01:13:55,772 INFO: Epoch 007/200 | Train Loss: 0.0366 | LR: 1.20e-05
+2025-02-24 01:13:56,861 INFO: Saved model to: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/diffusion/diffusion_model.pth
+2025-02-24 01:13:56,862 INFO: Updated training history at: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/histories/diffusion/diffusion_history.npz
+2025-02-24 01:13:56,862 INFO: Checkpoint saved at epoch 7
+2025-02-24 01:13:56,862 INFO: Epoch 7 - Generating samples...
+2025-02-24 01:15:29,229 INFO: Epoch 008/200 | Train Loss: 0.0360 | LR: 1.20e-05
+2025-02-24 01:15:30,084 INFO: Saved model to: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/diffusion/diffusion_model.pth
+2025-02-24 01:15:30,084 INFO: Updated training history at: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/histories/diffusion/diffusion_history.npz
+2025-02-24 01:15:30,084 INFO: Checkpoint saved at epoch 8
+2025-02-24 01:16:56,644 INFO: Epoch 009/200 | Train Loss: 0.0353 | LR: 1.20e-05
+2025-02-24 01:16:57,645 INFO: Saved model to: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/diffusion/diffusion_model.pth
+2025-02-24 01:16:57,645 INFO: Updated training history at: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/histories/diffusion/diffusion_history.npz
+2025-02-24 01:16:57,646 INFO: Checkpoint saved at epoch 9
+2025-02-24 01:16:57,646 INFO: Epoch 9 - Generating samples...
+2025-02-24 01:18:29,872 INFO: Epoch 010/200 | Train Loss: 0.0365 | LR: 1.20e-05
+2025-02-24 01:18:30,837 INFO: Saved model to: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/diffusion/diffusion_model.pth
+2025-02-24 01:18:30,838 INFO: Updated training history at: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/histories/diffusion/diffusion_history.npz
+2025-02-24 01:18:30,838 INFO: Checkpoint saved at epoch 10
+2025-02-24 01:19:56,483 INFO: Epoch 011/200 | Train Loss: 0.0359 | LR: 1.20e-05
+2025-02-24 01:19:57,509 INFO: Saved model to: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/diffusion/diffusion_model.pth
+2025-02-24 01:19:57,510 INFO: Updated training history at: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/histories/diffusion/diffusion_history.npz
+2025-02-24 01:19:57,510 INFO: Checkpoint saved at epoch 11
+2025-02-24 01:19:57,510 INFO: Epoch 11 - Generating samples...
+2025-02-24 01:21:28,285 INFO: Epoch 012/200 | Train Loss: 0.0354 | LR: 1.20e-05
+2025-02-24 01:21:29,364 INFO: Saved model to: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/diffusion/diffusion_model.pth
+2025-02-24 01:21:29,364 INFO: Updated training history at: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/histories/diffusion/diffusion_history.npz
+2025-02-24 01:21:29,364 INFO: Checkpoint saved at epoch 12
+2025-02-24 01:22:53,450 INFO: Epoch 013/200 | Train Loss: 0.0367 | LR: 1.20e-05
+2025-02-24 01:22:54,129 INFO: Saved model to: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/diffusion/diffusion_model.pth
+2025-02-24 01:22:54,130 INFO: Updated training history at: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/histories/diffusion/diffusion_history.npz
+2025-02-24 01:22:54,130 INFO: Checkpoint saved at epoch 13
+2025-02-24 01:22:54,131 INFO: Epoch 13 - Generating samples...
+2025-02-24 01:24:26,158 INFO: Epoch 014/200 | Train Loss: 0.0359 | LR: 1.20e-05
+2025-02-24 01:24:26,819 INFO: Saved model to: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/diffusion/diffusion_model.pth
+2025-02-24 01:24:26,819 INFO: Updated training history at: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/histories/diffusion/diffusion_history.npz
+2025-02-24 01:24:26,819 INFO: Checkpoint saved at epoch 14
+2025-02-24 01:25:54,412 INFO: Epoch 015/200 | Train Loss: 0.0363 | LR: 1.20e-05
+2025-02-24 01:25:55,260 INFO: Saved model to: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/diffusion/diffusion_model.pth
+2025-02-24 01:25:55,261 INFO: Updated training history at: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/histories/diffusion/diffusion_history.npz
+2025-02-24 01:25:55,261 INFO: Checkpoint saved at epoch 15
+2025-02-24 01:25:55,261 INFO: Epoch 15 - Generating samples...
+2025-02-24 01:27:29,494 INFO: Epoch 016/200 | Train Loss: 0.0346 | LR: 1.20e-05
+2025-02-24 01:27:30,222 INFO: Saved model to: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/diffusion/diffusion_model.pth
+2025-02-24 01:27:30,222 INFO: Updated training history at: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/histories/diffusion/diffusion_history.npz
+2025-02-24 01:27:30,222 INFO: Checkpoint saved at epoch 16
+2025-02-24 01:28:54,824 INFO: Epoch 017/200 | Train Loss: 0.0343 | LR: 1.21e-05
+2025-02-24 01:28:55,869 INFO: Saved model to: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/diffusion/diffusion_model.pth
+2025-02-24 01:28:55,870 INFO: Updated training history at: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/histories/diffusion/diffusion_history.npz
+2025-02-24 01:28:55,870 INFO: Checkpoint saved at epoch 17
+2025-02-24 01:28:55,870 INFO: Epoch 17 - Generating samples...
+2025-02-24 01:30:27,739 INFO: Epoch 018/200 | Train Loss: 0.0362 | LR: 1.21e-05
+2025-02-24 01:30:28,566 INFO: Saved model to: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/diffusion/diffusion_model.pth
+2025-02-24 01:30:28,567 INFO: Updated training history at: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/histories/diffusion/diffusion_history.npz
+2025-02-24 01:30:28,567 INFO: Checkpoint saved at epoch 18
+2025-02-24 01:31:53,172 INFO: Epoch 019/200 | Train Loss: 0.0365 | LR: 1.21e-05
+2025-02-24 01:31:53,780 INFO: Saved model to: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/diffusion/diffusion_model.pth
+2025-02-24 01:31:53,780 INFO: Updated training history at: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/histories/diffusion/diffusion_history.npz
+2025-02-24 01:31:53,780 INFO: Checkpoint saved at epoch 19
+2025-02-24 01:31:53,780 INFO: Epoch 19 - Generating samples...
+2025-02-24 01:33:24,721 INFO: Epoch 020/200 | Train Loss: 0.0347 | LR: 1.21e-05
+2025-02-24 01:33:25,725 INFO: Saved model to: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/diffusion/diffusion_model.pth
+2025-02-24 01:33:25,725 INFO: Updated training history at: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/histories/diffusion/diffusion_history.npz
+2025-02-24 01:33:25,726 INFO: Checkpoint saved at epoch 20
+2025-02-24 01:34:49,580 INFO: Epoch 021/200 | Train Loss: 0.0354 | LR: 1.21e-05
+2025-02-24 01:34:50,536 INFO: Saved model to: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/diffusion/diffusion_model.pth
+2025-02-24 01:34:50,536 INFO: Updated training history at: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/histories/diffusion/diffusion_history.npz
+2025-02-24 01:34:50,536 INFO: Checkpoint saved at epoch 21
+2025-02-24 01:34:50,537 INFO: Epoch 21 - Generating samples...
+2025-02-24 01:36:21,604 INFO: Epoch 022/200 | Train Loss: 0.0364 | LR: 1.21e-05
+2025-02-24 01:36:22,687 INFO: Saved model to: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/diffusion/diffusion_model.pth
+2025-02-24 01:36:22,687 INFO: Updated training history at: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/histories/diffusion/diffusion_history.npz
+2025-02-24 01:36:22,688 INFO: Checkpoint saved at epoch 22
+2025-02-24 01:37:47,550 INFO: Epoch 023/200 | Train Loss: 0.0359 | LR: 1.21e-05
+2025-02-24 01:37:48,216 INFO: Saved model to: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/diffusion/diffusion_model.pth
+2025-02-24 01:37:48,216 INFO: Updated training history at: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/histories/diffusion/diffusion_history.npz
+2025-02-24 01:37:48,216 INFO: Checkpoint saved at epoch 23
+2025-02-24 01:37:48,216 INFO: Epoch 23 - Generating samples...
+2025-02-24 01:39:20,039 INFO: Epoch 024/200 | Train Loss: 0.0351 | LR: 1.21e-05
+2025-02-24 01:39:21,084 INFO: Saved model to: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/diffusion/diffusion_model.pth
+2025-02-24 01:39:21,084 INFO: Updated training history at: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/histories/diffusion/diffusion_history.npz
+2025-02-24 01:39:21,084 INFO: Checkpoint saved at epoch 24
+2025-02-24 01:40:45,797 INFO: Epoch 025/200 | Train Loss: 0.0369 | LR: 1.21e-05
+2025-02-24 01:40:46,867 INFO: Saved model to: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/diffusion/diffusion_model.pth
+2025-02-24 01:40:46,868 INFO: Updated training history at: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/histories/diffusion/diffusion_history.npz
+2025-02-24 01:40:46,868 INFO: Checkpoint saved at epoch 25
+2025-02-24 01:40:46,869 INFO: Epoch 25 - Generating samples...
+2025-02-24 01:42:21,111 INFO: Epoch 026/200 | Train Loss: 0.0356 | LR: 1.21e-05
+2025-02-24 01:42:21,872 INFO: Saved model to: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/diffusion/diffusion_model.pth
+2025-02-24 01:42:21,872 INFO: Updated training history at: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/histories/diffusion/diffusion_history.npz
+2025-02-24 01:42:21,873 INFO: Checkpoint saved at epoch 26
+2025-02-24 01:46:39,416 INFO: Initializing diffusion model training...
+2025-02-24 01:46:40,131 INFO: Loaded model from /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/diffusion/diffusion_model.pth
+2025-02-24 01:46:40,132 INFO: Training on cuda with 200 epochs
