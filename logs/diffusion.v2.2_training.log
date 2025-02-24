@@ -1,0 +1,343 @@
+2025-02-24 23:27:19,695 INFO: Initializing training...
+2025-02-24 23:27:20,607 INFO: Model: UNet2DModel(
+  (conv_in): Conv2d(3, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+  (time_proj): Timesteps()
+  (time_embedding): TimestepEmbedding(
+    (linear_1): Linear(in_features=128, out_features=512, bias=True)
+    (act): SiLU()
+    (linear_2): Linear(in_features=512, out_features=512, bias=True)
+  )
+  (down_blocks): ModuleList(
+    (0): DownBlock2D(
+      (resnets): ModuleList(
+        (0-1): 2 x ResnetBlock2D(
+          (norm1): GroupNorm(8, 128, eps=1e-05, affine=True)
+          (conv1): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+          (time_emb_proj): Linear(in_features=512, out_features=128, bias=True)
+          (norm2): GroupNorm(8, 128, eps=1e-05, affine=True)
+          (dropout): Dropout(p=0.1, inplace=False)
+          (conv2): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+          (nonlinearity): SiLU()
+        )
+      )
+      (downsamplers): ModuleList(
+        (0): Downsample2D(
+          (conv): Conv2d(128, 128, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1))
+        )
+      )
+    )
+    (1): AttnDownBlock2D(
+      (attentions): ModuleList(
+        (0-1): 2 x Attention(
+          (group_norm): GroupNorm(8, 256, eps=1e-05, affine=True)
+          (to_q): Linear(in_features=256, out_features=256, bias=True)
+          (to_k): Linear(in_features=256, out_features=256, bias=True)
+          (to_v): Linear(in_features=256, out_features=256, bias=True)
+          (to_out): ModuleList(
+            (0): Linear(in_features=256, out_features=256, bias=True)
+            (1): Dropout(p=0.0, inplace=False)
+          )
+        )
+      )
+      (resnets): ModuleList(
+        (0): ResnetBlock2D(
+          (norm1): GroupNorm(8, 128, eps=1e-05, affine=True)
+          (conv1): Conv2d(128, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+          (time_emb_proj): Linear(in_features=512, out_features=256, bias=True)
+          (norm2): GroupNorm(8, 256, eps=1e-05, affine=True)
+          (dropout): Dropout(p=0.1, inplace=False)
+          (conv2): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+          (nonlinearity): SiLU()
+          (conv_shortcut): Conv2d(128, 256, kernel_size=(1, 1), stride=(1, 1))
+        )
+        (1): ResnetBlock2D(
+          (norm1): GroupNorm(8, 256, eps=1e-05, affine=True)
+          (conv1): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+          (time_emb_proj): Linear(in_features=512, out_features=256, bias=True)
+          (norm2): GroupNorm(8, 256, eps=1e-05, affine=True)
+          (dropout): Dropout(p=0.1, inplace=False)
+          (conv2): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+          (nonlinearity): SiLU()
+        )
+      )
+      (downsamplers): ModuleList(
+        (0): Downsample2D(
+          (conv): Conv2d(256, 256, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1))
+        )
+      )
+    )
+    (2): AttnDownBlock2D(
+      (attentions): ModuleList(
+        (0-1): 2 x Attention(
+          (group_norm): GroupNorm(8, 512, eps=1e-05, affine=True)
+          (to_q): Linear(in_features=512, out_features=512, bias=True)
+          (to_k): Linear(in_features=512, out_features=512, bias=True)
+          (to_v): Linear(in_features=512, out_features=512, bias=True)
+          (to_out): ModuleList(
+            (0): Linear(in_features=512, out_features=512, bias=True)
+            (1): Dropout(p=0.0, inplace=False)
+          )
+        )
+      )
+      (resnets): ModuleList(
+        (0): ResnetBlock2D(
+          (norm1): GroupNorm(8, 256, eps=1e-05, affine=True)
+          (conv1): Conv2d(256, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+          (time_emb_proj): Linear(in_features=512, out_features=512, bias=True)
+          (norm2): GroupNorm(8, 512, eps=1e-05, affine=True)
+          (dropout): Dropout(p=0.1, inplace=False)
+          (conv2): Conv2d(512, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+          (nonlinearity): SiLU()
+          (conv_shortcut): Conv2d(256, 512, kernel_size=(1, 1), stride=(1, 1))
+        )
+        (1): ResnetBlock2D(
+          (norm1): GroupNorm(8, 512, eps=1e-05, affine=True)
+          (conv1): Conv2d(512, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+          (time_emb_proj): Linear(in_features=512, out_features=512, bias=True)
+          (norm2): GroupNorm(8, 512, eps=1e-05, affine=True)
+          (dropout): Dropout(p=0.1, inplace=False)
+          (conv2): Conv2d(512, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+          (nonlinearity): SiLU()
+        )
+      )
+      (downsamplers): ModuleList(
+        (0): Downsample2D(
+          (conv): Conv2d(512, 512, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1))
+        )
+      )
+    )
+    (3): AttnDownBlock2D(
+      (attentions): ModuleList(
+        (0-1): 2 x Attention(
+          (group_norm): GroupNorm(8, 512, eps=1e-05, affine=True)
+          (to_q): Linear(in_features=512, out_features=512, bias=True)
+          (to_k): Linear(in_features=512, out_features=512, bias=True)
+          (to_v): Linear(in_features=512, out_features=512, bias=True)
+          (to_out): ModuleList(
+            (0): Linear(in_features=512, out_features=512, bias=True)
+            (1): Dropout(p=0.0, inplace=False)
+          )
+        )
+      )
+      (resnets): ModuleList(
+        (0-1): 2 x ResnetBlock2D(
+          (norm1): GroupNorm(8, 512, eps=1e-05, affine=True)
+          (conv1): Conv2d(512, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+          (time_emb_proj): Linear(in_features=512, out_features=512, bias=True)
+          (norm2): GroupNorm(8, 512, eps=1e-05, affine=True)
+          (dropout): Dropout(p=0.1, inplace=False)
+          (conv2): Conv2d(512, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+          (nonlinearity): SiLU()
+        )
+      )
+    )
+  )
+  (up_blocks): ModuleList(
+    (0): AttnUpBlock2D(
+      (attentions): ModuleList(
+        (0-2): 3 x Attention(
+          (group_norm): GroupNorm(8, 512, eps=1e-05, affine=True)
+          (to_q): Linear(in_features=512, out_features=512, bias=True)
+          (to_k): Linear(in_features=512, out_features=512, bias=True)
+          (to_v): Linear(in_features=512, out_features=512, bias=True)
+          (to_out): ModuleList(
+            (0): Linear(in_features=512, out_features=512, bias=True)
+            (1): Dropout(p=0.0, inplace=False)
+          )
+        )
+      )
+      (resnets): ModuleList(
+        (0-2): 3 x ResnetBlock2D(
+          (norm1): GroupNorm(8, 1024, eps=1e-05, affine=True)
+          (conv1): Conv2d(1024, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+          (time_emb_proj): Linear(in_features=512, out_features=512, bias=True)
+          (norm2): GroupNorm(8, 512, eps=1e-05, affine=True)
+          (dropout): Dropout(p=0.1, inplace=False)
+          (conv2): Conv2d(512, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+          (nonlinearity): SiLU()
+          (conv_shortcut): Conv2d(1024, 512, kernel_size=(1, 1), stride=(1, 1))
+        )
+      )
+      (upsamplers): ModuleList(
+        (0): Upsample2D(
+          (conv): Conv2d(512, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        )
+      )
+    )
+    (1): AttnUpBlock2D(
+      (attentions): ModuleList(
+        (0-2): 3 x Attention(
+          (group_norm): GroupNorm(8, 512, eps=1e-05, affine=True)
+          (to_q): Linear(in_features=512, out_features=512, bias=True)
+          (to_k): Linear(in_features=512, out_features=512, bias=True)
+          (to_v): Linear(in_features=512, out_features=512, bias=True)
+          (to_out): ModuleList(
+            (0): Linear(in_features=512, out_features=512, bias=True)
+            (1): Dropout(p=0.0, inplace=False)
+          )
+        )
+      )
+      (resnets): ModuleList(
+        (0-1): 2 x ResnetBlock2D(
+          (norm1): GroupNorm(8, 1024, eps=1e-05, affine=True)
+          (conv1): Conv2d(1024, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+          (time_emb_proj): Linear(in_features=512, out_features=512, bias=True)
+          (norm2): GroupNorm(8, 512, eps=1e-05, affine=True)
+          (dropout): Dropout(p=0.1, inplace=False)
+          (conv2): Conv2d(512, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+          (nonlinearity): SiLU()
+          (conv_shortcut): Conv2d(1024, 512, kernel_size=(1, 1), stride=(1, 1))
+        )
+        (2): ResnetBlock2D(
+          (norm1): GroupNorm(8, 768, eps=1e-05, affine=True)
+          (conv1): Conv2d(768, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+          (time_emb_proj): Linear(in_features=512, out_features=512, bias=True)
+          (norm2): GroupNorm(8, 512, eps=1e-05, affine=True)
+          (dropout): Dropout(p=0.1, inplace=False)
+          (conv2): Conv2d(512, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+          (nonlinearity): SiLU()
+          (conv_shortcut): Conv2d(768, 512, kernel_size=(1, 1), stride=(1, 1))
+        )
+      )
+      (upsamplers): ModuleList(
+        (0): Upsample2D(
+          (conv): Conv2d(512, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        )
+      )
+    )
+    (2): AttnUpBlock2D(
+      (attentions): ModuleList(
+        (0-2): 3 x Attention(
+          (group_norm): GroupNorm(8, 256, eps=1e-05, affine=True)
+          (to_q): Linear(in_features=256, out_features=256, bias=True)
+          (to_k): Linear(in_features=256, out_features=256, bias=True)
+          (to_v): Linear(in_features=256, out_features=256, bias=True)
+          (to_out): ModuleList(
+            (0): Linear(in_features=256, out_features=256, bias=True)
+            (1): Dropout(p=0.0, inplace=False)
+          )
+        )
+      )
+      (resnets): ModuleList(
+        (0): ResnetBlock2D(
+          (norm1): GroupNorm(8, 768, eps=1e-05, affine=True)
+          (conv1): Conv2d(768, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+          (time_emb_proj): Linear(in_features=512, out_features=256, bias=True)
+          (norm2): GroupNorm(8, 256, eps=1e-05, affine=True)
+          (dropout): Dropout(p=0.1, inplace=False)
+          (conv2): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+          (nonlinearity): SiLU()
+          (conv_shortcut): Conv2d(768, 256, kernel_size=(1, 1), stride=(1, 1))
+        )
+        (1): ResnetBlock2D(
+          (norm1): GroupNorm(8, 512, eps=1e-05, affine=True)
+          (conv1): Conv2d(512, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+          (time_emb_proj): Linear(in_features=512, out_features=256, bias=True)
+          (norm2): GroupNorm(8, 256, eps=1e-05, affine=True)
+          (dropout): Dropout(p=0.1, inplace=False)
+          (conv2): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+          (nonlinearity): SiLU()
+          (conv_shortcut): Conv2d(512, 256, kernel_size=(1, 1), stride=(1, 1))
+        )
+        (2): ResnetBlock2D(
+          (norm1): GroupNorm(8, 384, eps=1e-05, affine=True)
+          (conv1): Conv2d(384, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+          (time_emb_proj): Linear(in_features=512, out_features=256, bias=True)
+          (norm2): GroupNorm(8, 256, eps=1e-05, affine=True)
+          (dropout): Dropout(p=0.1, inplace=False)
+          (conv2): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+          (nonlinearity): SiLU()
+          (conv_shortcut): Conv2d(384, 256, kernel_size=(1, 1), stride=(1, 1))
+        )
+      )
+      (upsamplers): ModuleList(
+        (0): Upsample2D(
+          (conv): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        )
+      )
+    )
+    (3): UpBlock2D(
+      (resnets): ModuleList(
+        (0): ResnetBlock2D(
+          (norm1): GroupNorm(8, 384, eps=1e-05, affine=True)
+          (conv1): Conv2d(384, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+          (time_emb_proj): Linear(in_features=512, out_features=128, bias=True)
+          (norm2): GroupNorm(8, 128, eps=1e-05, affine=True)
+          (dropout): Dropout(p=0.1, inplace=False)
+          (conv2): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+          (nonlinearity): SiLU()
+          (conv_shortcut): Conv2d(384, 128, kernel_size=(1, 1), stride=(1, 1))
+        )
+        (1-2): 2 x ResnetBlock2D(
+          (norm1): GroupNorm(8, 256, eps=1e-05, affine=True)
+          (conv1): Conv2d(256, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+          (time_emb_proj): Linear(in_features=512, out_features=128, bias=True)
+          (norm2): GroupNorm(8, 128, eps=1e-05, affine=True)
+          (dropout): Dropout(p=0.1, inplace=False)
+          (conv2): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+          (nonlinearity): SiLU()
+          (conv_shortcut): Conv2d(256, 128, kernel_size=(1, 1), stride=(1, 1))
+        )
+      )
+    )
+  )
+  (mid_block): UNetMidBlock2D(
+    (attentions): ModuleList(
+      (0): Attention(
+        (group_norm): GroupNorm(8, 512, eps=1e-05, affine=True)
+        (to_q): Linear(in_features=512, out_features=512, bias=True)
+        (to_k): Linear(in_features=512, out_features=512, bias=True)
+        (to_v): Linear(in_features=512, out_features=512, bias=True)
+        (to_out): ModuleList(
+          (0): Linear(in_features=512, out_features=512, bias=True)
+          (1): Dropout(p=0.0, inplace=False)
+        )
+      )
+    )
+    (resnets): ModuleList(
+      (0-1): 2 x ResnetBlock2D(
+        (norm1): GroupNorm(8, 512, eps=1e-05, affine=True)
+        (conv1): Conv2d(512, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        (time_emb_proj): Linear(in_features=512, out_features=512, bias=True)
+        (norm2): GroupNorm(8, 512, eps=1e-05, affine=True)
+        (dropout): Dropout(p=0.1, inplace=False)
+        (conv2): Conv2d(512, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        (nonlinearity): SiLU()
+      )
+    )
+  )
+  (conv_norm_out): GroupNorm(8, 128, eps=1e-05, affine=True)
+  (conv_act): SiLU()
+  (conv_out): Conv2d(128, 3, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+)
+2025-02-24 23:27:20,608 INFO: Model parameters: 107698435
+2025-02-24 23:28:26,226 INFO: Epoch [1/30] Loss: 0.1498
+2025-02-24 23:28:27,975 INFO: Checkpoint saved: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/diffusion/diffusion_v2.2.pth
+2025-02-24 23:29:32,841 INFO: Epoch [2/30] Loss: 0.0825
+2025-02-24 23:29:34,647 INFO: Checkpoint saved: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/diffusion/diffusion_v2.2.pth
+2025-02-24 23:30:45,133 INFO: Epoch [3/30] Loss: 0.0680
+2025-02-24 23:30:46,671 INFO: Checkpoint saved: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/diffusion/diffusion_v2.2.pth
+2025-02-24 23:31:52,357 INFO: Epoch [4/30] Loss: 0.0635
+2025-02-24 23:31:54,137 INFO: Checkpoint saved: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/diffusion/diffusion_v2.2.pth
+2025-02-24 23:33:06,582 INFO: Epoch [5/30] Loss: 0.0621
+2025-02-24 23:33:08,016 INFO: Checkpoint saved: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/diffusion/diffusion_v2.2.pth
+2025-02-24 23:34:13,050 INFO: Epoch [6/30] Loss: 0.0592
+2025-02-24 23:34:14,458 INFO: Checkpoint saved: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/diffusion/diffusion_v2.2.pth
+2025-02-24 23:35:25,912 INFO: Epoch [7/30] Loss: 0.0581
+2025-02-24 23:35:27,680 INFO: Checkpoint saved: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/diffusion/diffusion_v2.2.pth
+2025-02-24 23:36:32,233 INFO: Epoch [8/30] Loss: 0.0589
+2025-02-24 23:36:33,779 INFO: Checkpoint saved: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/diffusion/diffusion_v2.2.pth
+2025-02-24 23:37:44,491 INFO: Epoch [9/30] Loss: 0.0543
+2025-02-24 23:37:45,555 INFO: Checkpoint saved: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/diffusion/diffusion_v2.2.pth
+2025-02-24 23:38:50,628 INFO: Epoch [10/30] Loss: 0.0528
+2025-02-24 23:38:51,891 INFO: Checkpoint saved: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/diffusion/diffusion_v2.2.pth
+2025-02-24 23:40:02,642 INFO: Epoch [11/30] Loss: 0.0533
+2025-02-24 23:40:04,051 INFO: Checkpoint saved: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/diffusion/diffusion_v2.2.pth
+2025-02-24 23:41:09,154 INFO: Epoch [12/30] Loss: 0.0545
+2025-02-24 23:41:10,790 INFO: Checkpoint saved: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/diffusion/diffusion_v2.2.pth
+2025-02-24 23:42:22,065 INFO: Epoch [13/30] Loss: 0.0532
+2025-02-24 23:42:23,641 INFO: Checkpoint saved: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/diffusion/diffusion_v2.2.pth
+2025-02-24 23:43:28,060 INFO: Epoch [14/30] Loss: 0.0510
+2025-02-24 23:43:29,466 INFO: Checkpoint saved: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/diffusion/diffusion_v2.2.pth
+2025-02-24 23:44:41,301 INFO: Epoch [15/30] Loss: 0.0507
+2025-02-24 23:44:43,193 INFO: Checkpoint saved: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/diffusion/diffusion_v2.2.pth
