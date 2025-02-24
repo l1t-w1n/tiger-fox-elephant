@@ -1,0 +1,800 @@
+2025-02-24 12:33:46,704 INFO: Initializing diffusion model training...
+2025-02-24 12:33:48,338 INFO: Dataset contains 6499 images
+2025-02-24 12:33:48,341 INFO: Model architecture:
+UNet2DModel(
+  (conv_in): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+  (time_proj): Timesteps()
+  (time_embedding): TimestepEmbedding(
+    (linear_1): Linear(in_features=64, out_features=256, bias=True)
+    (act): SiLU()
+    (linear_2): Linear(in_features=256, out_features=256, bias=True)
+  )
+  (down_blocks): ModuleList(
+    (0): DownBlock2D(
+      (resnets): ModuleList(
+        (0-1): 2 x ResnetBlock2D(
+          (norm1): GroupNorm(32, 64, eps=1e-05, affine=True)
+          (conv1): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+          (time_emb_proj): Linear(in_features=256, out_features=64, bias=True)
+          (norm2): GroupNorm(32, 64, eps=1e-05, affine=True)
+          (dropout): Dropout(p=0.2, inplace=False)
+          (conv2): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+          (nonlinearity): SiLU()
+        )
+      )
+      (downsamplers): ModuleList(
+        (0): Downsample2D(
+          (conv): Conv2d(64, 64, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1))
+        )
+      )
+    )
+    (1): DownBlock2D(
+      (resnets): ModuleList(
+        (0): ResnetBlock2D(
+          (norm1): GroupNorm(32, 64, eps=1e-05, affine=True)
+          (conv1): Conv2d(64, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+          (time_emb_proj): Linear(in_features=256, out_features=128, bias=True)
+          (norm2): GroupNorm(32, 128, eps=1e-05, affine=True)
+          (dropout): Dropout(p=0.2, inplace=False)
+          (conv2): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+          (nonlinearity): SiLU()
+          (conv_shortcut): Conv2d(64, 128, kernel_size=(1, 1), stride=(1, 1))
+        )
+        (1): ResnetBlock2D(
+          (norm1): GroupNorm(32, 128, eps=1e-05, affine=True)
+          (conv1): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+          (time_emb_proj): Linear(in_features=256, out_features=128, bias=True)
+          (norm2): GroupNorm(32, 128, eps=1e-05, affine=True)
+          (dropout): Dropout(p=0.2, inplace=False)
+          (conv2): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+          (nonlinearity): SiLU()
+        )
+      )
+      (downsamplers): ModuleList(
+        (0): Downsample2D(
+          (conv): Conv2d(128, 128, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1))
+        )
+      )
+    )
+    (2): AttnDownBlock2D(
+      (attentions): ModuleList(
+        (0-1): 2 x Attention(
+          (group_norm): GroupNorm(32, 256, eps=1e-05, affine=True)
+          (to_q): Linear(in_features=256, out_features=256, bias=True)
+          (to_k): Linear(in_features=256, out_features=256, bias=True)
+          (to_v): Linear(in_features=256, out_features=256, bias=True)
+          (to_out): ModuleList(
+            (0): Linear(in_features=256, out_features=256, bias=True)
+            (1): Dropout(p=0.0, inplace=False)
+          )
+        )
+      )
+      (resnets): ModuleList(
+        (0): ResnetBlock2D(
+          (norm1): GroupNorm(32, 128, eps=1e-05, affine=True)
+          (conv1): Conv2d(128, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+          (time_emb_proj): Linear(in_features=256, out_features=256, bias=True)
+          (norm2): GroupNorm(32, 256, eps=1e-05, affine=True)
+          (dropout): Dropout(p=0.2, inplace=False)
+          (conv2): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+          (nonlinearity): SiLU()
+          (conv_shortcut): Conv2d(128, 256, kernel_size=(1, 1), stride=(1, 1))
+        )
+        (1): ResnetBlock2D(
+          (norm1): GroupNorm(32, 256, eps=1e-05, affine=True)
+          (conv1): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+          (time_emb_proj): Linear(in_features=256, out_features=256, bias=True)
+          (norm2): GroupNorm(32, 256, eps=1e-05, affine=True)
+          (dropout): Dropout(p=0.2, inplace=False)
+          (conv2): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+          (nonlinearity): SiLU()
+        )
+      )
+      (downsamplers): ModuleList(
+        (0): Downsample2D(
+          (conv): Conv2d(256, 256, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1))
+        )
+      )
+    )
+    (3): AttnDownBlock2D(
+      (attentions): ModuleList(
+        (0-1): 2 x Attention(
+          (group_norm): GroupNorm(32, 512, eps=1e-05, affine=True)
+          (to_q): Linear(in_features=512, out_features=512, bias=True)
+          (to_k): Linear(in_features=512, out_features=512, bias=True)
+          (to_v): Linear(in_features=512, out_features=512, bias=True)
+          (to_out): ModuleList(
+            (0): Linear(in_features=512, out_features=512, bias=True)
+            (1): Dropout(p=0.0, inplace=False)
+          )
+        )
+      )
+      (resnets): ModuleList(
+        (0): ResnetBlock2D(
+          (norm1): GroupNorm(32, 256, eps=1e-05, affine=True)
+          (conv1): Conv2d(256, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+          (time_emb_proj): Linear(in_features=256, out_features=512, bias=True)
+          (norm2): GroupNorm(32, 512, eps=1e-05, affine=True)
+          (dropout): Dropout(p=0.2, inplace=False)
+          (conv2): Conv2d(512, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+          (nonlinearity): SiLU()
+          (conv_shortcut): Conv2d(256, 512, kernel_size=(1, 1), stride=(1, 1))
+        )
+        (1): ResnetBlock2D(
+          (norm1): GroupNorm(32, 512, eps=1e-05, affine=True)
+          (conv1): Conv2d(512, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+          (time_emb_proj): Linear(in_features=256, out_features=512, bias=True)
+          (norm2): GroupNorm(32, 512, eps=1e-05, affine=True)
+          (dropout): Dropout(p=0.2, inplace=False)
+          (conv2): Conv2d(512, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+          (nonlinearity): SiLU()
+        )
+      )
+      (downsamplers): ModuleList(
+        (0): Downsample2D(
+          (conv): Conv2d(512, 512, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1))
+        )
+      )
+    )
+    (4): AttnDownBlock2D(
+      (attentions): ModuleList(
+        (0-1): 2 x Attention(
+          (group_norm): GroupNorm(32, 1024, eps=1e-05, affine=True)
+          (to_q): Linear(in_features=1024, out_features=1024, bias=True)
+          (to_k): Linear(in_features=1024, out_features=1024, bias=True)
+          (to_v): Linear(in_features=1024, out_features=1024, bias=True)
+          (to_out): ModuleList(
+            (0): Linear(in_features=1024, out_features=1024, bias=True)
+            (1): Dropout(p=0.0, inplace=False)
+          )
+        )
+      )
+      (resnets): ModuleList(
+        (0): ResnetBlock2D(
+          (norm1): GroupNorm(32, 512, eps=1e-05, affine=True)
+          (conv1): Conv2d(512, 1024, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+          (time_emb_proj): Linear(in_features=256, out_features=1024, bias=True)
+          (norm2): GroupNorm(32, 1024, eps=1e-05, affine=True)
+          (dropout): Dropout(p=0.2, inplace=False)
+          (conv2): Conv2d(1024, 1024, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+          (nonlinearity): SiLU()
+          (conv_shortcut): Conv2d(512, 1024, kernel_size=(1, 1), stride=(1, 1))
+        )
+        (1): ResnetBlock2D(
+          (norm1): GroupNorm(32, 1024, eps=1e-05, affine=True)
+          (conv1): Conv2d(1024, 1024, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+          (time_emb_proj): Linear(in_features=256, out_features=1024, bias=True)
+          (norm2): GroupNorm(32, 1024, eps=1e-05, affine=True)
+          (dropout): Dropout(p=0.2, inplace=False)
+          (conv2): Conv2d(1024, 1024, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+          (nonlinearity): SiLU()
+        )
+      )
+    )
+  )
+  (up_blocks): ModuleList(
+    (0): AttnUpBlock2D(
+      (attentions): ModuleList(
+        (0-2): 3 x Attention(
+          (group_norm): GroupNorm(32, 1024, eps=1e-05, affine=True)
+          (to_q): Linear(in_features=1024, out_features=1024, bias=True)
+          (to_k): Linear(in_features=1024, out_features=1024, bias=True)
+          (to_v): Linear(in_features=1024, out_features=1024, bias=True)
+          (to_out): ModuleList(
+            (0): Linear(in_features=1024, out_features=1024, bias=True)
+            (1): Dropout(p=0.0, inplace=False)
+          )
+        )
+      )
+      (resnets): ModuleList(
+        (0-1): 2 x ResnetBlock2D(
+          (norm1): GroupNorm(32, 2048, eps=1e-05, affine=True)
+          (conv1): Conv2d(2048, 1024, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+          (time_emb_proj): Linear(in_features=256, out_features=1024, bias=True)
+          (norm2): GroupNorm(32, 1024, eps=1e-05, affine=True)
+          (dropout): Dropout(p=0.2, inplace=False)
+          (conv2): Conv2d(1024, 1024, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+          (nonlinearity): SiLU()
+          (conv_shortcut): Conv2d(2048, 1024, kernel_size=(1, 1), stride=(1, 1))
+        )
+        (2): ResnetBlock2D(
+          (norm1): GroupNorm(32, 1536, eps=1e-05, affine=True)
+          (conv1): Conv2d(1536, 1024, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+          (time_emb_proj): Linear(in_features=256, out_features=1024, bias=True)
+          (norm2): GroupNorm(32, 1024, eps=1e-05, affine=True)
+          (dropout): Dropout(p=0.2, inplace=False)
+          (conv2): Conv2d(1024, 1024, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+          (nonlinearity): SiLU()
+          (conv_shortcut): Conv2d(1536, 1024, kernel_size=(1, 1), stride=(1, 1))
+        )
+      )
+      (upsamplers): ModuleList(
+        (0): Upsample2D(
+          (conv): Conv2d(1024, 1024, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        )
+      )
+    )
+    (1): AttnUpBlock2D(
+      (attentions): ModuleList(
+        (0-2): 3 x Attention(
+          (group_norm): GroupNorm(32, 512, eps=1e-05, affine=True)
+          (to_q): Linear(in_features=512, out_features=512, bias=True)
+          (to_k): Linear(in_features=512, out_features=512, bias=True)
+          (to_v): Linear(in_features=512, out_features=512, bias=True)
+          (to_out): ModuleList(
+            (0): Linear(in_features=512, out_features=512, bias=True)
+            (1): Dropout(p=0.0, inplace=False)
+          )
+        )
+      )
+      (resnets): ModuleList(
+        (0): ResnetBlock2D(
+          (norm1): GroupNorm(32, 1536, eps=1e-05, affine=True)
+          (conv1): Conv2d(1536, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+          (time_emb_proj): Linear(in_features=256, out_features=512, bias=True)
+          (norm2): GroupNorm(32, 512, eps=1e-05, affine=True)
+          (dropout): Dropout(p=0.2, inplace=False)
+          (conv2): Conv2d(512, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+          (nonlinearity): SiLU()
+          (conv_shortcut): Conv2d(1536, 512, kernel_size=(1, 1), stride=(1, 1))
+        )
+        (1): ResnetBlock2D(
+          (norm1): GroupNorm(32, 1024, eps=1e-05, affine=True)
+          (conv1): Conv2d(1024, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+          (time_emb_proj): Linear(in_features=256, out_features=512, bias=True)
+          (norm2): GroupNorm(32, 512, eps=1e-05, affine=True)
+          (dropout): Dropout(p=0.2, inplace=False)
+          (conv2): Conv2d(512, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+          (nonlinearity): SiLU()
+          (conv_shortcut): Conv2d(1024, 512, kernel_size=(1, 1), stride=(1, 1))
+        )
+        (2): ResnetBlock2D(
+          (norm1): GroupNorm(32, 768, eps=1e-05, affine=True)
+          (conv1): Conv2d(768, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+          (time_emb_proj): Linear(in_features=256, out_features=512, bias=True)
+          (norm2): GroupNorm(32, 512, eps=1e-05, affine=True)
+          (dropout): Dropout(p=0.2, inplace=False)
+          (conv2): Conv2d(512, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+          (nonlinearity): SiLU()
+          (conv_shortcut): Conv2d(768, 512, kernel_size=(1, 1), stride=(1, 1))
+        )
+      )
+      (upsamplers): ModuleList(
+        (0): Upsample2D(
+          (conv): Conv2d(512, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        )
+      )
+    )
+    (2): AttnUpBlock2D(
+      (attentions): ModuleList(
+        (0-2): 3 x Attention(
+          (group_norm): GroupNorm(32, 256, eps=1e-05, affine=True)
+          (to_q): Linear(in_features=256, out_features=256, bias=True)
+          (to_k): Linear(in_features=256, out_features=256, bias=True)
+          (to_v): Linear(in_features=256, out_features=256, bias=True)
+          (to_out): ModuleList(
+            (0): Linear(in_features=256, out_features=256, bias=True)
+            (1): Dropout(p=0.0, inplace=False)
+          )
+        )
+      )
+      (resnets): ModuleList(
+        (0): ResnetBlock2D(
+          (norm1): GroupNorm(32, 768, eps=1e-05, affine=True)
+          (conv1): Conv2d(768, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+          (time_emb_proj): Linear(in_features=256, out_features=256, bias=True)
+          (norm2): GroupNorm(32, 256, eps=1e-05, affine=True)
+          (dropout): Dropout(p=0.2, inplace=False)
+          (conv2): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+          (nonlinearity): SiLU()
+          (conv_shortcut): Conv2d(768, 256, kernel_size=(1, 1), stride=(1, 1))
+        )
+        (1): ResnetBlock2D(
+          (norm1): GroupNorm(32, 512, eps=1e-05, affine=True)
+          (conv1): Conv2d(512, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+          (time_emb_proj): Linear(in_features=256, out_features=256, bias=True)
+          (norm2): GroupNorm(32, 256, eps=1e-05, affine=True)
+          (dropout): Dropout(p=0.2, inplace=False)
+          (conv2): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+          (nonlinearity): SiLU()
+          (conv_shortcut): Conv2d(512, 256, kernel_size=(1, 1), stride=(1, 1))
+        )
+        (2): ResnetBlock2D(
+          (norm1): GroupNorm(32, 384, eps=1e-05, affine=True)
+          (conv1): Conv2d(384, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+          (time_emb_proj): Linear(in_features=256, out_features=256, bias=True)
+          (norm2): GroupNorm(32, 256, eps=1e-05, affine=True)
+          (dropout): Dropout(p=0.2, inplace=False)
+          (conv2): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+          (nonlinearity): SiLU()
+          (conv_shortcut): Conv2d(384, 256, kernel_size=(1, 1), stride=(1, 1))
+        )
+      )
+      (upsamplers): ModuleList(
+        (0): Upsample2D(
+          (conv): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        )
+      )
+    )
+    (3): AttnUpBlock2D(
+      (attentions): ModuleList(
+        (0-2): 3 x Attention(
+          (group_norm): GroupNorm(32, 128, eps=1e-05, affine=True)
+          (to_q): Linear(in_features=128, out_features=128, bias=True)
+          (to_k): Linear(in_features=128, out_features=128, bias=True)
+          (to_v): Linear(in_features=128, out_features=128, bias=True)
+          (to_out): ModuleList(
+            (0): Linear(in_features=128, out_features=128, bias=True)
+            (1): Dropout(p=0.0, inplace=False)
+          )
+        )
+      )
+      (resnets): ModuleList(
+        (0): ResnetBlock2D(
+          (norm1): GroupNorm(32, 384, eps=1e-05, affine=True)
+          (conv1): Conv2d(384, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+          (time_emb_proj): Linear(in_features=256, out_features=128, bias=True)
+          (norm2): GroupNorm(32, 128, eps=1e-05, affine=True)
+          (dropout): Dropout(p=0.2, inplace=False)
+          (conv2): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+          (nonlinearity): SiLU()
+          (conv_shortcut): Conv2d(384, 128, kernel_size=(1, 1), stride=(1, 1))
+        )
+        (1): ResnetBlock2D(
+          (norm1): GroupNorm(32, 256, eps=1e-05, affine=True)
+          (conv1): Conv2d(256, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+          (time_emb_proj): Linear(in_features=256, out_features=128, bias=True)
+          (norm2): GroupNorm(32, 128, eps=1e-05, affine=True)
+          (dropout): Dropout(p=0.2, inplace=False)
+          (conv2): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+          (nonlinearity): SiLU()
+          (conv_shortcut): Conv2d(256, 128, kernel_size=(1, 1), stride=(1, 1))
+        )
+        (2): ResnetBlock2D(
+          (norm1): GroupNorm(32, 192, eps=1e-05, affine=True)
+          (conv1): Conv2d(192, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+          (time_emb_proj): Linear(in_features=256, out_features=128, bias=True)
+          (norm2): GroupNorm(32, 128, eps=1e-05, affine=True)
+          (dropout): Dropout(p=0.2, inplace=False)
+          (conv2): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+          (nonlinearity): SiLU()
+          (conv_shortcut): Conv2d(192, 128, kernel_size=(1, 1), stride=(1, 1))
+        )
+      )
+      (upsamplers): ModuleList(
+        (0): Upsample2D(
+          (conv): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        )
+      )
+    )
+    (4): UpBlock2D(
+      (resnets): ModuleList(
+        (0): ResnetBlock2D(
+          (norm1): GroupNorm(32, 192, eps=1e-05, affine=True)
+          (conv1): Conv2d(192, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+          (time_emb_proj): Linear(in_features=256, out_features=64, bias=True)
+          (norm2): GroupNorm(32, 64, eps=1e-05, affine=True)
+          (dropout): Dropout(p=0.2, inplace=False)
+          (conv2): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+          (nonlinearity): SiLU()
+          (conv_shortcut): Conv2d(192, 64, kernel_size=(1, 1), stride=(1, 1))
+        )
+        (1-2): 2 x ResnetBlock2D(
+          (norm1): GroupNorm(32, 128, eps=1e-05, affine=True)
+          (conv1): Conv2d(128, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+          (time_emb_proj): Linear(in_features=256, out_features=64, bias=True)
+          (norm2): GroupNorm(32, 64, eps=1e-05, affine=True)
+          (dropout): Dropout(p=0.2, inplace=False)
+          (conv2): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+          (nonlinearity): SiLU()
+          (conv_shortcut): Conv2d(128, 64, kernel_size=(1, 1), stride=(1, 1))
+        )
+      )
+    )
+  )
+  (mid_block): UNetMidBlock2D(
+    (attentions): ModuleList(
+      (0): Attention(
+        (group_norm): GroupNorm(32, 1024, eps=1e-05, affine=True)
+        (to_q): Linear(in_features=1024, out_features=1024, bias=True)
+        (to_k): Linear(in_features=1024, out_features=1024, bias=True)
+        (to_v): Linear(in_features=1024, out_features=1024, bias=True)
+        (to_out): ModuleList(
+          (0): Linear(in_features=1024, out_features=1024, bias=True)
+          (1): Dropout(p=0.0, inplace=False)
+        )
+      )
+    )
+    (resnets): ModuleList(
+      (0-1): 2 x ResnetBlock2D(
+        (norm1): GroupNorm(32, 1024, eps=1e-05, affine=True)
+        (conv1): Conv2d(1024, 1024, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        (time_emb_proj): Linear(in_features=256, out_features=1024, bias=True)
+        (norm2): GroupNorm(32, 1024, eps=1e-05, affine=True)
+        (dropout): Dropout(p=0.2, inplace=False)
+        (conv2): Conv2d(1024, 1024, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        (nonlinearity): SiLU()
+      )
+    )
+  )
+  (conv_norm_out): GroupNorm(32, 64, eps=1e-05, affine=True)
+  (conv_act): SiLU()
+  (conv_out): Conv2d(64, 3, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+)
+2025-02-24 12:33:48,343 INFO: Model has 251,394,947 trainable parameters
+2025-02-24 12:33:48,343 INFO: Training on cuda with 50 epochs
+2025-02-24 12:33:51,662 INFO: LR: 1.2000e-05
+2025-02-24 12:34:39,353 INFO: LR: 1.4682e-05
+2025-02-24 12:35:25,537 INFO: LR: 2.2512e-05
+2025-02-24 12:36:11,529 INFO: LR: 3.5206e-05
+2025-02-24 12:36:24,591 INFO: Epoch 001/50 | Train Loss: 0.41960 | LR: 3.954e-05
+2025-02-24 12:36:28,045 INFO: Saved model to: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/diffusion/diffusion_model.pth
+2025-02-24 12:36:28,045 INFO: Updated training history at: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/histories/diffusion/diffusion_history.npz
+2025-02-24 12:36:28,045 INFO: Checkpoint saved at epoch 1
+2025-02-24 12:36:28,046 INFO: Epoch 1 - Generating samples...
+2025-02-24 12:36:34,076 INFO: LR: 3.9718e-05
+2025-02-24 12:37:20,528 INFO: LR: 5.7975e-05
+2025-02-24 12:38:07,576 INFO: LR: 7.9804e-05
+2025-02-24 12:38:53,781 INFO: LR: 1.0441e-04
+2025-02-24 12:39:06,329 INFO: Epoch 002/50 | Train Loss: 0.10925 | LR: 1.116e-04
+2025-02-24 12:39:09,599 INFO: Saved model to: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/diffusion/diffusion_model.pth
+2025-02-24 12:39:09,600 INFO: Updated training history at: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/histories/diffusion/diffusion_history.npz
+2025-02-24 12:39:09,600 INFO: Checkpoint saved at epoch 2
+2025-02-24 12:39:10,477 INFO: LR: 1.1191e-04
+2025-02-24 12:39:57,997 INFO: LR: 1.3876e-04
+2025-02-24 12:40:44,879 INFO: LR: 1.6624e-04
+2025-02-24 12:41:31,205 INFO: LR: 1.9334e-04
+2025-02-24 12:41:43,802 INFO: Epoch 003/50 | Train Loss: 0.08061 | LR: 2.007e-04
+2025-02-24 12:41:47,166 INFO: Saved model to: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/diffusion/diffusion_model.pth
+2025-02-24 12:41:47,166 INFO: Updated training history at: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/histories/diffusion/diffusion_history.npz
+2025-02-24 12:41:47,166 INFO: Checkpoint saved at epoch 3
+2025-02-24 12:41:47,166 INFO: Epoch 3 - Generating samples...
+2025-02-24 12:41:53,089 INFO: LR: 2.0096e-04
+2025-02-24 12:42:39,599 INFO: LR: 2.2614e-04
+2025-02-24 12:43:24,401 INFO: LR: 2.4876e-04
+2025-02-24 12:44:09,230 INFO: LR: 2.6800e-04
+2025-02-24 12:44:21,485 INFO: Epoch 004/50 | Train Loss: 0.06427 | LR: 2.726e-04
+2025-02-24 12:44:24,793 INFO: Saved model to: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/diffusion/diffusion_model.pth
+2025-02-24 12:44:24,794 INFO: Updated training history at: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/histories/diffusion/diffusion_history.npz
+2025-02-24 12:44:24,794 INFO: Checkpoint saved at epoch 4
+2025-02-24 12:44:25,691 INFO: LR: 2.7282e-04
+2025-02-24 12:45:10,479 INFO: LR: 2.8669e-04
+2025-02-24 12:45:55,246 INFO: LR: 2.9580e-04
+2025-02-24 12:46:39,986 INFO: LR: 2.9981e-04
+2025-02-24 12:46:52,241 INFO: Epoch 005/50 | Train Loss: 0.05592 | LR: 3.000e-04
+2025-02-24 12:46:55,781 INFO: Saved model to: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/diffusion/diffusion_model.pth
+2025-02-24 12:46:55,781 INFO: Updated training history at: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/histories/diffusion/diffusion_history.npz
+2025-02-24 12:46:55,781 INFO: Checkpoint saved at epoch 5
+2025-02-24 12:46:55,781 INFO: Epoch 5 - Generating samples...
+2025-02-24 12:47:01,423 INFO: LR: 3.0000e-04
+2025-02-24 12:47:46,260 INFO: LR: 2.9996e-04
+2025-02-24 12:48:30,975 INFO: LR: 2.9986e-04
+2025-02-24 12:49:15,699 INFO: LR: 2.9969e-04
+2025-02-24 12:49:27,908 INFO: Epoch 006/50 | Train Loss: 0.05147 | LR: 2.996e-04
+2025-02-24 12:49:31,761 INFO: Saved model to: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/diffusion/diffusion_model.pth
+2025-02-24 12:49:31,762 INFO: Updated training history at: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/histories/diffusion/diffusion_history.npz
+2025-02-24 12:49:31,762 INFO: Checkpoint saved at epoch 6
+2025-02-24 12:49:32,722 INFO: LR: 2.9963e-04
+2025-02-24 12:50:17,494 INFO: LR: 2.9937e-04
+2025-02-24 12:51:02,237 INFO: LR: 2.9905e-04
+2025-02-24 12:51:47,009 INFO: LR: 2.9866e-04
+2025-02-24 12:51:59,233 INFO: Epoch 007/50 | Train Loss: 0.04801 | LR: 2.985e-04
+2025-02-24 12:52:02,963 INFO: Saved model to: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/diffusion/diffusion_model.pth
+2025-02-24 12:52:02,963 INFO: Updated training history at: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/histories/diffusion/diffusion_history.npz
+2025-02-24 12:52:02,963 INFO: Checkpoint saved at epoch 7
+2025-02-24 12:52:02,964 INFO: Epoch 7 - Generating samples...
+2025-02-24 12:52:08,546 INFO: LR: 2.9853e-04
+2025-02-24 12:52:53,326 INFO: LR: 2.9805e-04
+2025-02-24 12:53:38,121 INFO: LR: 2.9751e-04
+2025-02-24 12:54:22,889 INFO: LR: 2.9690e-04
+2025-02-24 12:54:35,132 INFO: Epoch 008/50 | Train Loss: 0.04648 | LR: 2.967e-04
+2025-02-24 12:54:38,486 INFO: Saved model to: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/diffusion/diffusion_model.pth
+2025-02-24 12:54:38,487 INFO: Updated training history at: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/histories/diffusion/diffusion_history.npz
+2025-02-24 12:54:38,487 INFO: Checkpoint saved at epoch 8
+2025-02-24 12:54:39,405 INFO: LR: 2.9671e-04
+2025-02-24 12:55:24,109 INFO: LR: 2.9601e-04
+2025-02-24 12:56:08,918 INFO: LR: 2.9525e-04
+2025-02-24 12:56:53,674 INFO: LR: 2.9442e-04
+2025-02-24 12:57:05,936 INFO: Epoch 009/50 | Train Loss: 0.04464 | LR: 2.942e-04
+2025-02-24 12:57:09,570 INFO: Saved model to: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/diffusion/diffusion_model.pth
+2025-02-24 12:57:09,570 INFO: Updated training history at: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/histories/diffusion/diffusion_history.npz
+2025-02-24 12:57:09,571 INFO: Checkpoint saved at epoch 9
+2025-02-24 12:57:09,571 INFO: Epoch 9 - Generating samples...
+2025-02-24 12:57:15,206 INFO: LR: 2.9417e-04
+2025-02-24 12:57:59,901 INFO: LR: 2.9326e-04
+2025-02-24 12:58:44,575 INFO: LR: 2.9228e-04
+2025-02-24 12:59:29,317 INFO: LR: 2.9124e-04
+2025-02-24 12:59:41,522 INFO: Epoch 010/50 | Train Loss: 0.04304 | LR: 2.909e-04
+2025-02-24 12:59:44,766 INFO: Saved model to: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/diffusion/diffusion_model.pth
+2025-02-24 12:59:44,766 INFO: Updated training history at: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/histories/diffusion/diffusion_history.npz
+2025-02-24 12:59:44,766 INFO: Checkpoint saved at epoch 10
+2025-02-24 12:59:45,669 INFO: LR: 2.9093e-04
+2025-02-24 13:00:30,476 INFO: LR: 2.8981e-04
+2025-02-24 13:01:15,258 INFO: LR: 2.8862e-04
+2025-02-24 13:02:00,027 INFO: LR: 2.8738e-04
+2025-02-24 13:02:12,265 INFO: Epoch 011/50 | Train Loss: 0.04396 | LR: 2.870e-04
+2025-02-24 13:02:16,108 INFO: Saved model to: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/diffusion/diffusion_model.pth
+2025-02-24 13:02:16,109 INFO: Updated training history at: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/histories/diffusion/diffusion_history.npz
+2025-02-24 13:02:16,109 INFO: Checkpoint saved at epoch 11
+2025-02-24 13:02:16,109 INFO: Epoch 11 - Generating samples...
+2025-02-24 13:02:21,890 INFO: LR: 2.8700e-04
+2025-02-24 13:03:06,704 INFO: LR: 2.8568e-04
+2025-02-24 13:03:51,858 INFO: LR: 2.8429e-04
+2025-02-24 13:04:39,651 INFO: LR: 2.8284e-04
+2025-02-24 13:04:52,711 INFO: Epoch 012/50 | Train Loss: 0.04340 | LR: 2.824e-04
+2025-02-24 13:04:56,083 INFO: Saved model to: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/diffusion/diffusion_model.pth
+2025-02-24 13:04:56,083 INFO: Updated training history at: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/histories/diffusion/diffusion_history.npz
+2025-02-24 13:04:56,083 INFO: Checkpoint saved at epoch 12
+2025-02-24 13:04:57,121 INFO: LR: 2.8241e-04
+2025-02-24 13:05:44,919 INFO: LR: 2.8088e-04
+2025-02-24 13:06:32,768 INFO: LR: 2.7930e-04
+2025-02-24 13:07:20,538 INFO: LR: 2.7766e-04
+2025-02-24 13:07:33,611 INFO: Epoch 013/50 | Train Loss: 0.04370 | LR: 2.772e-04
+2025-02-24 13:07:37,123 INFO: Saved model to: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/diffusion/diffusion_model.pth
+2025-02-24 13:07:37,123 INFO: Updated training history at: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/histories/diffusion/diffusion_history.npz
+2025-02-24 13:07:37,124 INFO: Checkpoint saved at epoch 13
+2025-02-24 13:07:37,124 INFO: Epoch 13 - Generating samples...
+2025-02-24 13:07:43,028 INFO: LR: 2.7717e-04
+2025-02-24 13:08:30,837 INFO: LR: 2.7545e-04
+2025-02-24 13:09:18,656 INFO: LR: 2.7368e-04
+2025-02-24 13:10:06,429 INFO: LR: 2.7185e-04
+2025-02-24 13:10:19,462 INFO: Epoch 014/50 | Train Loss: 0.04152 | LR: 2.713e-04
+2025-02-24 13:10:22,863 INFO: Saved model to: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/diffusion/diffusion_model.pth
+2025-02-24 13:10:22,864 INFO: Updated training history at: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/histories/diffusion/diffusion_history.npz
+2025-02-24 13:10:22,864 INFO: Checkpoint saved at epoch 14
+2025-02-24 13:10:23,775 INFO: LR: 2.7131e-04
+2025-02-24 13:11:11,732 INFO: LR: 2.6941e-04
+2025-02-24 13:11:59,546 INFO: LR: 2.6746e-04
+2025-02-24 13:12:47,345 INFO: LR: 2.6545e-04
+2025-02-24 13:13:00,378 INFO: Epoch 015/50 | Train Loss: 0.04175 | LR: 2.649e-04
+2025-02-24 13:13:03,731 INFO: Saved model to: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/diffusion/diffusion_model.pth
+2025-02-24 13:13:03,732 INFO: Updated training history at: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/histories/diffusion/diffusion_history.npz
+2025-02-24 13:13:03,732 INFO: Checkpoint saved at epoch 15
+2025-02-24 13:13:03,732 INFO: Epoch 15 - Generating samples...
+2025-02-24 13:13:09,672 INFO: LR: 2.6486e-04
+2025-02-24 13:13:57,501 INFO: LR: 2.6279e-04
+2025-02-24 13:14:45,339 INFO: LR: 2.6066e-04
+2025-02-24 13:15:33,193 INFO: LR: 2.5849e-04
+2025-02-24 13:15:46,233 INFO: Epoch 016/50 | Train Loss: 0.04295 | LR: 2.579e-04
+2025-02-24 13:15:50,276 INFO: Saved model to: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/diffusion/diffusion_model.pth
+2025-02-24 13:15:50,276 INFO: Updated training history at: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/histories/diffusion/diffusion_history.npz
+2025-02-24 13:15:50,277 INFO: Checkpoint saved at epoch 16
+2025-02-24 13:15:51,342 INFO: LR: 2.5785e-04
+2025-02-24 13:16:39,192 INFO: LR: 2.5562e-04
+2025-02-24 13:17:27,017 INFO: LR: 2.5333e-04
+2025-02-24 13:18:14,836 INFO: LR: 2.5100e-04
+2025-02-24 13:18:27,892 INFO: Epoch 017/50 | Train Loss: 0.04066 | LR: 2.503e-04
+2025-02-24 13:18:31,083 INFO: Saved model to: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/diffusion/diffusion_model.pth
+2025-02-24 13:18:31,084 INFO: Updated training history at: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/histories/diffusion/diffusion_history.npz
+2025-02-24 13:18:31,084 INFO: Checkpoint saved at epoch 17
+2025-02-24 13:18:31,084 INFO: Epoch 17 - Generating samples...
+2025-02-24 13:18:37,175 INFO: LR: 2.5032e-04
+2025-02-24 13:19:24,977 INFO: LR: 2.4793e-04
+2025-02-24 13:20:12,813 INFO: LR: 2.4550e-04
+2025-02-24 13:21:00,641 INFO: LR: 2.4302e-04
+2025-02-24 13:21:13,678 INFO: Epoch 018/50 | Train Loss: 0.04190 | LR: 2.423e-04
+2025-02-24 13:21:17,247 INFO: Saved model to: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/diffusion/diffusion_model.pth
+2025-02-24 13:21:17,247 INFO: Updated training history at: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/histories/diffusion/diffusion_history.npz
+2025-02-24 13:21:17,248 INFO: Checkpoint saved at epoch 18
+2025-02-24 13:21:18,176 INFO: LR: 2.4230e-04
+2025-02-24 13:22:06,043 INFO: LR: 2.3977e-04
+2025-02-24 13:22:53,803 INFO: LR: 2.3719e-04
+2025-02-24 13:23:41,552 INFO: LR: 2.3458e-04
+2025-02-24 13:23:54,581 INFO: Epoch 019/50 | Train Loss: 0.03991 | LR: 2.339e-04
+2025-02-24 13:23:58,418 INFO: Saved model to: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/diffusion/diffusion_model.pth
+2025-02-24 13:23:58,419 INFO: Updated training history at: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/histories/diffusion/diffusion_history.npz
+2025-02-24 13:23:58,419 INFO: Checkpoint saved at epoch 19
+2025-02-24 13:23:58,419 INFO: Epoch 19 - Generating samples...
+2025-02-24 13:24:04,505 INFO: LR: 2.3382e-04
+2025-02-24 13:24:52,280 INFO: LR: 2.3116e-04
+2025-02-24 13:25:40,055 INFO: LR: 2.2847e-04
+2025-02-24 13:26:27,759 INFO: LR: 2.2574e-04
+2025-02-24 13:26:40,764 INFO: Epoch 020/50 | Train Loss: 0.04093 | LR: 2.250e-04
+2025-02-24 13:26:44,095 INFO: Saved model to: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/diffusion/diffusion_model.pth
+2025-02-24 13:26:44,095 INFO: Updated training history at: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/histories/diffusion/diffusion_history.npz
+2025-02-24 13:26:44,096 INFO: Checkpoint saved at epoch 20
+2025-02-24 13:26:45,026 INFO: LR: 2.2494e-04
+2025-02-24 13:27:32,808 INFO: LR: 2.2217e-04
+2025-02-24 13:28:20,601 INFO: LR: 2.1936e-04
+2025-02-24 13:29:08,339 INFO: LR: 2.1652e-04
+2025-02-24 13:29:21,363 INFO: Epoch 021/50 | Train Loss: 0.03943 | LR: 2.157e-04
+2025-02-24 13:29:24,926 INFO: Saved model to: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/diffusion/diffusion_model.pth
+2025-02-24 13:29:24,926 INFO: Updated training history at: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/histories/diffusion/diffusion_history.npz
+2025-02-24 13:29:24,926 INFO: Checkpoint saved at epoch 21
+2025-02-24 13:29:24,927 INFO: Epoch 21 - Generating samples...
+2025-02-24 13:29:30,799 INFO: LR: 2.1570e-04
+2025-02-24 13:30:18,514 INFO: LR: 2.1282e-04
+2025-02-24 13:31:06,232 INFO: LR: 2.0991e-04
+2025-02-24 13:31:53,988 INFO: LR: 2.0698e-04
+2025-02-24 13:32:07,063 INFO: Epoch 022/50 | Train Loss: 0.03961 | LR: 2.062e-04
+2025-02-24 13:32:10,504 INFO: Saved model to: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/diffusion/diffusion_model.pth
+2025-02-24 13:32:10,505 INFO: Updated training history at: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/histories/diffusion/diffusion_history.npz
+2025-02-24 13:32:10,505 INFO: Checkpoint saved at epoch 22
+2025-02-24 13:32:11,421 INFO: LR: 2.0613e-04
+2025-02-24 13:32:59,152 INFO: LR: 2.0316e-04
+2025-02-24 13:33:46,916 INFO: LR: 2.0018e-04
+2025-02-24 13:34:34,678 INFO: LR: 1.9716e-04
+2025-02-24 13:34:47,693 INFO: Epoch 023/50 | Train Loss: 0.03995 | LR: 1.963e-04
+2025-02-24 13:34:50,951 INFO: Saved model to: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/diffusion/diffusion_model.pth
+2025-02-24 13:34:50,952 INFO: Updated training history at: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/histories/diffusion/diffusion_history.npz
+2025-02-24 13:34:50,952 INFO: Checkpoint saved at epoch 23
+2025-02-24 13:34:50,952 INFO: Epoch 23 - Generating samples...
+2025-02-24 13:34:57,088 INFO: LR: 1.9629e-04
+2025-02-24 13:35:44,830 INFO: LR: 1.9325e-04
+2025-02-24 13:36:32,586 INFO: LR: 1.9019e-04
+2025-02-24 13:37:20,475 INFO: LR: 1.8712e-04
+2025-02-24 13:37:33,575 INFO: Epoch 024/50 | Train Loss: 0.04156 | LR: 1.863e-04
+2025-02-24 13:37:37,161 INFO: Saved model to: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/diffusion/diffusion_model.pth
+2025-02-24 13:37:37,162 INFO: Updated training history at: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/histories/diffusion/diffusion_history.npz
+2025-02-24 13:37:37,162 INFO: Checkpoint saved at epoch 24
+2025-02-24 13:37:38,187 INFO: LR: 1.8622e-04
+2025-02-24 13:38:25,869 INFO: LR: 1.8313e-04
+2025-02-24 13:39:11,375 INFO: LR: 1.8001e-04
+2025-02-24 13:39:56,173 INFO: LR: 1.7689e-04
+2025-02-24 13:40:08,022 INFO: Epoch 025/50 | Train Loss: 0.03968 | LR: 1.760e-04
+2025-02-24 13:40:11,493 INFO: Saved model to: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/diffusion/diffusion_model.pth
+2025-02-24 13:40:11,493 INFO: Updated training history at: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/histories/diffusion/diffusion_history.npz
+2025-02-24 13:40:11,494 INFO: Checkpoint saved at epoch 25
+2025-02-24 13:40:11,494 INFO: Epoch 25 - Generating samples...
+2025-02-24 13:40:17,502 INFO: LR: 1.7598e-04
+2025-02-24 13:41:03,316 INFO: LR: 1.7284e-04
+2025-02-24 13:41:47,942 INFO: LR: 1.6969e-04
+2025-02-24 13:42:35,830 INFO: LR: 1.6653e-04
+2025-02-24 13:42:48,986 INFO: Epoch 026/50 | Train Loss: 0.03845 | LR: 1.656e-04
+2025-02-24 13:42:52,452 INFO: Saved model to: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/diffusion/diffusion_model.pth
+2025-02-24 13:42:52,452 INFO: Updated training history at: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/histories/diffusion/diffusion_history.npz
+2025-02-24 13:42:52,452 INFO: Checkpoint saved at epoch 26
+2025-02-24 13:42:53,417 INFO: LR: 1.6561e-04
+2025-02-24 13:43:41,646 INFO: LR: 1.6244e-04
+2025-02-24 13:44:29,715 INFO: LR: 1.5927e-04
+2025-02-24 13:45:17,810 INFO: LR: 1.5609e-04
+2025-02-24 13:45:30,933 INFO: Epoch 027/50 | Train Loss: 0.03885 | LR: 1.552e-04
+2025-02-24 13:45:34,192 INFO: Saved model to: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/diffusion/diffusion_model.pth
+2025-02-24 13:45:34,193 INFO: Updated training history at: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/histories/diffusion/diffusion_history.npz
+2025-02-24 13:45:34,193 INFO: Checkpoint saved at epoch 27
+2025-02-24 13:45:34,193 INFO: Epoch 27 - Generating samples...
+2025-02-24 13:45:40,176 INFO: LR: 1.5517e-04
+2025-02-24 13:46:26,383 INFO: LR: 1.5199e-04
+2025-02-24 13:47:12,085 INFO: LR: 1.4880e-04
+2025-02-24 13:47:57,869 INFO: LR: 1.4562e-04
+2025-02-24 13:48:10,852 INFO: Epoch 028/50 | Train Loss: 0.03929 | LR: 1.447e-04
+2025-02-24 13:48:14,339 INFO: Saved model to: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/diffusion/diffusion_model.pth
+2025-02-24 13:48:14,340 INFO: Updated training history at: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/histories/diffusion/diffusion_history.npz
+2025-02-24 13:48:14,340 INFO: Checkpoint saved at epoch 28
+2025-02-24 13:48:15,451 INFO: LR: 1.4470e-04
+2025-02-24 13:49:03,008 INFO: LR: 1.4152e-04
+2025-02-24 13:49:51,322 INFO: LR: 1.3834e-04
+2025-02-24 13:50:39,967 INFO: LR: 1.3517e-04
+2025-02-24 13:50:53,226 INFO: Epoch 029/50 | Train Loss: 0.03713 | LR: 1.343e-04
+2025-02-24 13:50:56,841 INFO: Saved model to: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/diffusion/diffusion_model.pth
+2025-02-24 13:50:56,842 INFO: Updated training history at: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/histories/diffusion/diffusion_history.npz
+2025-02-24 13:50:56,842 INFO: Checkpoint saved at epoch 29
+2025-02-24 13:50:56,843 INFO: Epoch 29 - Generating samples...
+2025-02-24 13:51:03,122 INFO: LR: 1.3426e-04
+2025-02-24 13:51:51,030 INFO: LR: 1.3109e-04
+2025-02-24 13:52:39,682 INFO: LR: 1.2794e-04
+2025-02-24 13:53:28,905 INFO: LR: 1.2480e-04
+2025-02-24 13:53:42,409 INFO: Epoch 030/50 | Train Loss: 0.03807 | LR: 1.239e-04
+2025-02-24 13:53:45,597 INFO: Saved model to: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/diffusion/diffusion_model.pth
+2025-02-24 13:53:45,598 INFO: Updated training history at: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/histories/diffusion/diffusion_history.npz
+2025-02-24 13:53:45,598 INFO: Checkpoint saved at epoch 30
+2025-02-24 13:53:46,567 INFO: LR: 1.2389e-04
+2025-02-24 13:54:36,133 INFO: LR: 1.2076e-04
+2025-02-24 13:55:23,330 INFO: LR: 1.1764e-04
+2025-02-24 13:56:11,227 INFO: LR: 1.1454e-04
+2025-02-24 13:56:24,175 INFO: Epoch 031/50 | Train Loss: 0.03755 | LR: 1.137e-04
+2025-02-24 13:56:28,155 INFO: Saved model to: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/diffusion/diffusion_model.pth
+2025-02-24 13:56:28,155 INFO: Updated training history at: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/histories/diffusion/diffusion_history.npz
+2025-02-24 13:56:28,155 INFO: Checkpoint saved at epoch 31
+2025-02-24 13:56:28,155 INFO: Epoch 31 - Generating samples...
+2025-02-24 13:56:34,128 INFO: LR: 1.1365e-04
+2025-02-24 13:57:21,920 INFO: LR: 1.1057e-04
+2025-02-24 13:58:08,969 INFO: LR: 1.0751e-04
+2025-02-24 13:58:56,082 INFO: LR: 1.0446e-04
+2025-02-24 13:59:08,958 INFO: Epoch 032/50 | Train Loss: 0.03898 | LR: 1.036e-04
+2025-02-24 13:59:12,646 INFO: Saved model to: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/diffusion/diffusion_model.pth
+2025-02-24 13:59:12,647 INFO: Updated training history at: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/histories/diffusion/diffusion_history.npz
+2025-02-24 13:59:12,647 INFO: Checkpoint saved at epoch 32
+2025-02-24 13:59:13,653 INFO: LR: 1.0359e-04
+2025-02-24 13:59:59,838 INFO: LR: 1.0057e-04
+2025-02-24 14:00:47,532 INFO: LR: 9.7576e-05
+2025-02-24 14:01:34,959 INFO: LR: 9.4605e-05
+2025-02-24 14:01:47,521 INFO: Epoch 033/50 | Train Loss: 0.03664 | LR: 9.378e-05
+2025-02-24 14:01:51,197 INFO: Saved model to: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/diffusion/diffusion_model.pth
+2025-02-24 14:01:51,197 INFO: Updated training history at: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/histories/diffusion/diffusion_history.npz
+2025-02-24 14:01:51,198 INFO: Checkpoint saved at epoch 33
+2025-02-24 14:01:51,198 INFO: Epoch 33 - Generating samples...
+2025-02-24 14:01:56,951 INFO: LR: 9.3752e-05
+2025-02-24 14:02:43,009 INFO: LR: 9.0813e-05
+2025-02-24 14:03:29,286 INFO: LR: 8.7901e-05
+2025-02-24 14:04:15,414 INFO: LR: 8.5017e-05
+2025-02-24 14:04:28,111 INFO: Epoch 034/50 | Train Loss: 0.03868 | LR: 8.422e-05
+2025-02-24 14:04:31,407 INFO: Saved model to: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/diffusion/diffusion_model.pth
+2025-02-24 14:04:31,408 INFO: Updated training history at: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/histories/diffusion/diffusion_history.npz
+2025-02-24 14:04:31,408 INFO: Checkpoint saved at epoch 34
+2025-02-24 14:04:32,408 INFO: LR: 8.4189e-05
+2025-02-24 14:05:18,883 INFO: LR: 8.1343e-05
+2025-02-24 14:06:04,904 INFO: LR: 7.8528e-05
+2025-02-24 14:06:50,965 INFO: LR: 7.5745e-05
+2025-02-24 14:07:03,930 INFO: Epoch 035/50 | Train Loss: 0.03723 | LR: 7.498e-05
+2025-02-24 14:07:07,635 INFO: Saved model to: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/diffusion/diffusion_model.pth
+2025-02-24 14:07:07,636 INFO: Updated training history at: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/histories/diffusion/diffusion_history.npz
+2025-02-24 14:07:07,636 INFO: Checkpoint saved at epoch 35
+2025-02-24 14:07:07,637 INFO: Epoch 35 - Generating samples...
+2025-02-24 14:07:13,731 INFO: LR: 7.4948e-05
+2025-02-24 14:08:00,729 INFO: LR: 7.2208e-05
+2025-02-24 14:08:46,808 INFO: LR: 6.9504e-05
+2025-02-24 14:09:34,004 INFO: LR: 6.6836e-05
+2025-02-24 14:09:46,595 INFO: Epoch 036/50 | Train Loss: 0.03727 | LR: 6.610e-05
+2025-02-24 14:09:50,193 INFO: Saved model to: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/diffusion/diffusion_model.pth
+2025-02-24 14:09:50,194 INFO: Updated training history at: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/histories/diffusion/diffusion_history.npz
+2025-02-24 14:09:50,194 INFO: Checkpoint saved at epoch 36
+2025-02-24 14:09:51,246 INFO: LR: 6.6072e-05
+2025-02-24 14:10:39,173 INFO: LR: 6.3452e-05
+2025-02-24 14:11:27,087 INFO: LR: 6.0871e-05
+2025-02-24 14:12:14,235 INFO: LR: 5.8331e-05
+2025-02-24 14:12:27,185 INFO: Epoch 037/50 | Train Loss: 0.03730 | LR: 5.763e-05
+2025-02-24 14:12:30,723 INFO: Saved model to: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/diffusion/diffusion_model.pth
+2025-02-24 14:12:30,723 INFO: Updated training history at: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/histories/diffusion/diffusion_history.npz
+2025-02-24 14:12:30,723 INFO: Checkpoint saved at epoch 37
+2025-02-24 14:12:30,724 INFO: Epoch 37 - Generating samples...
+2025-02-24 14:12:37,025 INFO: LR: 5.7605e-05
+2025-02-24 14:13:25,196 INFO: LR: 5.5118e-05
+2025-02-24 14:14:12,165 INFO: LR: 5.2673e-05
+2025-02-24 14:14:58,756 INFO: LR: 5.0273e-05
+2025-02-24 14:15:11,237 INFO: Epoch 038/50 | Train Loss: 0.03827 | LR: 4.961e-05
+2025-02-24 14:15:14,888 INFO: Saved model to: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/diffusion/diffusion_model.pth
+2025-02-24 14:15:14,889 INFO: Updated training history at: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/histories/diffusion/diffusion_history.npz
+2025-02-24 14:15:14,889 INFO: Checkpoint saved at epoch 38
+2025-02-24 14:15:15,781 INFO: LR: 4.9588e-05
+2025-02-24 14:16:01,846 INFO: LR: 4.7246e-05
+2025-02-24 14:16:48,406 INFO: LR: 4.4950e-05
+2025-02-24 14:17:36,262 INFO: LR: 4.2701e-05
+2025-02-24 14:17:49,413 INFO: Epoch 039/50 | Train Loss: 0.03800 | LR: 4.208e-05
+2025-02-24 14:17:52,889 INFO: Saved model to: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/diffusion/diffusion_model.pth
+2025-02-24 14:17:52,889 INFO: Updated training history at: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/histories/diffusion/diffusion_history.npz
+2025-02-24 14:17:52,889 INFO: Checkpoint saved at epoch 39
+2025-02-24 14:17:52,890 INFO: Epoch 39 - Generating samples...
+2025-02-24 14:17:58,955 INFO: LR: 4.2060e-05
+2025-02-24 14:18:47,122 INFO: LR: 3.9874e-05
+2025-02-24 14:19:35,355 INFO: LR: 3.7737e-05
+2025-02-24 14:20:23,914 INFO: LR: 3.5652e-05
+2025-02-24 14:20:36,947 INFO: Epoch 040/50 | Train Loss: 0.03716 | LR: 3.508e-05
+2025-02-24 14:20:40,635 INFO: Saved model to: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/diffusion/diffusion_model.pth
+2025-02-24 14:20:40,636 INFO: Updated training history at: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/histories/diffusion/diffusion_history.npz
+2025-02-24 14:20:40,636 INFO: Checkpoint saved at epoch 40
+2025-02-24 14:20:41,556 INFO: LR: 3.5058e-05
+2025-02-24 14:21:29,849 INFO: LR: 3.3039e-05
+2025-02-24 14:22:17,846 INFO: LR: 3.1072e-05
+2025-02-24 14:23:05,991 INFO: LR: 2.9159e-05
+2025-02-24 14:23:19,040 INFO: Epoch 041/50 | Train Loss: 0.03556 | LR: 2.864e-05
+2025-02-24 14:23:22,733 INFO: Saved model to: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/diffusion/diffusion_model.pth
+2025-02-24 14:23:22,733 INFO: Updated training history at: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/histories/diffusion/diffusion_history.npz
+2025-02-24 14:23:22,733 INFO: Checkpoint saved at epoch 41
+2025-02-24 14:23:22,734 INFO: Epoch 41 - Generating samples...
+2025-02-24 14:23:28,906 INFO: LR: 2.8617e-05
+2025-02-24 14:24:16,867 INFO: LR: 2.6774e-05
+2025-02-24 14:25:05,302 INFO: LR: 2.4987e-05
+2025-02-24 14:25:54,526 INFO: LR: 2.3256e-05
+2025-02-24 14:26:07,865 INFO: Epoch 042/50 | Train Loss: 0.03791 | LR: 2.279e-05
+2025-02-24 14:26:11,504 INFO: Saved model to: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/diffusion/diffusion_model.pth
+2025-02-24 14:26:11,504 INFO: Updated training history at: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/histories/diffusion/diffusion_history.npz
+2025-02-24 14:26:11,504 INFO: Checkpoint saved at epoch 42
+2025-02-24 14:26:12,515 INFO: LR: 2.2766e-05
+2025-02-24 14:27:01,921 INFO: LR: 2.1109e-05
+2025-02-24 14:27:50,422 INFO: LR: 1.9510e-05
+2025-02-24 14:28:38,298 INFO: LR: 1.7970e-05
+2025-02-24 14:28:51,373 INFO: Epoch 043/50 | Train Loss: 0.03785 | LR: 1.755e-05
+2025-02-24 14:28:54,773 INFO: Saved model to: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/diffusion/diffusion_model.pth
+2025-02-24 14:28:54,774 INFO: Updated training history at: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/histories/diffusion/diffusion_history.npz
+2025-02-24 14:28:54,774 INFO: Checkpoint saved at epoch 43
+2025-02-24 14:28:54,774 INFO: Epoch 43 - Generating samples...
+2025-02-24 14:29:00,841 INFO: LR: 1.7536e-05
+2025-02-24 14:29:48,706 INFO: LR: 1.6072e-05
+2025-02-24 14:30:37,736 INFO: LR: 1.4669e-05
+2025-02-24 14:31:25,661 INFO: LR: 1.3327e-05
+2025-02-24 14:31:38,723 INFO: Epoch 044/50 | Train Loss: 0.03908 | LR: 1.297e-05
+2025-02-24 14:31:42,286 INFO: Saved model to: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/diffusion/diffusion_model.pth
+2025-02-24 14:31:42,287 INFO: Updated training history at: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/histories/diffusion/diffusion_history.npz
+2025-02-24 14:31:42,287 INFO: Checkpoint saved at epoch 44
+2025-02-24 14:31:43,230 INFO: LR: 1.2951e-05
