@@ -38,8 +38,8 @@ class Config:
     # Training parameters (adjust via command line)
     IMAGE_SIZE = 64
     BATCH_SIZE = 42
-    NUM_EPOCHS = 30
-    LR = 1e-4
+    NUM_EPOCHS = 50
+    LR = 1e-5
     NUM_TIMESTEPS = 1000
     SAMPLING_STEPS = 200
     PLOT_EVERY = 2  # Set to NUM_EPOCHS+1 to disable plotting
@@ -207,8 +207,8 @@ def count_parameters(model):
 # ================= MAIN EXECUTION =================
 def main(args):
     logger.info("Initializing training...")
-    save_checkpoint = None
-    #save_checkpoint = Config.WEIGHTS_DIR / "diffusion_v2.2.pth"
+    #save_checkpoint = None
+    save_checkpoint = Config.WEIGHTS_DIR / "diffusion_v2.2.pth"
     # Initialize components
     dataset = DiffusionDataset(Config.DATA_DIR)
     dataloader = DataLoader(dataset, batch_size=Config.BATCH_SIZE, shuffle=True, num_workers=20)
@@ -218,12 +218,14 @@ def main(args):
         beta_schedule="squaredcos_cap_v2",
         prediction_type="epsilon"
     )
-    logger.info(f"Model: {model}")
+    #logger.info(f"Model: {model}")
     logger.info(f"Model parameters: {count_parameters(model)}")
     # Load checkpoint if specified
     if args.checkpoint or save_checkpoint:
-        model.load_state_dict(torch.load(args.checkpoint))
-        logger.info(f"Resuming from checkpoint: {args.checkpoint}")
+        model.load_state_dict(torch.load(save_checkpoint))
+        #logger.info(f"Resuming from checkpoint: {args.checkpoint}")
+        logger.info(f"Resuming from checkpoint: {save_checkpoint}")
+
 
     # Start training
     train(model, dataloader, scheduler, resume_epoch=args.resume_epoch)
