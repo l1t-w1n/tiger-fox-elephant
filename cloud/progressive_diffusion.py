@@ -21,9 +21,15 @@ class Config:
     
     # Progressive training parameters
     PROGRESSIVE_STAGES = [
+<<<<<<< HEAD
         #{'size': 64, 'epochs': 50, 'lr': 1e-4, 'batch_size': 330},
         {'size': 128, 'epochs': 50, 'lr': 1e-4, 'batch_size': 86},
         {'size': 224, 'epochs': 50, 'lr': 1e-5, 'batch_size': 30}
+=======
+        #{'size': 64, 'epochs': 50, 'lr': 3e-4, 'batch_size': 330},
+        {'size': 128, 'epochs': 10, 'lr': 1e-4, 'batch_size': 86},
+        {'size': 224, 'epochs': 100, 'lr': 3e-5, 'batch_size': 30}
+>>>>>>> 7c1f4e8 (pause training)
     ]
     
     # Model parameters
@@ -136,8 +142,13 @@ def train_progressive():
     # Create one UNet at the largest resolution 
     # (or pick the average/largest resolution you want):
     model = create_unet(input_size=224)
+<<<<<<< HEAD
     model.load_state_dict(torch.load(Config.WEIGHTS_DIR / f"diffusion_v2.4.pth", map_location=Config.device))
     logging.info("model loaded")
+=======
+    model.load_state_dict(torch.load(Config.WEIGHTS_DIR / "diffusion_v2.4.pth", map_location=Config.device))
+    logging.info("checkpoint loaded")
+>>>>>>> 7c1f4e8 (pause training)
     # Single optimizer for the entire training
     optimizer = torch.optim.AdamW(model.parameters(), lr=3e-4)
     
@@ -150,7 +161,11 @@ def train_progressive():
         prediction_type="epsilon"
     )
 
+<<<<<<< HEAD
     scaler = torch.amp.GradScaler("cuda")
+=======
+    scaler = torch.amp.GradScaler(Config.device=="cuda")
+>>>>>>> 7c1f4e8 (pause training)
 
     for stage_idx, stage_cfg in enumerate(Config.PROGRESSIVE_STAGES):
         current_size = stage_cfg['size']
@@ -203,10 +218,17 @@ def train_progressive():
             logging.info(f"Stage {stage_idx+1} | Epoch {epoch}/{stage_cfg['epochs']} | Loss: {avg_loss:.4f}")
             
             # Save checkpoint or generate samples if you want
+<<<<<<< HEAD
             if epoch % Config.PLOT_EVERY == 0:
                 generate_samples(model, scheduler, current_size, epoch)
                 save_checkpoint(model, avg_loss)
 
+=======
+            
+            if epoch % Config.PLOT_EVERY == 0:
+                generate_samples(model, scheduler, current_size, epoch)
+                save_checkpoint(model, avg_loss) 
+>>>>>>> 7c1f4e8 (pause training)
     logging.info("Progressive training completed!")
 
 
