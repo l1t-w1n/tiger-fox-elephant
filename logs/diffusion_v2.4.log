@@ -128,3 +128,9 @@
 2025-02-26 21:44:36,966 INFO: Saved checkpoint: weights/diffusion/diffusion_v2.4.pth
 2025-02-26 21:46:03,031 INFO: Stage 1 | Epoch 31/50 | Loss: 0.0349
 2025-02-26 21:47:29,135 INFO: Stage 1 | Epoch 32/50 | Loss: 0.0339
+2025-02-26 21:48:55,183 INFO: Stage 1 | Epoch 33/50 | Loss: 0.0354
+2025-02-26 21:50:21,306 INFO: Stage 1 | Epoch 34/50 | Loss: 0.0355
+2025-02-26 21:51:47,362 INFO: Stage 1 | Epoch 35/50 | Loss: 0.0344
+2025-02-26 21:52:45,064 INFO: Saved checkpoint: weights/diffusion/diffusion_v2.4.pth
+2025-02-26 21:54:11,069 INFO: Stage 1 | Epoch 36/50 | Loss: 0.0353
+2025-02-26 21:55:37,105 INFO: Stage 1 | Epoch 37/50 | Loss: 0.0354
