@@ -56,7 +56,7 @@ class TrainPipeline:
         self.latent_height = config.LATENT_HEIGHT
         self.latent_width = config.LATENT_WIDTH
         
-        self.save_dir = "~/tiger-fox-elephant/ddpm/samples"
+        self.save_dir = "/home/tiger-fox-elephant/ddpm/samples"
         os.makedirs(self.save_dir, exist_ok=True)
         
         # Generator for random noise
@@ -271,8 +271,8 @@ if __name__ == '__main__':
     dataset = ButterflyDataset(transform=transform)
     
     trainer = TrainPipeline(
-        tokenizer_merges="~/tiger-fox-elephant/ddpm/src/data/tokenizer_merges.txt",
-        tokenizer_vocab="~/tiger-fox-elephant/ddpm/src/data/tokenizer_vocab.json",
+        tokenizer_merges="/home/tiger-fox-elephant/ddpm/src/data/tokenizer_merges.txt",
+        tokenizer_vocab="/home/tiger-fox-elephant/ddpm/src/data/tokenizer_vocab.json",
         dataset=dataset,
         pretrained_weights=True
     )
