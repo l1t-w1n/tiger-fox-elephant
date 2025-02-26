@@ -25,6 +25,7 @@ venv/
 ENV/
 env/
 .env/
+win_env/
 
 # Data files
 !data/raw/.gitkeep

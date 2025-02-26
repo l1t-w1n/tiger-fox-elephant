@@ -24,7 +24,7 @@ sys.path.append(str(project_root))
 # ================= CONFIGURATION =================
 class Config:
     # Cloud-optimized paths (assumes script runs in repo root)
-    """DATA_DIR = Path("data")  # Matches unzipped dataset location
+    """DATA_DIR = Path("data")  # Matches unzippedead_dim=16 dataset location
     WEIGHTS_DIR = Path("weights/diffusion")
     HIST_DIR = Path("histories/diffusion")
     LOG_DIR = Path("logs")"""
@@ -33,11 +33,11 @@ class Config:
     WEIGHTS_DIR = project_root / "weights/diffusion"
     HIST_DIR = project_root / "histories/diffusion"
     LOG_DIR = project_root / "logs"
-    SAMPLE_DIR = project_root / "diffusion_samples"
+    SAMPLE_DIR = project_root / "diffusion_samples/diffusion_samples.v2.3"
     
     # Training parameters (adjust via command line)
-    IMAGE_SIZE = 64
-    BATCH_SIZE = 42
+    IMAGE_SIZE = 224
+    BATCH_SIZE = 3
     NUM_EPOCHS = 50
     LR = 1e-5
     NUM_TIMESTEPS = 1000
@@ -62,7 +62,7 @@ logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s %(levelname)s: %(message)s",
     handlers=[
-        logging.FileHandler(Config.LOG_DIR / "diffusion.v2.2_training.log", mode="a"),
+        logging.FileHandler(Config.LOG_DIR / "diffusion.v2.3_training.log", mode="a"),
         logging.StreamHandler()
     ]
 )
@@ -95,30 +95,34 @@ def create_unet():
         in_channels=3,
         out_channels=3,
         layers_per_block=2,
-        block_out_channels=(128, 256, 512, 512),
-        dropout=0.1,
+        # Keep same channel structure
+        block_out_channels=(128, 128, 256, 256, 512, 512),
+        # Add attention to 3 more down blocks
         down_block_types=(
-            "DownBlock2D", 
-            "AttnDownBlock2D", 
-            "AttnDownBlock2D", 
-            "AttnDownBlock2D"
+            "AttnDownBlock2D",  # Changed from DownBlock2D
+            "AttnDownBlock2D",  # Changed from DownBlock2D
+            "DownBlock2D",
+            "AttnDownBlock2D",  # Changed from DownBlock2D
+            "AttnDownBlock2D",
+            "DownBlock2D",
         ),
+        # Add attention to 2 more up blocks
         up_block_types=(
-            "AttnUpBlock2D", 
+            "UpBlock2D",
             "AttnUpBlock2D",
-            "AttnUpBlock2D", 
-            "UpBlock2D"
+            "AttnUpBlock2D",  # Added attention
+            "UpBlock2D",
+            "AttnUpBlock2D",  # Added attention
+            "UpBlock2D",
         ),
-        norm_num_groups=8,
-        attention_head_dim=16
     ).to(Config.device)
 
 def save_checkpoint(model, loss):
     """Save model weights and update training history"""
-    weight_path = Config.WEIGHTS_DIR / f"diffusion_v2.2.pth"
+    weight_path = Config.WEIGHTS_DIR / f"diffusion_v2.3.pth"
     torch.save(model.state_dict(), weight_path)
     
-    hist_path = Config.HIST_DIR / "diffusion_v2.2.npz"
+    hist_path = Config.HIST_DIR / "diffusion_v2.3.npz"
     history = np.load(hist_path) if hist_path.exists() else {"losses": []}
     updated_losses = np.append(history.get("losses", []), loss)
     np.savez(hist_path, losses=updated_losses)
@@ -127,6 +131,9 @@ def save_checkpoint(model, loss):
 # ================= TRAINING LOOP =================
 def train(model, dataloader, scheduler, resume_epoch=0):
     optimizer = torch.optim.AdamW(model.parameters(), lr=Config.LR)
+    """lr_scheduler = torch.optim.lr_scheduler.OneCycleLR(
+        optimizer, max_lr=Config.LR, total_steps=Config.NUM_EPOCHS * len(dataloader)
+    )"""
     scaler = torch.amp.GradScaler("cuda")
 
     for epoch in range(resume_epoch, Config.NUM_EPOCHS):
@@ -149,14 +156,14 @@ def train(model, dataloader, scheduler, resume_epoch=0):
             with torch.amp.autocast("cuda"):
                 noisy_images = scheduler.add_noise(images, noise, timesteps)
                 pred_noise = model(noisy_images, timesteps).sample
-                
+            
                 # Calculate MSE loss
                 loss = F.mse_loss(pred_noise, noise)
                 
             optimizer.zero_grad()
             scaler.scale(loss).backward()
             scaler.unscale_(optimizer)
-            torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)          
+            torch.nn.utils.clip_grad_norm_(model.parameters(), 1)          
             scaler.step(optimizer)
             scaler.update()
             
@@ -165,6 +172,7 @@ def train(model, dataloader, scheduler, resume_epoch=0):
                 'Loss': f"{loss.item():.5f}",
                 'LR': f"{optimizer.param_groups[0]['lr']:.3e}"
             })
+            #lr_scheduler.step()
 
         avg_loss = epoch_loss / len(dataloader)
         logger.info(f"Epoch [{epoch+1}/{Config.NUM_EPOCHS}] Loss: {avg_loss:.4f}")
@@ -204,11 +212,43 @@ def count_parameters(model):
     """Utility function to count trainable parameters"""
     return sum(p.numel() for p in model.parameters() if p.requires_grad)
 
+def load_weights_with_compatibility(new_model, pretrained_path):
+    # Load original weights
+    pretrained_dict = torch.load(pretrained_path)
+    
+    # Get new model's state dict
+    new_dict = new_model.state_dict()
+    
+    # 1. Direct name matches (for unchanged layers)
+    matched_dict = {k: v for k, v in pretrained_dict.items() if k in new_dict}
+    
+    # 2. Cross-attention parameter mapping (for changed blocks)
+    for pk, pv in pretrained_dict.items():
+        if pk not in new_dict:
+            # Handle attention parameters in modified blocks
+            if 'attentions' in pk:
+                # Initialize new attention layers with default weights
+                continue  
+            # Map conv layers in attention blocks
+            if 'down_blocks.0' in pk:
+                new_key = pk.replace('down_blocks.0', 'down_blocks.0.resnets.0')
+                if new_key in new_dict:
+                    matched_dict[new_key] = pv
+    
+    # Load with strict=False to ignore new attention params
+    new_model.load_state_dict(matched_dict, strict=False)
+    
+    # Calculate statistics
+    num_matched = len(matched_dict)
+    total_params = len(pretrained_dict)
+    print(f"Loaded {num_matched}/{total_params} parameters")
+    return new_model
+
 # ================= MAIN EXECUTION =================
 def main(args):
     logger.info("Initializing training...")
     #save_checkpoint = None
-    save_checkpoint = Config.WEIGHTS_DIR / "diffusion_v2.2.pth"
+    save_checkpoint = Config.WEIGHTS_DIR / "diffusion_v2.3.pth"
     # Initialize components
     dataset = DiffusionDataset(Config.DATA_DIR)
     dataloader = DataLoader(dataset, batch_size=Config.BATCH_SIZE, shuffle=True, num_workers=20)
@@ -222,8 +262,9 @@ def main(args):
     logger.info(f"Model parameters: {count_parameters(model)}")
     # Load checkpoint if specified
     if args.checkpoint or save_checkpoint:
-        model.load_state_dict(torch.load(save_checkpoint))
+        #model.load_state_dict(torch.load(save_checkpoint))
         #logger.info(f"Resuming from checkpoint: {args.checkpoint}")
+        model = load_weights_with_compatibility(model, save_checkpoint)
         logger.info(f"Resuming from checkpoint: {save_checkpoint}")
 
 
