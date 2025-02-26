@@ -37,7 +37,7 @@ class Config:
     
     # Training parameters (adjust via command line)
     IMAGE_SIZE = 224
-    BATCH_SIZE = 3
+    BATCH_SIZE = 64
     NUM_EPOCHS = 50
     LR = 1e-5
     NUM_TIMESTEPS = 1000
@@ -251,7 +251,7 @@ def main(args):
     save_checkpoint = Config.WEIGHTS_DIR / "diffusion_v2.3.pth"
     # Initialize components
     dataset = DiffusionDataset(Config.DATA_DIR)
-    dataloader = DataLoader(dataset, batch_size=Config.BATCH_SIZE, shuffle=True, num_workers=20)
+    dataloader = DataLoader(dataset, batch_size=Config.BATCH_SIZE, shuffle=True, num_workers=12)
     model = create_unet()
     scheduler = DDPMScheduler(
         num_train_timesteps=Config.NUM_TIMESTEPS,
