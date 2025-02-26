@@ -18,4 +18,4 @@ NUM_INFERENCE_STEPS=200
 DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
 SEED = 42
 
-checkpoint_path = '~/tiger-fox-elephant/ddpm/src/data/v1-5-pruned-emaonly.ckpt'
+checkpoint_path = "/home/l1t-w1n/tiger-fox-elephant/ddpm/src/data/v1-5-pruned-emaonly.ckpt"
