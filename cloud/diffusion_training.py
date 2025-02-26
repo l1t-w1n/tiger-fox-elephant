@@ -37,7 +37,7 @@ class Config:
     
     # Training parameters (adjust via command line)
     IMAGE_SIZE = 224
-    BATCH_SIZE = 64
+    BATCH_SIZE = 4
     NUM_EPOCHS = 50
     LR = 1e-5
     NUM_TIMESTEPS = 1000
@@ -96,23 +96,18 @@ def create_unet():
         out_channels=3,
         layers_per_block=2,
         # Keep same channel structure
-        block_out_channels=(128, 128, 256, 256, 512, 512),
+        block_out_channels=(128, 256, 512, 1024),
         # Add attention to 3 more down blocks
         down_block_types=(
-            "AttnDownBlock2D",  # Changed from DownBlock2D
-            "AttnDownBlock2D",  # Changed from DownBlock2D
-            "DownBlock2D",
-            "AttnDownBlock2D",  # Changed from DownBlock2D
+            "DownBlock2D",  
             "AttnDownBlock2D",
-            "DownBlock2D",
+            "AttnDownBlock2D",
+            "AttnDownBlock2D",
         ),
-        # Add attention to 2 more up blocks
         up_block_types=(
-            "UpBlock2D",
             "AttnUpBlock2D",
-            "AttnUpBlock2D",  # Added attention
-            "UpBlock2D",
-            "AttnUpBlock2D",  # Added attention
+            "AttnUpBlock2D",  
+            "AttnUpBlock2D",  
             "UpBlock2D",
         ),
     ).to(Config.device)
@@ -251,7 +246,7 @@ def main(args):
     save_checkpoint = Config.WEIGHTS_DIR / "diffusion_v2.3.pth"
     # Initialize components
     dataset = DiffusionDataset(Config.DATA_DIR)
-    dataloader = DataLoader(dataset, batch_size=Config.BATCH_SIZE, shuffle=True, num_workers=12)
+    dataloader = DataLoader(dataset, batch_size=Config.BATCH_SIZE, shuffle=True, num_workers=20)
     model = create_unet()
     scheduler = DDPMScheduler(
         num_train_timesteps=Config.NUM_TIMESTEPS,

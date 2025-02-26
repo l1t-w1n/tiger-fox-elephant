@@ -439,3 +439,28 @@
 2025-02-26 14:59:24,797 INFO: Initializing training...
 2025-02-26 14:59:25,357 INFO: Model parameters: 115455747
 2025-02-26 14:59:25,861 INFO: Resuming from checkpoint: /media/Ittwin/E/_uni/DL_Project/tiger-fox-elephant/weights/diffusion/diffusion_v2.3.pth
+2025-02-26 15:31:57,125 INFO: Initializing training...
+2025-02-26 15:31:58,053 INFO: Model parameters: 115455747
+2025-02-26 15:33:21,293 INFO: Initializing training...
+2025-02-26 15:33:22,185 INFO: Model parameters: 115455747
+2025-02-26 15:36:37,317 INFO: Initializing training...
+2025-02-26 15:36:38,204 INFO: Model parameters: 115455747
+2025-02-26 15:36:38,473 INFO: Resuming from checkpoint: /home/l1t-w1n/tiger-fox-elephant/weights/diffusion/diffusion_v2.3.pth
+2025-02-26 15:38:14,504 INFO: Initializing training...
+2025-02-26 15:38:15,493 INFO: Model parameters: 115455747
+2025-02-26 15:38:15,848 INFO: Resuming from checkpoint: /home/l1t-w1n/tiger-fox-elephant/weights/diffusion/diffusion_v2.3.pth
+2025-02-26 15:39:14,611 INFO: Initializing training...
+2025-02-26 15:39:15,610 INFO: Model parameters: 115455747
+2025-02-26 15:39:15,966 INFO: Resuming from checkpoint: /home/l1t-w1n/tiger-fox-elephant/weights/diffusion/diffusion_v2.3.pth
+2025-02-26 15:39:56,485 INFO: Initializing training...
+2025-02-26 15:39:57,464 INFO: Model parameters: 115455747
+2025-02-26 15:39:57,794 INFO: Resuming from checkpoint: /home/l1t-w1n/tiger-fox-elephant/weights/diffusion/diffusion_v2.3.pth
+2025-02-26 15:40:37,877 INFO: Initializing training...
+2025-02-26 15:40:38,840 INFO: Model parameters: 115455747
+2025-02-26 15:40:39,186 INFO: Resuming from checkpoint: /home/l1t-w1n/tiger-fox-elephant/weights/diffusion/diffusion_v2.3.pth
+2025-02-26 16:04:06,567 INFO: Epoch [1/50] Loss: 0.0273
+2025-02-26 16:04:19,472 INFO: Checkpoint saved: /home/l1t-w1n/tiger-fox-elephant/weights/diffusion/diffusion_v2.3.pth
+2025-02-26 16:27:45,307 INFO: Epoch [2/50] Loss: 0.0262
+2025-02-26 16:27:58,371 INFO: Checkpoint saved: /home/l1t-w1n/tiger-fox-elephant/weights/diffusion/diffusion_v2.3.pth
+2025-02-26 16:59:19,886 INFO: Epoch [3/50] Loss: 0.0274
+2025-02-26 16:59:32,799 INFO: Checkpoint saved: /home/l1t-w1n/tiger-fox-elephant/weights/diffusion/diffusion_v2.3.pth
