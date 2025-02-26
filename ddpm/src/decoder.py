@@ -81,3 +81,91 @@ class VAE_AttentionBlock(nn.Module):
         
         x += residual
         return x 
+    
+
+class VAE_Decoder(nn.Sequential):
+    def __init__(self):
+        super(VAE_Decoder, self).__init__(
+            # (batch_size, 4, height/8, width/8) -> (batch_size, 4, height/8, width/8)
+            nn.Conv2d(in_channels=4, out_channels=4, kernel_size=1, stride=1, padding=0),
+            
+            # (batch_size, 4, height/8, width/8) -> (batch_size, 512, height/8, width/8)
+            nn.Conv2d(in_channels=4, out_channels=512, kernel_size=3, stride=1, padding=1),
+            
+            # (batch_size, 512, height/8, width/8) -> (batch_size, 512, height/8, width/8)
+            VAE_ResidualBlock(512, 512),
+            
+            # (batch_size, 512, height/8, width/8) -> (batch_size, 512, height/8, width/8)
+            VAE_AttentionBlock(512),
+            
+            # (batch_size, 512, height/8, width/8) -> (batch_size, 512, height/8, width/8)
+            VAE_ResidualBlock(512, 512),
+            
+            # (batch_size, 512, height/8, width/8) -> (batch_size, 512, height/8, width/8)
+            VAE_ResidualBlock(512, 512),
+            
+            # (batch_size, 512, height/8, width/8) -> (batch_size, 512, height/8, width/8)
+            VAE_ResidualBlock(512, 512),
+            
+            # (batch_size, 512, height/8, width/8) -> (batch_size, 512, height/8, width/8)
+            VAE_ResidualBlock(512, 512),
+            
+            # (batch_size, 512, height/8, width/8) -> (batch_size, 512, height/4, width/4)
+            nn.Upsample(scale_factor=2, mode='nearest'),
+            
+            # (batch_size, 512, height/4, width/4) -> (batch_size, 512, height/4, width/4)
+            VAE_ResidualBlock(512, 512),
+            
+            # (batch_size, 512, height/4, width/4) -> (batch_size, 512, height/4, width/4)
+            VAE_ResidualBlock(512, 512),
+            
+            # (batch_size, 512, height/4, width/4) -> (batch_size, 512, height/4, width/4)
+            VAE_ResidualBlock(512, 512),
+            
+            # (batch_size, 512, height/4, width/4) -> (batch_size, 256, height/2, width/2)
+            nn.Upsample(scale_factor=2, mode='nearest'),
+            
+            # (batch_size, 256, height/2, width/2) -> (batch_size, 256, height/2, width/2)
+            nn.Conv2d(in_channels=512, out_channels=512, kernel_size=3, stride=1, padding=1),
+            
+            # (Batch_Size, 512, Height / 2, Width / 2) -> (Batch_Size, 256, Height / 2, Width / 2)
+            VAE_ResidualBlock(512, 256), 
+            
+            # (Batch_Size, 256, Height / 2, Width / 2) -> (Batch_Size, 256, Height / 2, Width / 2)
+            VAE_ResidualBlock(256, 256), 
+            
+            # (Batch_Size, 256, Height / 2, Width / 2) -> (Batch_Size, 256, Height / 2, Width / 2)
+            VAE_ResidualBlock(256, 256), 
+            
+            # (Batch_size, 256, height/2, width/2) -> (batch_size, 128, height, width)
+            nn.Upsample(scale_factor=2, mode='nearest'),
+            
+            # (batch_size, 128, height, width) -> (batch_size, 128, height, width)
+            nn.Conv2d(in_channels=256, out_channels=256, kernel_size=3, stride=1, padding=1),
+            
+            # (Batch_Size, 256, Height, Width) -> (Batch_Size, 128, Height, Width)
+            VAE_ResidualBlock(256, 128), 
+            
+            # (Batch_Size, 128, Height, Width) -> (Batch_Size, 128, Height, Width)
+            VAE_ResidualBlock(128, 128), 
+            
+            # (Batch_Size, 128, Height, Width) -> (Batch_Size, 128, Height, Width)
+            VAE_ResidualBlock(128, 128), 
+            
+            nn.GroupNorm(num_groups=32, num_channels=128),
+            
+            nn.SiLU(),
+            
+            nn.Conv2d(in_channels=128, out_channels=3, kernel_size=3, stride=1, padding=1)
+        )
+        
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        # x: (batch_size, 8, height/8, wiodth/8)
+        
+        x /= 0.18215
+        
+        for layer in self:
+            x = layer(x)
+        
+        # (Batch_size, 3, height, width)
+        return x
