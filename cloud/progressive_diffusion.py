@@ -21,9 +21,9 @@ class Config:
     
     # Progressive training parameters
     PROGRESSIVE_STAGES = [
-        {'size': 64, 'epochs': 50, 'lr': 3e-4, 'batch_size': 64},
-        {'size': 128, 'epochs': 50, 'lr': 1e-4, 'batch_size': 32},
-        {'size': 224, 'epochs': 100, 'lr': 3e-5, 'batch_size': 16}
+        {'size': 64, 'epochs': 50, 'lr': 3e-4, 'batch_size': 330},
+        {'size': 128, 'epochs': 50, 'lr': 1e-4, 'batch_size': 110},
+        {'size': 224, 'epochs': 100, 'lr': 3e-5, 'batch_size': 30}
     ]
     
     # Model parameters
@@ -62,45 +62,6 @@ def create_unet(input_size):
         norm_num_groups=32
     ).to(Config.device)
 
-def transfer_weights(src_model, dest_model, new_size):
-    """Transfer weights with spatial interpolation and layer matching"""
-    try:
-        # Get scale factor based on input sizes
-        scale_factor = new_size / src_model.sample_size
-        
-        # Transfer initial convolution with interpolation
-        with torch.no_grad():
-            dest_model.conv_in.weight.data = F.interpolate(
-                src_model.conv_in.weight.data,
-                scale_factor=scale_factor,
-                mode='bicubic',
-                align_corners=False
-            )
-            dest_model.conv_in.bias.data.copy_(src_model.conv_in.bias.data)
-
-        # Transfer compatible middle blocks
-        dest_model.mid_block.load_state_dict(src_model.mid_block.state_dict())
-
-        # Transfer down/up blocks with matching depth
-        for src_block, dest_block in zip(src_model.down_blocks, dest_model.down_blocks):
-            if isinstance(src_block, type(dest_block)):
-                dest_block.load_state_dict(src_block.state_dict())
-
-        for src_block, dest_block in zip(src_model.up_blocks, dest_model.up_blocks):
-            if isinstance(src_block, type(dest_block)):
-                dest_block.load_state_dict(src_block.state_dict())
-
-        # Initialize new attention layers
-        for name, param in dest_model.named_parameters():
-            if 'attn' in name and param not in src_model.state_dict():
-                if 'weight' in name:
-                    torch.nn.init.normal_(param, mean=0.0, std=0.02)
-                elif 'bias' in name:
-                    torch.nn.init.constant_(param, 0.0)
-
-    except Exception as e:
-        logging.error(f"Weight transfer failed: {str(e)}")
-        raise
 # ================= DATASET =================
 class ProgressiveDataset(Dataset):
     def __init__(self, root_dir):
@@ -169,48 +130,62 @@ def train_progressive():
     if torch.cuda.is_available():
         torch.cuda.manual_seed_all(Config.SEED)
         
+    # Create one dataset instance
     dataset = ProgressiveDataset(Config.DATA_DIR)
-    previous_model = None
     
-    for stage_idx, stage in enumerate(Config.PROGRESSIVE_STAGES):
-        current_size = stage['size']
+    # Create one UNet at the largest resolution 
+    # (or pick the average/largest resolution you want):
+    model = create_unet(input_size=224)
+    
+    # Single optimizer for the entire training
+    optimizer = torch.optim.AdamW(model.parameters(), lr=3e-4)
+    
+    # (You may later adjust learning rate stage by stage if you wish.)
+    
+    # Single DDPM Scheduler
+    scheduler = DDPMScheduler(
+        num_train_timesteps=Config.NUM_TIMESTEPS,
+        beta_schedule="squaredcos_cap_v2",
+        prediction_type="epsilon"
+    )
+
+    scaler = torch.amp.GradScaler(enabled=(Config.device=="cuda"))
+
+    for stage_idx, stage_cfg in enumerate(Config.PROGRESSIVE_STAGES):
+        current_size = stage_cfg['size']
+        logging.info(f"\n=== Starting Stage {stage_idx+1} ({current_size}px) ===")
+
+        # Update dataset transforms to produce images at `current_size`
         dataset.update_transform(current_size)
         
-        # Create model with weight transfer
-        model = create_unet(current_size, previous_model)
-        previous_model = model  # Store for next stage
-        
+        # Create a DataLoader at this stage's batch_size
         dataloader = DataLoader(
             dataset, 
-            batch_size=stage['batch_size'],
+            batch_size=stage_cfg['batch_size'],
             shuffle=True, 
             num_workers=16
         )
         
-        optimizer = torch.optim.AdamW([
-            {'params': [p for n,p in model.named_parameters() if 'attn' not in n], 'lr': stage['lr']},
-            {'params': [p for n,p in model.named_parameters() if 'attn' in n], 'lr': stage['lr']*2}
-        ])
-        
-        scheduler = DDPMScheduler(
-            num_train_timesteps=Config.NUM_TIMESTEPS,
-            beta_schedule="squaredcos_cap_v2",
-            prediction_type="epsilon"
-        )
-        
-        scaler = torch.amp.GradScaler("cuda")
-        logging.info(f"\n=== Starting Stage {stage_idx+1} ({current_size}px) ===")
-        
-        for epoch in range(1, stage['epochs']+1):
+        # Optionally set a stage‐specific learning rate
+        for g in optimizer.param_groups:
+            g['lr'] = stage_cfg['lr']
+
+        # Train for the specified number of epochs at this size
+        for epoch in range(1, stage_cfg['epochs']+1):
             model.train()
             epoch_loss = 0.0
             
-            for batch in tqdm(dataloader, desc=f"Stage {stage_idx+1} Epoch {epoch}"):
-                images = batch[0].to(Config.device)
+            for images, _ in tqdm(dataloader, desc=f"Stage {stage_idx+1} Epoch {epoch}"):
+                images = images.to(Config.device)
                 noise = torch.randn_like(images)
-                timesteps = torch.randint(0, Config.NUM_TIMESTEPS, (images.size(0),), device=Config.device)
+                timesteps = torch.randint(
+                    0, 
+                    Config.NUM_TIMESTEPS, 
+                    (images.size(0),), 
+                    device=Config.device
+                )
                 
-                with torch.amp.autocast("cuda"):
+                with torch.amp.autocast(enabled=(Config.device=="cuda")):
                     noisy = scheduler.add_noise(images, noise, timesteps)
                     pred = model(noisy, timesteps).sample
                     loss = F.mse_loss(pred, noise)
@@ -220,16 +195,19 @@ def train_progressive():
                 torch.nn.utils.clip_grad_norm_(model.parameters(), Config.GRAD_CLIP)
                 scaler.step(optimizer)
                 scaler.update()
+                
                 epoch_loss += loss.item()
 
             avg_loss = epoch_loss / len(dataloader)
-            logging.info(f"Stage {stage_idx+1} Epoch {epoch}/{stage['epochs']} Loss: {avg_loss:.4f}")
+            logging.info(f"Stage {stage_idx+1} | Epoch {epoch}/{stage_cfg['epochs']} | Loss: {avg_loss:.4f}")
             
+            # Save checkpoint or generate samples if you want
             save_checkpoint(model, avg_loss)
             if epoch % Config.PLOT_EVERY == 0:
                 generate_samples(model, scheduler, current_size, epoch)
 
     logging.info("Progressive training completed!")
+
 
 if __name__ == "__main__":
     train_progressive()
