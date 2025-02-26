@@ -1,0 +1,130 @@
+2025-02-26 18:13:02,181 INFO: 
+=== Starting Stage 1 (64px) ===
+2025-02-26 18:14:30,268 INFO: 
+=== Starting Stage 1 (64px) ===
+2025-02-26 18:14:45,447 INFO: Stage 1 | Epoch 1/50 | Loss: 0.3877
+2025-02-26 18:14:46,691 INFO: Saved checkpoint: weights/diffusion/diffusion_v2.4.pth
+2025-02-26 18:15:01,009 INFO: Stage 1 | Epoch 2/50 | Loss: 0.1101
+2025-02-26 18:15:35,639 INFO: Saved checkpoint: weights/diffusion/diffusion_v2.4.pth
+2025-02-26 18:15:54,195 INFO: Stage 1 | Epoch 3/50 | Loss: 0.0928
+2025-02-26 18:16:25,986 INFO: Saved checkpoint: weights/diffusion/diffusion_v2.4.pth
+2025-02-26 18:16:40,337 INFO: Stage 1 | Epoch 4/50 | Loss: 0.0830
+2025-02-26 18:17:11,868 INFO: Saved checkpoint: weights/diffusion/diffusion_v2.4.pth
+2025-02-26 18:22:58,288 INFO: model loaded
+2025-02-26 18:22:58,293 INFO: 
+=== Starting Stage 1 (64px) ===
+2025-02-26 18:23:13,574 INFO: Stage 1 | Epoch 1/50 | Loss: 0.1127
+2025-02-26 18:23:28,297 INFO: Stage 1 | Epoch 2/50 | Loss: 0.0773
+2025-02-26 18:24:05,224 INFO: Saved checkpoint: weights/diffusion/diffusion_v2.4.pth
+2025-02-26 18:24:44,609 INFO: model loaded
+2025-02-26 18:24:44,615 INFO: 
+=== Starting Stage 1 (64px) ===
+2025-02-26 18:24:59,888 INFO: Stage 1 | Epoch 1/50 | Loss: 0.0769
+2025-02-26 18:25:14,227 INFO: Stage 1 | Epoch 2/50 | Loss: 0.0714
+2025-02-26 18:25:28,587 INFO: Stage 1 | Epoch 3/50 | Loss: 0.0724
+2025-02-26 18:25:42,919 INFO: Stage 1 | Epoch 4/50 | Loss: 0.0707
+2025-02-26 18:25:57,269 INFO: Stage 1 | Epoch 5/50 | Loss: 0.0667
+2025-02-26 18:26:34,200 INFO: Saved checkpoint: weights/diffusion/diffusion_v2.4.pth
+2025-02-26 18:26:48,594 INFO: Stage 1 | Epoch 6/50 | Loss: 0.0664
+2025-02-26 18:27:02,911 INFO: Stage 1 | Epoch 7/50 | Loss: 0.0682
+2025-02-26 18:27:17,244 INFO: Stage 1 | Epoch 8/50 | Loss: 0.0636
+2025-02-26 18:27:31,596 INFO: Stage 1 | Epoch 9/50 | Loss: 0.0630
+2025-02-26 18:27:45,940 INFO: Stage 1 | Epoch 10/50 | Loss: 0.0613
+2025-02-26 18:28:21,384 INFO: Saved checkpoint: weights/diffusion/diffusion_v2.4.pth
+2025-02-26 18:28:36,387 INFO: Stage 1 | Epoch 11/50 | Loss: 0.0589
+2025-02-26 18:28:50,768 INFO: Stage 1 | Epoch 12/50 | Loss: 0.0617
+2025-02-26 18:29:05,164 INFO: Stage 1 | Epoch 13/50 | Loss: 0.0612
+2025-02-26 18:29:19,553 INFO: Stage 1 | Epoch 14/50 | Loss: 0.0577
+2025-02-26 18:29:33,939 INFO: Stage 1 | Epoch 15/50 | Loss: 0.0585
+2025-02-26 18:30:10,803 INFO: Saved checkpoint: weights/diffusion/diffusion_v2.4.pth
+2025-02-26 18:30:25,202 INFO: Stage 1 | Epoch 16/50 | Loss: 0.0580
+2025-02-26 18:30:39,560 INFO: Stage 1 | Epoch 17/50 | Loss: 0.0575
+2025-02-26 18:30:53,937 INFO: Stage 1 | Epoch 18/50 | Loss: 0.0585
+2025-02-26 18:31:08,311 INFO: Stage 1 | Epoch 19/50 | Loss: 0.0568
+2025-02-26 18:31:22,704 INFO: Stage 1 | Epoch 20/50 | Loss: 0.0590
+2025-02-26 18:31:59,553 INFO: Saved checkpoint: weights/diffusion/diffusion_v2.4.pth
+2025-02-26 18:32:13,991 INFO: Stage 1 | Epoch 21/50 | Loss: 0.0581
+2025-02-26 18:32:28,405 INFO: Stage 1 | Epoch 22/50 | Loss: 0.0586
+2025-02-26 18:32:42,785 INFO: Stage 1 | Epoch 23/50 | Loss: 0.0556
+2025-02-26 18:32:57,186 INFO: Stage 1 | Epoch 24/50 | Loss: 0.0538
+2025-02-26 18:33:11,623 INFO: Stage 1 | Epoch 25/50 | Loss: 0.0559
+2025-02-26 18:33:47,079 INFO: Saved checkpoint: weights/diffusion/diffusion_v2.4.pth
+2025-02-26 18:34:01,528 INFO: Stage 1 | Epoch 26/50 | Loss: 0.0560
+2025-02-26 18:34:15,935 INFO: Stage 1 | Epoch 27/50 | Loss: 0.0541
+2025-02-26 18:34:30,331 INFO: Stage 1 | Epoch 28/50 | Loss: 0.0569
+2025-02-26 18:34:44,808 INFO: Stage 1 | Epoch 29/50 | Loss: 0.0553
+2025-02-26 18:34:59,196 INFO: Stage 1 | Epoch 30/50 | Loss: 0.0542
+2025-02-26 18:35:36,151 INFO: Saved checkpoint: weights/diffusion/diffusion_v2.4.pth
+2025-02-26 18:35:50,625 INFO: Stage 1 | Epoch 31/50 | Loss: 0.0553
+2025-02-26 18:36:05,051 INFO: Stage 1 | Epoch 32/50 | Loss: 0.0527
+2025-02-26 18:36:19,464 INFO: Stage 1 | Epoch 33/50 | Loss: 0.0536
+2025-02-26 18:36:33,889 INFO: Stage 1 | Epoch 34/50 | Loss: 0.0535
+2025-02-26 18:36:48,321 INFO: Stage 1 | Epoch 35/50 | Loss: 0.0552
+2025-02-26 18:37:24,216 INFO: Saved checkpoint: weights/diffusion/diffusion_v2.4.pth
+2025-02-26 18:37:38,592 INFO: Stage 1 | Epoch 36/50 | Loss: 0.0520
+2025-02-26 18:37:52,928 INFO: Stage 1 | Epoch 37/50 | Loss: 0.0519
+2025-02-26 18:38:07,281 INFO: Stage 1 | Epoch 38/50 | Loss: 0.0555
+2025-02-26 18:38:21,636 INFO: Stage 1 | Epoch 39/50 | Loss: 0.0525
+2025-02-26 18:38:35,961 INFO: Stage 1 | Epoch 40/50 | Loss: 0.0515
+2025-02-26 18:39:10,887 INFO: Saved checkpoint: weights/diffusion/diffusion_v2.4.pth
+2025-02-26 18:39:25,329 INFO: Stage 1 | Epoch 41/50 | Loss: 0.0550
+2025-02-26 18:39:39,702 INFO: Stage 1 | Epoch 42/50 | Loss: 0.0520
+2025-02-26 18:39:54,061 INFO: Stage 1 | Epoch 43/50 | Loss: 0.0514
+2025-02-26 18:40:08,408 INFO: Stage 1 | Epoch 44/50 | Loss: 0.0510
+2025-02-26 18:40:22,768 INFO: Stage 1 | Epoch 45/50 | Loss: 0.0532
+2025-02-26 18:40:58,110 INFO: Saved checkpoint: weights/diffusion/diffusion_v2.4.pth
+2025-02-26 18:41:12,585 INFO: Stage 1 | Epoch 46/50 | Loss: 0.0517
+2025-02-26 18:41:26,966 INFO: Stage 1 | Epoch 47/50 | Loss: 0.0512
+2025-02-26 18:41:41,348 INFO: Stage 1 | Epoch 48/50 | Loss: 0.0551
+2025-02-26 18:41:55,726 INFO: Stage 1 | Epoch 49/50 | Loss: 0.0528
+2025-02-26 18:42:10,109 INFO: Stage 1 | Epoch 50/50 | Loss: 0.0514
+2025-02-26 18:42:47,168 INFO: Saved checkpoint: weights/diffusion/diffusion_v2.4.pth
+2025-02-26 18:42:47,168 INFO: 
+=== Starting Stage 2 (128px) ===
+2025-02-26 20:54:13,204 INFO: model loaded
+2025-02-26 20:54:13,206 INFO: 
+=== Starting Stage 1 (128px) ===
+2025-02-26 20:54:43,629 INFO: model loaded
+2025-02-26 20:54:43,632 INFO: 
+=== Starting Stage 1 (128px) ===
+2025-02-26 20:55:15,433 INFO: model loaded
+2025-02-26 20:55:15,438 INFO: 
+=== Starting Stage 1 (128px) ===
+2025-02-26 20:56:42,226 INFO: Stage 1 | Epoch 1/50 | Loss: 0.0451
+2025-02-26 20:58:08,156 INFO: Stage 1 | Epoch 2/50 | Loss: 0.0408
+2025-02-26 20:59:34,183 INFO: Stage 1 | Epoch 3/50 | Loss: 0.0402
+2025-02-26 21:01:00,147 INFO: Stage 1 | Epoch 4/50 | Loss: 0.0418
+2025-02-26 21:02:26,138 INFO: Stage 1 | Epoch 5/50 | Loss: 0.0410
+2025-02-26 21:03:23,043 INFO: Saved checkpoint: weights/diffusion/diffusion_v2.4.pth
+2025-02-26 21:04:49,002 INFO: Stage 1 | Epoch 6/50 | Loss: 0.0398
+2025-02-26 21:06:15,016 INFO: Stage 1 | Epoch 7/50 | Loss: 0.0391
+2025-02-26 21:07:41,056 INFO: Stage 1 | Epoch 8/50 | Loss: 0.0384
+2025-02-26 21:09:07,101 INFO: Stage 1 | Epoch 9/50 | Loss: 0.0386
+2025-02-26 21:10:33,184 INFO: Stage 1 | Epoch 10/50 | Loss: 0.0387
+2025-02-26 21:11:29,822 INFO: Saved checkpoint: weights/diffusion/diffusion_v2.4.pth
+2025-02-26 21:12:55,821 INFO: Stage 1 | Epoch 11/50 | Loss: 0.0387
+2025-02-26 21:14:21,916 INFO: Stage 1 | Epoch 12/50 | Loss: 0.0374
+2025-02-26 21:15:47,957 INFO: Stage 1 | Epoch 13/50 | Loss: 0.0384
+2025-02-26 21:17:13,965 INFO: Stage 1 | Epoch 14/50 | Loss: 0.0391
+2025-02-26 21:18:39,972 INFO: Stage 1 | Epoch 15/50 | Loss: 0.0384
+2025-02-26 21:19:37,218 INFO: Saved checkpoint: weights/diffusion/diffusion_v2.4.pth
+2025-02-26 21:21:03,312 INFO: Stage 1 | Epoch 16/50 | Loss: 0.0395
+2025-02-26 21:22:29,344 INFO: Stage 1 | Epoch 17/50 | Loss: 0.0371
+2025-02-26 21:23:55,373 INFO: Stage 1 | Epoch 18/50 | Loss: 0.0381
+2025-02-26 21:25:21,399 INFO: Stage 1 | Epoch 19/50 | Loss: 0.0370
+2025-02-26 21:26:47,399 INFO: Stage 1 | Epoch 20/50 | Loss: 0.0368
+2025-02-26 21:27:44,122 INFO: Saved checkpoint: weights/diffusion/diffusion_v2.4.pth
+2025-02-26 21:29:10,173 INFO: Stage 1 | Epoch 21/50 | Loss: 0.0379
+2025-02-26 21:30:36,162 INFO: Stage 1 | Epoch 22/50 | Loss: 0.0382
+2025-02-26 21:32:02,175 INFO: Stage 1 | Epoch 23/50 | Loss: 0.0356
+2025-02-26 21:33:28,220 INFO: Stage 1 | Epoch 24/50 | Loss: 0.0372
+2025-02-26 21:34:55,449 INFO: Stage 1 | Epoch 25/50 | Loss: 0.0365
+2025-02-26 21:36:28,871 INFO: Saved checkpoint: weights/diffusion/diffusion_v2.4.pth
+2025-02-26 21:37:55,812 INFO: Stage 1 | Epoch 26/50 | Loss: 0.0374
+2025-02-26 21:39:21,768 INFO: Stage 1 | Epoch 27/50 | Loss: 0.0362
+2025-02-26 21:40:47,747 INFO: Stage 1 | Epoch 28/50 | Loss: 0.0358
+2025-02-26 21:42:13,790 INFO: Stage 1 | Epoch 29/50 | Loss: 0.0354
+2025-02-26 21:43:39,819 INFO: Stage 1 | Epoch 30/50 | Loss: 0.0357
+2025-02-26 21:44:36,966 INFO: Saved checkpoint: weights/diffusion/diffusion_v2.4.pth
+2025-02-26 21:46:03,031 INFO: Stage 1 | Epoch 31/50 | Loss: 0.0349
+2025-02-26 21:47:29,135 INFO: Stage 1 | Epoch 32/50 | Loss: 0.0339
