@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 
 class ButterflyDataset(Dataset):
     def __init__(self, 
-                 data_dir: str = '~/tiger-fox-elephant/ddpm/src/data/butterflies_dataset', 
+                 data_dir: str = '/home/l1t-w1n/tiger-fox-elephant/ddpm/src/data/butterflies_dataset', 
                  transform: transforms.Compose = None):
         
         self.data_dir = data_dir
