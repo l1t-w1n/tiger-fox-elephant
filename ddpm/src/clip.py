@@ -1,114 +1,96 @@
-import torch 
-import torch.nn as nn
-import torch.nn.functional as F
+import torch
+from torch import nn
+from torch.nn import functional as F
+from attention import SelfAttention
 
-from attention import SelfAttention 
+class CLIPEmbedding(nn.Module):
+    def __init__(self, n_vocab: int, n_embd: int, n_token: int):
+        super().__init__()
+        
+        self.token_embedding = nn.Embedding(n_vocab, n_embd)
+        # A learnable weight matrix encodes the position information for each token
+        self.position_embedding = nn.Parameter(torch.zeros((n_token, n_embd)))
+    
+    def forward(self, tokens):
+        # (Batch_Size, Seq_Len) -> (Batch_Size, Seq_Len, Dim) 
+        x = self.token_embedding(tokens)
+        # (Batch_Size, Seq_Len) -> (Batch_Size, Seq_Len, Dim)
+        x += self.position_embedding
+        
+        return x
 
-class CLIP_Embedding(nn.Module):
-    def __init__(self, vocabulary_size: int = 49408, embedding_dim: int = 768, sequence_length: int = 77):
-        super(CLIP_Embedding, self).__init__()
+class CLIPLayer(nn.Module):
+    def __init__(self, n_head: int, n_embd: int):
+        super().__init__()
         
-        self.token_embedding = nn.Embedding(
-            num_embeddings=vocabulary_size,
-            embedding_dim=embedding_dim
-        )
-        
-        # positional_embeddings - will be learned during training as usual weights
-        self.positional_embeddings = nn.Parameter(
-            torch.zeros((sequence_length, embedding_dim))
-        )
-        
-    def forward(self, text_tokens: torch.Tensor) -> torch.Tensor:
-        # text_tokens = (batch_size, sequence_length)
-        
-        # (batch_size, sequence_length) -> (batch_size, sequence_length, embedding_dim)
-        text_tokens = self.token_embeddingz(text_tokens)
-        
-        # (batch_size, sequence_length, embedding_dim) + (sequence_length, embedding_dim) -> (batch_size, sequence_length, embedding_dim)
-        text_tokens = text_tokens + self.positional_embeddings
-        return text_tokens
+        # Pre-attention norm
+        self.layernorm_1 = nn.LayerNorm(n_embd)
+        # Self attention
+        self.attention = SelfAttention(n_head, n_embd)
+        # Pre-FNN norm
+        self.layernorm_2 = nn.LayerNorm(n_embd)
+        # Feedforward layer
+        self.linear_1 = nn.Linear(n_embd, 4 * n_embd)
+        self.linear_2 = nn.Linear(4 * n_embd, n_embd)
 
-class CLIP_Layer(nn.Module):
-    def __init__(self, num_heads: int = 12, embedding_dim: int = 768):
-        super(CLIP_Layer, self).__init__()
+    def forward(self, x):
+        # (Batch_Size, Seq_Len, Dim)
+        residue = x
         
-        self.layer_normalization_1 = nn.LayerNorm(normalized_shape=embedding_dim)
-        self.attention = SelfAttention(
-            num_heads=num_heads,
-            embedding_dim=embedding_dim
-        )
+        ### SELF ATTENTION ###
+
+        # (Batch_Size, Seq_Len, Dim) -> (Batch_Size, Seq_Len, Dim)
+        x = self.layernorm_1(x)
         
-        self.layer_normalization_2 = nn.LayerNorm(normalized_shape=embedding_dim)
-        
-        self.mlp_1 = nn.Linear(
-            in_features=embedding_dim,
-            out_features=embedding_dim * 4
-        )
-        
-        self.mlp_2 = nn.Linear(
-            in_features=embedding_dim * 4,
-            out_features=embedding_dim
-        )
-        
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
-        # x = (batch_size, sequence_length, embedding_dim)
-        
-        residual = x
-        
-        x = self.layer_normalizxation_1(x)
-        
+        # (Batch_Size, Seq_Len, Dim) -> (Batch_Size, Seq_Len, Dim)
         x = self.attention(x, causal_mask=True)
         
-        x += residual
+        # (Batch_Size, Seq_Len, Dim) + (Batch_Size, Seq_Len, Dim) -> (Batch_Size, Seq_Len, Dim)
+        x += residue
+
+        ### FEEDFORWARD LAYER ###
+        # Apply a feedforward layer where the hidden dimension is 4 times the embedding dimension. 
+
+        residue = x
+        # (Batch_Size, Seq_Len, Dim) -> (Batch_Size, Seq_Len, Dim)
+        x = self.layernorm_2(x)
         
-        residual = x
+        # (Batch_Size, Seq_Len, Dim) -> (Batch_Size, Seq_Len, 4 * Dim)
+        x = self.linear_1(x)
         
-        x = self.layer_normalization_2(x)
-        
-        x = self.mlp_1(x)
-        
+        # (Batch_Size, Seq_Len, 4 * Dim) -> (Batch_Size, Seq_Len, 4 * Dim)
         x = x * torch.sigmoid(1.702 * x)   # QuickGELU activation function
         
         # (Batch_Size, Seq_Len, 4 * Dim) -> (Batch_Size, Seq_Len, Dim)
         x = self.linear_2(x)
         
         # (Batch_Size, Seq_Len, Dim) + (Batch_Size, Seq_Len, Dim) -> (Batch_Size, Seq_Len, Dim)
-        x += residual
+        x += residue
 
         return x
 
-
 class CLIP(nn.Module):
     def __init__(self):
-        super(CLIP, self).__init__()
-        
-        # embedding exists for convert text data representation into high-dimensional vector space
-        self.embedding = CLIP_Embedding(
-            vocabulary_size=49408,
-            embedding_dim=768,
-            sequence_length=77
-        )
-        
+        super().__init__()
+        self.embedding = CLIPEmbedding(49408, 768, 77)
+
         self.layers = nn.ModuleList([
-            CLIP_Layer(
-                num_heads=12,
-                embedding_dim=768
-            )
-            for _ in range(12)
+            CLIPLayer(12, 768) for i in range(12)
         ])
-        
-        self.layer_normalization = nn.LayerNorm(normalized_shape=768)
+
+        self.layernorm = nn.LayerNorm(768)
     
-    def forward(self, text_tokens: torch.Tensor) -> torch.Tensor:
-        # text_tokens = (batch_size, sequence_length)
+    def forward(self, tokens: torch.LongTensor) -> torch.FloatTensor:
+        tokens = tokens.type(torch.long)
         
-        text_tokens = text_tokens.type(torch.long)
+        # (Batch_Size, Seq_Len) -> (Batch_Size, Seq_Len, Dim)
+        state = self.embedding(tokens)
+
+        # Apply encoder layers similar to the Transformer's encoder.
+        for layer in self.layers: 
+            # (Batch_Size, Seq_Len, Dim) -> (Batch_Size, Seq_Len, Dim)
+            state = layer(state)
+        # (Batch_Size, Seq_Len, Dim) -> (Batch_Size, Seq_Len, Dim)
+        output = self.layernorm(state)
         
-        # (batch, sequence_length) -> (batch, sequence_length, embedding_dim)
-        x = self.embedding(text_tokens)
-        
-        for layer in self.layers:
-            x = layer(x)
-            
-        x = self.layer_normalization(x)
-        return x 
+        return output

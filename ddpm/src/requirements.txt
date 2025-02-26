@@ -1,0 +1,9 @@
+datasets
+torch 
+torchvision
+numpy 
+matplotlib
+accelerate
+tqdm
+transformers
+lightning
