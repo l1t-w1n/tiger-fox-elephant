@@ -37,6 +37,7 @@ data/
 checkpoints/*
 !checkpoints/.gitkeep
 **/*.pth
+**/*.safetensors
 **/*.npz
 # Results and outputs
 results/figures/*
