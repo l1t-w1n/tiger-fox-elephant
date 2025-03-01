@@ -39,6 +39,7 @@ checkpoints/*
 **/*.pth
 **/*.safetensors
 **/*.npz
+weights/
 # Results and outputs
 results/figures/*
 results/metrics/*
