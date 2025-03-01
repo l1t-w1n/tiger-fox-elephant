@@ -18,17 +18,17 @@ project_root = Path.cwd()
 sys.path.append(str(project_root))
 
 class Config:
-    DATA_DIR = project_root / "data/diffusion/fox"
-    WEIGHTS_DIR = project_root / "weights/diffusion"
-    LOG_DIR = project_root / "logs/diffusion.v3"
-    output_dir = project_root / "diffusion_samples/diffusion.v3"
+    DATA_DIR = project_root / "data/diffusion/cat_face"
+    WEIGHTS_DIR = project_root / "weights/diffusion/diffusion.v3_cat"
+    LOG_DIR = project_root / "logs/diffusion.v3_cat"
+    output_dir = project_root / "diffusion_samples/diffusion.v3_cat"
     
     Path(WEIGHTS_DIR).mkdir(parents=True, exist_ok=True)
     Path(LOG_DIR).mkdir(parents=True, exist_ok=True)
     Path(output_dir).mkdir(parents=True, exist_ok=True)
     
     image_size = 128 
-    train_batch_size = 32
+    train_batch_size = 48
     eval_batch_size = 16 
     num_epochs = 50
     gradient_accumulation_steps = 1
@@ -90,12 +90,12 @@ def create_unet():
             "AttnDownBlock2D",
             "AttnDownBlock2D",
             "AttnDownBlock2D",
-            "AttnDownBlock2D",
             "DownBlock2D",
+            "AttnDownBlock2D",
         ),
         up_block_types=(
-            "UpBlock2D",
             "AttnUpBlock2D",
+            "UpBlock2D",
             "AttnUpBlock2D",
             "AttnUpBlock2D",
             "AttnUpBlock2D",
@@ -192,7 +192,7 @@ def main(checkpoint_path=None):
         dataset, 
         batch_size=config.train_batch_size, 
         shuffle=True, 
-        num_workers=os.cpu_count(),  # Dynamically set workers
+        num_workers=16,
         pin_memory=True
     )
     
