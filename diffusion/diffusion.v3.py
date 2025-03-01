@@ -28,14 +28,14 @@ class Config:
     Path(output_dir).mkdir(parents=True, exist_ok=True)
     
     image_size = 128 
-    train_batch_size = 16
+    train_batch_size = 32
     eval_batch_size = 16 
     num_epochs = 50
     gradient_accumulation_steps = 1
     learning_rate = 1e-4
-    lr_warmup_steps = 500
-    save_image_epochs = 2
-    save_model_epochs = 2
+    lr_warmup_steps = 1500
+    save_image_epochs = 5
+    save_model_epochs = 5
     mixed_precision = "fp16"
     scheduler_timesteps = 1000
     
@@ -84,11 +84,11 @@ def create_unet():
         in_channels=3,
         out_channels=3,
         layers_per_block=2,
-        block_out_channels=(128, 128, 256, 256, 512, 512),
+        block_out_channels=(64, 128, 256, 512, 512, 1024),
         down_block_types=(
             "DownBlock2D", 
-            "DownBlock2D",
-            "DownBlock2D",
+            "AttnDownBlock2D",
+            "AttnDownBlock2D",
             "AttnDownBlock2D",
             "AttnDownBlock2D",
             "DownBlock2D",
@@ -97,8 +97,8 @@ def create_unet():
             "UpBlock2D",
             "AttnUpBlock2D",
             "AttnUpBlock2D",
-            "UpBlock2D",
-            "UpBlock2D",
+            "AttnUpBlock2D",
+            "AttnUpBlock2D",
             "UpBlock2D",
         ),
     )
@@ -106,7 +106,6 @@ def create_unet():
 def evaluate(config, epoch, pipeline):
     images = pipeline(
         batch_size=config.eval_batch_size,
-        generator=torch.Generator(device=config.device).manual_seed(config.seed),
     ).images
 
     image_grid = diffusers.utils.make_image_grid(images, rows=4, cols=4)
