@@ -32,7 +32,7 @@ class Config:
     image_size = 128 
     train_batch_size = 48
     eval_batch_size = 16 
-    num_epochs = 125
+    num_epochs = 150
     gradient_accumulation_steps = 1
     learning_rate = 1e-5
     lr_warmup_steps = 500
@@ -145,7 +145,7 @@ def train_loop(config, model, noise_scheduler, optimizer, train_dataloader, lr_s
     )
 
     global_step = 0
-    for epoch in range(100, config.num_epochs):
+    for epoch in range(125, config.num_epochs):
         progress_bar = tqdm(total=len(train_dataloader), disable=not accelerator.is_local_main_process)
         progress_bar.set_description(f"Epoch {epoch}")
 
@@ -265,7 +265,7 @@ def accelerated_inference(config, num_iters=5):
         if accelerator.is_main_process:
             # Convert to PIL images
             images = (noise / 2 + 0.5).clamp(0, 1)
-            images = images.detach().cpu().permute(0, 2, 3, 0).numpy()
+            images = images.detach().cpu().permute(0, 2, 3, 1).numpy()
             images = (images * 255).round().astype("uint8")
             pil_images = [Image.fromarray(img) for img in images]
             
@@ -274,6 +274,6 @@ def accelerated_inference(config, num_iters=5):
             image_grid.save(f"{config.output_dir}/inference_{iter}.png")
     
 if __name__ == "__main__":
-    main(load_checkpoint = True)
+#    main(load_checkpoint = True)
     config = Config()
     accelerated_inference(config, num_iters=5)
