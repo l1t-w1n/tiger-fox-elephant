@@ -1,3 +1,5 @@
+### https://images.cv/dataset/cat-image-classification-dataset ###
+
 import torch
 import diffusers
 from diffusers import DDPMPipeline
@@ -30,9 +32,9 @@ class Config:
     image_size = 128 
     train_batch_size = 48
     eval_batch_size = 16 
-    num_epochs = 50
+    num_epochs = 100
     gradient_accumulation_steps = 1
-    learning_rate = 1e-4
+    learning_rate = 5e-5
     lr_warmup_steps = 1500
     save_image_epochs = 5
     save_model_epochs = 5
@@ -143,7 +145,7 @@ def train_loop(config, model, noise_scheduler, optimizer, train_dataloader, lr_s
     )
 
     global_step = 0
-    for epoch in range(config.num_epochs):
+    for epoch in range(50, config.num_epochs):
         progress_bar = tqdm(total=len(train_dataloader), disable=not accelerator.is_local_main_process)
         progress_bar.set_description(f"Epoch {epoch}")
 
@@ -185,7 +187,7 @@ def train_loop(config, model, noise_scheduler, optimizer, train_dataloader, lr_s
             if (epoch + 1) % config.save_model_epochs == 0 or epoch == config.num_epochs - 1:
                 pipeline.save_pretrained(config.WEIGHTS_DIR)
 
-def main(checkpoint_path=None):
+def main(load_checkpoint = False):
     config = Config()
     dataset = foxDataset(config.DATA_DIR)
     train_dataloader = DataLoader(
@@ -200,10 +202,10 @@ def main(checkpoint_path=None):
     with SummaryWriter(config.LOG_DIR) as writer:
         writer.add_scalar("model parameters", count_parameters(model))
     
-    if checkpoint_path:
-        pipeline = DDPMPipeline.from_pretrained(checkpoint_path)
+    if load_checkpoint:
+        pipeline = DDPMPipeline.from_pretrained(config.WEIGHTS_DIR)
         model = pipeline.unet
-        print(f"Loaded model from {checkpoint_path}")
+        print(f"Loaded model from {config.WEIGHTS_DIR}")
     
     noise_scheduler = DDPMScheduler(num_train_timesteps=config.scheduler_timesteps)
     optimizer = torch.optim.AdamW(model.parameters(), lr=config.learning_rate)
@@ -218,5 +220,20 @@ def main(checkpoint_path=None):
     
     train_loop(config, model, noise_scheduler, optimizer, train_dataloader, lr_scheduler)
     
+def infer_image(pipeline, output_dir, num_iters=1):
+    for i in range(num_iters):
+        images = pipeline(
+            batch_size=16
+        ).images
+        image_grid = diffusers.utils.make_image_grid(images, rows=4, cols=4)
+        image_grid.save(f"{output_dir}/inference{i}.png")
+    
 if __name__ == "__main__":
-    main()
+    main(load_checkpoint = True)
+    config = Config()
+    model = create_unet()
+    pipeline = DDPMPipeline.from_pretrained(config.WEIGHTS_DIR)
+    model = pipeline.unet
+    model = model.to(config.device)
+    print("Loaded model")
+    infer_image(pipeline, config.output_dir, num_iters=5)
