@@ -32,10 +32,10 @@ class Config:
     image_size = 128 
     train_batch_size = 48
     eval_batch_size = 16 
-    num_epochs = 100
+    num_epochs = 125
     gradient_accumulation_steps = 1
-    learning_rate = 5e-5
-    lr_warmup_steps = 1500
+    learning_rate = 1e-5
+    lr_warmup_steps = 500
     save_image_epochs = 5
     save_model_epochs = 5
     mixed_precision = "fp16"
@@ -145,7 +145,7 @@ def train_loop(config, model, noise_scheduler, optimizer, train_dataloader, lr_s
     )
 
     global_step = 0
-    for epoch in range(50, config.num_epochs):
+    for epoch in range(100, config.num_epochs):
         progress_bar = tqdm(total=len(train_dataloader), disable=not accelerator.is_local_main_process)
         progress_bar.set_description(f"Epoch {epoch}")
 
@@ -220,20 +220,60 @@ def main(load_checkpoint = False):
     
     train_loop(config, model, noise_scheduler, optimizer, train_dataloader, lr_scheduler)
     
-def infer_image(pipeline, output_dir, num_iters=1):
-    for i in range(num_iters):
-        images = pipeline(
-            batch_size=16
-        ).images
-        image_grid = diffusers.utils.make_image_grid(images, rows=4, cols=4)
-        image_grid.save(f"{output_dir}/inference{i}.png")
+def accelerated_inference(config, num_iters=5):
+    # Initialize accelerator
+    accelerator = Accelerator(mixed_precision=config.mixed_precision)
+    
+    # Load model and scheduler
+    pipeline = DDPMPipeline.from_pretrained(config.WEIGHTS_DIR)
+    print("Loaded model")
+    model = pipeline.unet
+    noise_scheduler = pipeline.scheduler
+    
+    # Prepare model with Accelerator
+    model = accelerator.prepare(model)
+    
+    # Generate samples
+    for iter in range(num_iters):
+        if accelerator.is_main_process:
+            print(f"Generation iteration {iter+1}/{num_iters}")
+            
+        # Sample noise on correct device
+        noise = torch.randn(
+            (config.eval_batch_size, 3, config.image_size, config.image_size),
+            device=accelerator.device
+        )
+        
+        # Denoising loop with progress bar
+        timesteps = noise_scheduler.timesteps
+        with tqdm(total=len(timesteps), disable=not accelerator.is_local_main_process) as pbar:
+            for t in timesteps:
+                # Model prediction (conditioned on timestep)
+                with torch.inference_mode():
+                    noise_pred = model(noise, t).sample
+
+                # Update sample with scheduler
+                noise = noise_scheduler.step(
+                    noise_pred, t, noise
+                ).prev_sample
+                pbar.update(1)
+        
+        # Gather all images across processes
+        noise = accelerator.gather(noise)
+        
+        # Save images only from main process
+        if accelerator.is_main_process:
+            # Convert to PIL images
+            images = (noise / 2 + 0.5).clamp(0, 1)
+            images = images.detach().cpu().permute(0, 2, 3, 0).numpy()
+            images = (images * 255).round().astype("uint8")
+            pil_images = [Image.fromarray(img) for img in images]
+            
+            # Create and save grid
+            image_grid = diffusers.utils.make_image_grid(pil_images, rows=4, cols=4)
+            image_grid.save(f"{config.output_dir}/inference_{iter}.png")
     
 if __name__ == "__main__":
     main(load_checkpoint = True)
     config = Config()
-    model = create_unet()
-    pipeline = DDPMPipeline.from_pretrained(config.WEIGHTS_DIR)
-    model = pipeline.unet
-    model = model.to(config.device)
-    print("Loaded model")
-    infer_image(pipeline, config.output_dir, num_iters=5)
+    accelerated_inference(config, num_iters=5)
