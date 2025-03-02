@@ -82,17 +82,15 @@ class foxDataset(Dataset):
 
 def create_unet():
     return UNet2DModel(
-        sample_size=Config.image_size,
+        sample_size=128,
         in_channels=3,
         out_channels=3,
         layers_per_block=2,
-        block_out_channels=(64, 128, 128, 256, 256, 512, 512, 1024, 2048),
+        block_out_channels=(64, 128, 256, 256, 512, 512, 1024),
         down_block_types=(
-            "DownBlock2D", 
+            "DownBlock2D",
             "AttnDownBlock2D",
-            "DownBlock2D", 
-            "AttnDownBlock2D",
-            "DownBlock2D", 
+            "DownBlock2D",
             "AttnDownBlock2D",
             "DownBlock2D",
             "AttnDownBlock2D",
@@ -106,10 +104,9 @@ def create_unet():
             "UpBlock2D",
             "AttnUpBlock2D",
             "UpBlock2D",
-            "AttnUpBlock2D",
-            "UpBlock2D",            
-        ),
+        )
     )
+
 
 def evaluate(config, epoch, pipeline):
     images = pipeline(
