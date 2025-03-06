@@ -179,6 +179,33 @@ class Trainer:
         torch.save(state, save_path / filename)
         print(f"Saved checkpoint to {save_path / filename}")
     
+    def load_checkpoint(self, checkpoint_path):
+        """
+        Load a checkpoint to resume training.
+        
+        Args:
+            checkpoint_path (str or Path): Path to the checkpoint file.
+        """
+        checkpoint_path = Path(checkpoint_path)
+        if not checkpoint_path.exists():
+            raise FileNotFoundError(f"Checkpoint file not found: {checkpoint_path}")
+
+        # Load checkpoint
+        checkpoint = torch.load(checkpoint_path, map_location=self.device)
+
+        # Restore training state
+        self.model.load_state_dict(checkpoint["model"])
+        self.optimizer.load_state_dict(checkpoint["optimizer"])
+        self.scheduler.load_state_dict(checkpoint["scheduler"])
+        self.best_psnr = checkpoint["best_psnr"]
+        self.current_iter = checkpoint["iter"]  # or checkpoint["iter"] + 1 if you prefer
+
+        print(
+            f"Checkpoint loaded from '{checkpoint_path}': "
+            f"iteration={self.current_iter}, best_psnr={self.best_psnr:.2f}"
+        )
+
+    
     def _count_parameters(self):
         return sum(p.numel() for p in self.model.parameters() if p.requires_grad)
 
@@ -271,7 +298,7 @@ class Trainer:
                     
                     # Update main progress bar
                     main_pbar.set_postfix({
-                        'loss': main_pbar.postfix['loss'],
+                        'loss': loss.item(),
                         'lr': f"{self.scheduler.get_last_lr()[0]:.2e}",
                         'psnr': f"{avg_psnr:.2f}",
                         'ssim': f"{avg_ssim:.4f}"
@@ -301,4 +328,5 @@ if __name__ == "__main__":
     # Initialize and run training
     config = Config()
     trainer = Trainer(config)
+    trainer.load_checkpoint(project_root / "FECAN/checkpoints/final.pth")
     trainer.train()
