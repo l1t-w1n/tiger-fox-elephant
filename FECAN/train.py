@@ -1,7 +1,7 @@
 import torch
 import torch.optim as optim
 from torch.utils.data import DataLoader
-from torch.optim.lr_scheduler import CosineAnnealingLR
+from torch.optim.lr_scheduler import OneCycleLR
 import cv2
 from tqdm import tqdm
 import numpy as np
@@ -30,7 +30,7 @@ class Trainer:
         # Loss and optimizer
         self.criterion = Loss(l1_weight=config.l1_weight, freq_weight=config.freq_weight)
         self.optimizer = optim.Adam(self.model.parameters(), lr=config.lr, betas=config.betas)
-        self.scheduler = optim.lr_scheduler.OneCycleLR(
+        self.scheduler = OneCycleLR(
             self.optimizer,
             max_lr=config.lr,
             total_steps=config.max_iter,
@@ -153,11 +153,11 @@ class Trainer:
             "best_psnr": self.best_psnr,
         }
         
-        filename = f"checkpoint_{self.current_iter:07d}.pth"
+        filename = f"checkpoint.pth"
         if best:
             filename = "best.pth"
         elif final:
-            filename = f"final_{self.current_iter:07d}.pth"
+            filename = f"final.pth"
             
         save_path = project_root / "FECAN" / "checkpoints"
         (save_path).mkdir(exist_ok=True)
@@ -232,10 +232,9 @@ class Trainer:
                     # Update main progress bar
                     main_pbar.set_postfix({
                         'loss': f"{accum_loss:.4f}",
-                        'lr': f"{self.scheduler.get_last_lr()[0]:.2e}",
-                        'psnr': main_pbar.postfix['psnr'],
-                        'ssim': main_pbar.postfix['ssim']
+                        'lr': f"{self.scheduler.get_last_lr()[0]:.2e}"
                     })
+
                     accum_loss = 0.0
 
                     # Validation and logging
