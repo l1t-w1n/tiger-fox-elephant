@@ -191,7 +191,7 @@ class Trainer:
             raise FileNotFoundError(f"Checkpoint file not found: {checkpoint_path}")
 
         # Load checkpoint
-        checkpoint = torch.load(checkpoint_path, map_location=self.device)
+        checkpoint = torch.load(checkpoint_path, map_location=self.device, weights_only=False)
 
         # Restore training state
         self.model.load_state_dict(checkpoint["model"])
