@@ -4,6 +4,7 @@ from torch.utils.data import DataLoader
 from torch.optim.lr_scheduler import CosineAnnealingLR
 import cv2
 from tqdm import tqdm
+import numpy as np
 import sys
 from pathlib import Path
 from torch.utils.tensorboard import SummaryWriter
@@ -29,12 +30,17 @@ class Trainer:
         # Loss and optimizer
         self.criterion = Loss(l1_weight=config.l1_weight, freq_weight=config.freq_weight)
         self.optimizer = optim.Adam(self.model.parameters(), lr=config.lr, betas=config.betas)
-        self.scheduler = CosineAnnealingLR(
-            self.optimizer, 
-            T_max=config.max_iter, 
-            eta_min=config.min_lr
+        self.scheduler = optim.lr_scheduler.OneCycleLR(
+            self.optimizer,
+            max_lr=config.lr,
+            total_steps=config.max_iter,
+            pct_start=0.05,
+            anneal_strategy='cos',
+            cycle_momentum=False,
+            div_factor=config.div_factor,
+            final_div_factor=config.final_div_factor
         )
-        self.scaler = torch.amp.GradScaler(self.device)
+        self.scaler = torch.amp.GradScaler(device=self.device)
         
         # Datasets and loaders
         self.train_dataset = SRDataset(config.train_hr_path, scale=config.scale_factor, train=True)
@@ -61,7 +67,7 @@ class Trainer:
         self.writer = SummaryWriter(log_dir=log_dir)
         
         # Training state
-        self.current_iter = 0
+        self.current_iter = 1
         self.best_psnr = 0.0
 
     def _log_images(self, lr, sr, hr, tag="train"):
@@ -81,15 +87,16 @@ class Trainer:
         sr_y = self._rgb_to_y(sr)
         hr_y = self._rgb_to_y(hr)
         
-        psnr = peak_signal_noise_ratio(hr_y, sr_y, data_range=1.0)
-        ssim = structural_similarity(hr_y, sr_y, data_range=1.0)
+        psnr = peak_signal_noise_ratio(hr_y, sr_y, data_range=255)
+        ssim = structural_similarity(hr_y, sr_y, data_range=255)
         return psnr, ssim
 
     def _rgb_to_y(self, img):
-        """Convert RGB tensor to Y channel (numpy)"""
+        """Convert RGB tensor to Y channel (0-255 range)"""
         img_np = img.squeeze(0).cpu().numpy().transpose(1, 2, 0)
+        img_np = (img_np * 255).clip(0, 255).astype(np.uint8)  # Denormalize
         ycbcr = cv2.cvtColor(img_np, cv2.COLOR_RGB2YCrCb)
-        return ycbcr[:, :, 0].clip(0, 1)
+        return ycbcr[:, :, 0].astype(np.float32)  # Keep as float32 for calculations
 
     def _validate(self, pbar=None):
         """Run validation with optional progress bar"""
@@ -136,7 +143,7 @@ class Trainer:
         self.model.train()
         return avg_psnr, avg_ssim
 
-    def _save_checkpoint(self, best=False):
+    def _save_checkpoint(self, best=False, final=False):
         """Save model checkpoint"""
         state = {
             "iter": self.current_iter,
@@ -149,126 +156,135 @@ class Trainer:
         filename = f"checkpoint_{self.current_iter:07d}.pth"
         if best:
             filename = "best.pth"
+        elif final:
+            filename = f"final_{self.current_iter:07d}.pth"
             
         save_path = project_root / "FECAN" / "checkpoints"
-        torch.save(state, save_path)
-        print(f"Saved checkpoint to {save_path}")
+        (save_path).mkdir(exist_ok=True)
+        
+        torch.save(state, save_path / filename)
+        print(f"Saved checkpoint to {save_path / filename}")
+    
+    def _count_parameters(self):
+        return sum(p.numel() for p in self.model.parameters() if p.requires_grad)
 
     def train(self):
         self.model.train()
+        print(f"The model has {self._count_parameters()} trainable parameters")
         
-        # Create main epoch progress bar
-        epoch_pbar = tqdm(
-            range(self.config.num_epochs),
-            desc="[Training Progress]",
-            unit="epoch",
+        # Create main progress bar
+        main_pbar = tqdm(
+            total=self.config.max_iter,
+            desc="[Training]",
+            unit="iter",
             dynamic_ncols=True,
             postfix={
                 'loss': 'N/A', 
                 'lr': 'N/A', 
                 'psnr': 'N/A', 
-                'ssim': 'N/A',
-                'epoch': '0/{}'.format(self.config.num_epochs)
+                'ssim': 'N/A'
             }
         )
 
+        # Create data loader iterator with restart capability
+        data_iter = iter(self.train_loader)
+        
+        # Gradient accumulation
+        grad_accum_steps = self.config.grad_accumulation
+        accum_loss = 0.0
+        
         try:
-            for epoch in epoch_pbar:
-                # Update epoch counter in progress bar
-                epoch_pbar.postfix['epoch'] = f'{epoch+1}/{self.config.num_epochs}'
-                
-                # Create batch progress bar
-                batch_pbar = tqdm(
-                    self.train_loader,
-                    desc=f"Epoch {epoch+1}/{self.config.num_epochs}",
-                    unit="batch",
-                    leave=False,
-                    dynamic_ncols=True,
-                    postfix={'batch_loss': 'N/A'}
-                )
+            while self.current_iter < self.config.max_iter + 1:
+                try:
+                    lr, hr = next(data_iter)
+                except StopIteration:
+                    # Restart the iterator when exhausted
+                    data_iter = iter(self.train_loader)
+                    lr, hr = next(data_iter)
 
-                epoch_loss = 0.0
-                processed_batches = 0
+                # Training step
+                lr = lr.to(self.device, non_blocking=True)
+                hr = hr.to(self.device, non_blocking=True)
 
-                for lr, hr in batch_pbar:
-                    # Training step
-                    lr = lr.to(self.device)
-                    hr = hr.to(self.device)
+                # Forward pass with mixed precision
+                with torch.amp.autocast(device_type=config.device, dtype=torch.float16):
+                    sr = self.model(lr)
+                    loss = self.criterion(sr, hr) / grad_accum_steps
 
-                    # Forward pass with mixed precision
-                    with torch.amp.autocast("cuda"):
-                        sr = self.model(lr)
-                        loss = self.criterion(sr, hr)
+                # Backward pass with gradient accumulation
+                self.scaler.scale(loss).backward()
+                accum_loss += loss.item()
 
-                    # Backward pass
-                    self.optimizer.zero_grad()
-                    self.scaler.scale(loss).backward()
+                # Update weights if accumulation steps completed
+                if (self.current_iter + 1) % grad_accum_steps == 0:
+                    # Gradient clipping
+                    self.scaler.unscale_(self.optimizer)
+                    torch.nn.utils.clip_grad_norm_(self.model.parameters(), 1.0)
+                    
+                    # Optimizer step
                     self.scaler.step(self.optimizer)
                     self.scaler.update()
+                    self.optimizer.zero_grad(set_to_none=True)
+                    
+                    # Learning rate scheduling
                     self.scheduler.step()
+                    
+                    # Update main progress bar
+                    main_pbar.set_postfix({
+                        'loss': f"{accum_loss:.4f}",
+                        'lr': f"{self.scheduler.get_last_lr()[0]:.2e}",
+                        'psnr': main_pbar.postfix['psnr'],
+                        'ssim': main_pbar.postfix['ssim']
+                    })
+                    accum_loss = 0.0
 
-                    # Update metrics
-                    batch_loss = loss.item()
-                    epoch_loss += batch_loss
-                    processed_batches += 1
-
-                    # Update batch progress
-                    batch_pbar.set_postfix({
-                        'batch_loss': f"{batch_loss:.4f}",
-                        'lr': f"{self.scheduler.get_last_lr()[0]:.2e}"
+                    # Validation and logging
+                    self.writer.add_scalar("Loss/train", loss.item() * grad_accum_steps, self.current_iter)
+                    self.writer.add_scalar("LR", self.scheduler.get_last_lr()[0], self.current_iter)
+                    
+                if self.current_iter % self.config.save_interval == 0:
+                    # Create validation progress bar
+                    val_pbar = tqdm(
+                        total=len(self.val_loader),
+                        desc=f"[Validation @ iter {self.current_iter}]",
+                        unit="img",
+                        position=1,
+                        leave=False,
+                        dynamic_ncols=True
+                    )
+                    
+                    avg_psnr, avg_ssim = self._validate(val_pbar)
+                    val_pbar.close()
+                    
+                    # Update main progress bar
+                    main_pbar.set_postfix({
+                        'loss': main_pbar.postfix['loss'],
+                        'lr': f"{self.scheduler.get_last_lr()[0]:.2e}",
+                        'psnr': f"{avg_psnr:.2f}",
+                        'ssim': f"{avg_ssim:.4f}"
                     })
 
-                    # Log training metrics
-                    if processed_batches % self.config.log_interval == 0:
-                        self.writer.add_scalar(
-                            "Loss/train_batch", 
-                            batch_loss, 
-                            epoch * len(self.train_loader) + processed_batches
-                        )
-
-                batch_pbar.close()
-
-                # Calculate epoch metrics
-                avg_epoch_loss = epoch_loss / len(self.train_loader)
-                self.writer.add_scalar("Loss/train_epoch", avg_epoch_loss, epoch+1)
-
-                # Run validation
-                val_pbar = tqdm(
-                    self.val_loader,
-                    desc=f"Validating Epoch {epoch+1}",
-                    leave=False,
-                    unit="img",
-                    dynamic_ncols=True
-                )
-                avg_psnr, avg_ssim = self._validate(val_pbar)
-                val_pbar.close()
-
-                # Update epoch progress bar
-                epoch_pbar.set_postfix({
-                    'loss': f"{avg_epoch_loss:.4f}",
-                    'lr': f"{self.scheduler.get_last_lr()[0]:.2e}",
-                    'psnr': f"{avg_psnr:.2f}",
-                    'ssim': f"{avg_ssim:.4f}"
-                })
-
                 # Save checkpoint
-                if (epoch + 1) % self.config.save_interval == 0 or (epoch + 1) == self.config.num_epochs:
+                if self.current_iter % self.config.save_interval == 0:
                     self._save_checkpoint()
 
-                # Early stopping check
+                # Update iteration counter
+                self.current_iter += 1
+                main_pbar.update(1)
+
+                # Early stopping
                 if self.current_iter >= self.config.max_iter:
                     break
 
         except KeyboardInterrupt:
-            tqdm.write("\nTraining interrupted! Saving current state...")
+            tqdm.write("\nTraining interrupted! Saving final state...")
         finally:
-            epoch_pbar.close()
+            main_pbar.close()
             self.writer.close()
+            self._save_checkpoint(final=True)
+            tqdm.write(f"Training completed. Best PSNR: {self.best_psnr:.2f} dB")
             
-if __name__ == "__main__":
-    # Create checkpoints directory
-    (project_root / "FECAN" / "checkpoints").mkdir(exist_ok=True)
-    
+if __name__ == "__main__":   
     # Initialize and run training
     config = Config()
     trainer = Trainer(config)
