@@ -35,22 +35,6 @@ class Trainer:
             betas=config.betas
         )
         
-        # (A) CosineAnnealing over total steps => step per iteration
-        # T_max is total number of iterations across all epochs
-        total_steps = config.num_epochs * len(self.train_dataset) // config.batch_size
-        self.scheduler = CosineAnnealingLR(
-            self.optimizer,
-            T_max=total_steps,  # step once per iteration
-            eta_min=config.min_lr
-        )
-        
-        # (B) Alternatively, if you want to step once per epoch, do:
-        # self.scheduler = CosineAnnealingLR(
-        #     self.optimizer,
-        #     T_max=config.num_epochs,  # step once per epoch
-        #     eta_min=config.min_lr
-        # )
-        
         self.scaler = torch.amp.GradScaler(device=self.device)
         
         # Datasets and loaders
@@ -81,6 +65,14 @@ class Trainer:
         self.current_epoch = 0
         self.global_step = 0  # Counts total iterations across epochs
         self.best_psnr = 0.0
+        total_steps = config.num_epochs * len(self.train_dataset) // config.batch_size
+        
+        self.scheduler = CosineAnnealingLR(
+            self.optimizer,
+            T_max=total_steps,
+            eta_min=config.min_lr
+        )
+
 
     def _log_images(self, lr, sr, hr, tag="train"):
         """
