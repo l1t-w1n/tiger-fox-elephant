@@ -12,14 +12,12 @@ class Config:
     Path(val_hr_path).mkdir(parents=True, exist_ok=True)
     
     batch_size = 20
-    grad_accumulation = 1
     num_workers = 16
     
     # Training
     scale_factor = 4
-    lr = 5e-4
-    div_factor = 10
-    final_div_factor = 50
+    lr = 1e-4
+    min_lr = 1e-7
     betas = (0.9, 0.99)
     max_iter = 2000
     save_interval = 100

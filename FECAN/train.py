@@ -1,7 +1,7 @@
 import torch
 import torch.optim as optim
 from torch.utils.data import DataLoader
-from torch.optim.lr_scheduler import OneCycleLR
+from torch.optim.lr_scheduler import CosineAnnealingLR
 import cv2
 from tqdm import tqdm
 import numpy as np
@@ -17,7 +17,7 @@ sys.path.append(str(project_root))
 from config import Config
 from dataset import SRDataset
 from loss import Loss
-from model import FECAN 
+from model import FECAN
 
 class Trainer:
     def __init__(self, config):
@@ -30,15 +30,10 @@ class Trainer:
         # Loss and optimizer
         self.criterion = Loss(l1_weight=config.l1_weight, freq_weight=config.freq_weight)
         self.optimizer = optim.Adam(self.model.parameters(), lr=config.lr, betas=config.betas)
-        self.scheduler = OneCycleLR(
+        self.scheduler = CosineAnnealingLR(
             self.optimizer,
-            max_lr=config.lr,
-            total_steps=config.max_iter,
-            pct_start=0.05,
-            anneal_strategy='cos',
-            cycle_momentum=False,
-            div_factor=config.div_factor,
-            final_div_factor=config.final_div_factor
+            T_max=config.max_iter,
+            eta_min=config.min_lr
         )
         self.scaler = torch.amp.GradScaler(device=self.device)
         
@@ -123,6 +118,7 @@ class Trainer:
                 lr = lr.to(self.device)
                 hr = hr.to(self.device)
                 
+                # Use mixed precision autocast
                 with torch.amp.autocast("cuda"):
                     sr = self.model(lr)
                 
@@ -131,7 +127,6 @@ class Trainer:
                 total_psnr += psnr
                 total_ssim += ssim
                 
-                # Update validation progress bar if provided
                 if pbar:
                     pbar.update(1)
                     pbar.set_postfix({
@@ -146,7 +141,7 @@ class Trainer:
         self.writer.add_scalar("Validation/PSNR", avg_psnr, self.current_iter)
         self.writer.add_scalar("Validation/SSIM", avg_ssim, self.current_iter)
         
-        # Log images
+        # Log images (only the last batch in this loop)
         self._log_images(lr, sr, hr, tag="val")
         
         # Save best model
@@ -167,14 +162,14 @@ class Trainer:
             "best_psnr": self.best_psnr,
         }
         
-        filename = f"checkpoint.pth"
+        filename = "checkpoint.pth"
         if best:
             filename = "best.pth"
         elif final:
-            filename = f"final.pth"
+            filename = "final.pth"
             
         save_path = project_root / "FECAN" / "checkpoints"
-        (save_path).mkdir(exist_ok=True)
+        save_path.mkdir(exist_ok=True)
         
         torch.save(state, save_path / filename)
         print(f"Saved checkpoint to {save_path / filename}")
@@ -205,7 +200,6 @@ class Trainer:
             f"iteration={self.current_iter}, best_psnr={self.best_psnr:.2f}"
         )
 
-    
     def _count_parameters(self):
         return sum(p.numel() for p in self.model.parameters() if p.requires_grad)
 
@@ -227,63 +221,55 @@ class Trainer:
             }
         )
 
-        # Create data loader iterator with restart capability
+        # Create an iterator over the training DataLoader
         data_iter = iter(self.train_loader)
         
-        # Gradient accumulation
-        grad_accum_steps = self.config.grad_accumulation
-        accum_loss = 0.0
-        
         try:
-            while self.current_iter < self.config.max_iter + 1:
+            while self.current_iter <= self.config.max_iter:
+                # If data_iter runs out, re-initialize
                 try:
                     lr, hr = next(data_iter)
                 except StopIteration:
-                    # Restart the iterator when exhausted
                     data_iter = iter(self.train_loader)
                     lr, hr = next(data_iter)
 
-                # Training step
                 lr = lr.to(self.device, non_blocking=True)
                 hr = hr.to(self.device, non_blocking=True)
 
                 # Forward pass with mixed precision
-                with torch.amp.autocast(device_type=config.device, dtype=torch.float16):
+                with torch.amp.autocast(device_type=self.config.device, dtype=torch.float16):
                     sr = self.model(lr)
-                    loss = self.criterion(sr, hr) / grad_accum_steps
+                    loss = self.criterion(sr, hr)
 
-                # Backward pass with gradient accumulation
+                # Backward pass
                 self.scaler.scale(loss).backward()
-                accum_loss += loss.item()
+                
+                # Gradient clipping
+                self.scaler.unscale_(self.optimizer)
+                torch.nn.utils.clip_grad_norm_(self.model.parameters(), 1.0)
 
-                # Update weights if accumulation steps completed
-                if (self.current_iter + 1) % grad_accum_steps == 0:
-                    # Gradient clipping
-                    self.scaler.unscale_(self.optimizer)
-                    torch.nn.utils.clip_grad_norm_(self.model.parameters(), 1.0)
-                    
-                    # Optimizer step
-                    self.scaler.step(self.optimizer)
-                    self.scaler.update()
-                    self.optimizer.zero_grad(set_to_none=True)
-                    
-                    # Learning rate scheduling
-                    self.scheduler.step()
-                    
-                    # Update main progress bar
-                    main_pbar.set_postfix({
-                        'loss': f"{accum_loss:.4f}",
-                        'lr': f"{self.scheduler.get_last_lr()[0]:.2e}"
-                    })
+                # Optimizer step
+                self.scaler.step(self.optimizer)
+                self.scaler.update()
+                self.optimizer.zero_grad(set_to_none=True)
 
-                    accum_loss = 0.0
+                # Scheduler step
+                self.scheduler.step()
 
-                    # Validation and logging
-                    self.writer.add_scalar("Loss/train", loss.item() * grad_accum_steps, self.current_iter)
-                    self.writer.add_scalar("LR", self.scheduler.get_last_lr()[0], self.current_iter)
-                    
+                # Update progress bar
+                main_pbar.set_postfix({
+                    'loss': f"{loss.item():.4f}",
+                    'lr': f"{self.scheduler.get_last_lr()[0]:.2e}"
+                })
+                main_pbar.update(1)
+
+                # TensorBoard logging
+                self.writer.add_scalar("Loss/train", loss.item(), self.current_iter)
+                self.writer.add_scalar("LR", self.scheduler.get_last_lr()[0], self.current_iter)
+
+                # Validation and checkpoint saving every `save_interval` iterations
                 if self.current_iter % self.config.save_interval == 0:
-                    # Create validation progress bar
+                    # Validation progress bar
                     val_pbar = tqdm(
                         total=len(self.val_loader),
                         desc=f"[Validation @ iter {self.current_iter}]",
@@ -292,28 +278,24 @@ class Trainer:
                         leave=False,
                         dynamic_ncols=True
                     )
-                    
                     avg_psnr, avg_ssim = self._validate(val_pbar)
                     val_pbar.close()
-                    
-                    # Update main progress bar
+
+                    # Update main progress bar with validation metrics
                     main_pbar.set_postfix({
-                        'loss': loss.item(),
+                        'loss': f"{loss.item():.4f}",
                         'lr': f"{self.scheduler.get_last_lr()[0]:.2e}",
                         'psnr': f"{avg_psnr:.2f}",
                         'ssim': f"{avg_ssim:.4f}"
                     })
 
-                # Save checkpoint
-                if self.current_iter % self.config.save_interval == 0:
+                    # Save checkpoint
                     self._save_checkpoint()
 
-                # Update iteration counter
                 self.current_iter += 1
-                main_pbar.update(1)
 
-                # Early stopping
-                if self.current_iter >= self.config.max_iter:
+                # If we've reached max_iter, stop training
+                if self.current_iter > self.config.max_iter:
                     break
 
         except KeyboardInterrupt:
@@ -323,7 +305,7 @@ class Trainer:
             self.writer.close()
             self._save_checkpoint(final=True)
             tqdm.write(f"Training completed. Best PSNR: {self.best_psnr:.2f} dB")
-            
+
 if __name__ == "__main__":   
     # Initialize and run training
     config = Config()
