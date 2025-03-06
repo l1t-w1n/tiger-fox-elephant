@@ -71,16 +71,30 @@ class Trainer:
         self.best_psnr = 0.0
 
     def _log_images(self, lr, sr, hr, tag="train"):
-        """Log image examples to TensorBoard"""
-        # Convert tensors to numpy arrays
+        """
+        Log image examples to TensorBoard.
+        Assumes `lr[0]`, `sr[0]`, and `hr[0]` each have shape (C,H,W) in [0,1].
+        """
+        # Convert tensors to NumPy arrays and move channels last => (H,W,C)
         lr_img = lr[0].cpu().detach().numpy().transpose(1, 2, 0)
         sr_img = sr[0].cpu().detach().numpy().transpose(1, 2, 0)
         hr_img = hr[0].cpu().detach().numpy().transpose(1, 2, 0)
-        
-        # Denormalize if needed (assuming input is [0,1])
-        self.writer.add_images(f"{tag}/LR", [lr_img], self.current_iter)
-        self.writer.add_images(f"{tag}/SR", [sr_img], self.current_iter)
-        self.writer.add_images(f"{tag}/HR", [hr_img], self.current_iter)
+
+        # Now transpose back to (C,H,W)
+        lr_img = lr_img.transpose(2, 0, 1)  # (3,H,W)
+        sr_img = sr_img.transpose(2, 0, 1)  # (3,H,W)
+        hr_img = hr_img.transpose(2, 0, 1)  # (3,H,W)
+
+        # Expand dimensions so we have (N,C,H,W) with N=1
+        lr_img = np.expand_dims(lr_img, axis=0)
+        sr_img = np.expand_dims(sr_img, axis=0)
+        hr_img = np.expand_dims(hr_img, axis=0)
+
+        # Finally, log them with dataformats="NCHW" so TB knows how to interpret it
+        self.writer.add_images(f"{tag}/LR", lr_img, self.current_iter, dataformats='NCHW')
+        self.writer.add_images(f"{tag}/SR", sr_img, self.current_iter, dataformats='NCHW')
+        self.writer.add_images(f"{tag}/HR", hr_img, self.current_iter, dataformats='NCHW')
+
 
     def _calculate_psnr_ssim(self, sr, hr):
         """Calculate PSNR and SSIM on Y channel"""
