@@ -29,15 +29,15 @@ class Config:
     Path(LOG_DIR).mkdir(parents=True, exist_ok=True)
     Path(output_dir).mkdir(parents=True, exist_ok=True)
     
-    image_size = 128 
-    train_batch_size = 16
+    image_size = 128
+    train_batch_size = 56
     eval_batch_size = 16 
-    num_epochs = 50
+    num_epochs = 150
     gradient_accumulation_steps = 1
     learning_rate = 1e-4
-    lr_warmup_steps = 1000
-    save_image_epochs = 5
-    save_model_epochs = 5
+    lr_warmup_steps = 500
+    save_image_epochs = 10
+    save_model_epochs = 10
     mixed_precision = "fp16"
     scheduler_timesteps = 1000
     
@@ -85,26 +85,27 @@ def create_unet():
         sample_size=128,
         in_channels=3,
         out_channels=3,
-        layers_per_block=2,
+        layers_per_block=3,
         block_out_channels=(64, 128, 256, 256, 512, 512, 1024),
         down_block_types=(
             "DownBlock2D",
             "AttnDownBlock2D",
             "DownBlock2D",
             "AttnDownBlock2D",
-            "DownBlock2D",
+            "AttnDownBlock2D",
             "AttnDownBlock2D",
             "AttnDownBlock2D",
         ),
         up_block_types=(
             "AttnUpBlock2D",
             "AttnUpBlock2D",
-            "UpBlock2D",
+            "AttnUpBlock2D",
             "AttnUpBlock2D",
             "UpBlock2D",
             "AttnUpBlock2D",
             "UpBlock2D",
-        )
+        ),
+        attention_head_dim = 16
     )
 
 
@@ -148,7 +149,7 @@ def train_loop(config, model, noise_scheduler, optimizer, train_dataloader, lr_s
     )
 
     global_step = 0
-    for epoch in range(config.num_epochs):
+    for epoch in range(50, config.num_epochs):
         progress_bar = tqdm(total=len(train_dataloader), disable=not accelerator.is_local_main_process)
         progress_bar.set_description(f"Epoch {epoch}")
 
@@ -277,6 +278,6 @@ def accelerated_inference(config, num_iters=5):
             image_grid.save(f"{config.output_dir}/inference_{iter}.png")
     
 if __name__ == "__main__":
-    main(load_checkpoint = False)
+    main(load_checkpoint = True)
     config = Config()
     accelerated_inference(config, num_iters=5)

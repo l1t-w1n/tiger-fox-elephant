@@ -11,9 +11,9 @@ class Config:
     Path(train_hr_path).mkdir(parents=True, exist_ok=True)
     Path(val_hr_path).mkdir(parents=True, exist_ok=True)
     
-    batch_size = 2
-    grad_accumulation = 4
-    num_workers = 20
+    batch_size = 20
+    grad_accumulation = 1
+    num_workers = 16
     
     # Training
     scale_factor = 4
@@ -21,8 +21,8 @@ class Config:
     div_factor = 10
     final_div_factor = 50
     betas = (0.9, 0.99)
-    max_iter = 1600000
-    save_interval = 5000
+    max_iter = 2000
+    save_interval = 100
     
     # Loss weights
     l1_weight = 1.0
