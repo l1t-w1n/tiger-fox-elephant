@@ -29,12 +29,28 @@ class Trainer:
         
         # Loss and optimizer
         self.criterion = Loss(l1_weight=config.l1_weight, freq_weight=config.freq_weight)
-        self.optimizer = optim.Adam(self.model.parameters(), lr=config.lr, betas=config.betas)
+        self.optimizer = optim.Adam(
+            self.model.parameters(),
+            lr=config.lr,
+            betas=config.betas
+        )
+        
+        # (A) CosineAnnealing over total steps => step per iteration
+        # T_max is total number of iterations across all epochs
+        total_steps = config.num_epochs * len(self.train_dataset) // config.batch_size
         self.scheduler = CosineAnnealingLR(
             self.optimizer,
-            T_max=config.max_iter,
+            T_max=total_steps,  # step once per iteration
             eta_min=config.min_lr
         )
+        
+        # (B) Alternatively, if you want to step once per epoch, do:
+        # self.scheduler = CosineAnnealingLR(
+        #     self.optimizer,
+        #     T_max=config.num_epochs,  # step once per epoch
+        #     eta_min=config.min_lr
+        # )
+        
         self.scaler = torch.amp.GradScaler(device=self.device)
         
         # Datasets and loaders
@@ -62,7 +78,8 @@ class Trainer:
         self.writer = SummaryWriter(log_dir=log_dir)
         
         # Training state
-        self.current_iter = 1
+        self.current_epoch = 0
+        self.global_step = 0  # Counts total iterations across epochs
         self.best_psnr = 0.0
 
     def _log_images(self, lr, sr, hr, tag="train"):
@@ -86,10 +103,9 @@ class Trainer:
         hr_img = np.expand_dims(hr_img, axis=0)
 
         # Finally, log them with dataformats="NCHW" so TB knows how to interpret it
-        self.writer.add_images(f"{tag}/LR", lr_img, self.current_iter, dataformats='NCHW')
-        self.writer.add_images(f"{tag}/SR", sr_img, self.current_iter, dataformats='NCHW')
-        self.writer.add_images(f"{tag}/HR", hr_img, self.current_iter, dataformats='NCHW')
-
+        self.writer.add_images(f"{tag}/LR", lr_img, self.global_step, dataformats='NCHW')
+        self.writer.add_images(f"{tag}/SR", sr_img, self.global_step, dataformats='NCHW')
+        self.writer.add_images(f"{tag}/HR", hr_img, self.global_step, dataformats='NCHW')
 
     def _calculate_psnr_ssim(self, sr, hr):
         """Calculate PSNR and SSIM on Y channel"""
@@ -107,18 +123,26 @@ class Trainer:
         ycbcr = cv2.cvtColor(img_np, cv2.COLOR_RGB2YCrCb)
         return ycbcr[:, :, 0].astype(np.float32)  # Keep as float32 for calculations
 
-    def _validate(self, pbar=None):
-        """Run validation with optional progress bar"""
+    def _validate(self):
+        """Run validation on the entire val_loader."""
         self.model.eval()
         total_psnr = 0.0
         total_ssim = 0.0
         
+        # Create a small TQDM for validation
+        val_pbar = tqdm(
+            total=len(self.val_loader),
+            desc=f"[Validation @ epoch {self.current_epoch}]",
+            unit="img",
+            leave=False,
+            dynamic_ncols=True
+        )
+        
         with torch.inference_mode():
-            for idx, (lr, hr) in enumerate(self.val_loader):
+            for (lr, hr) in self.val_loader:
                 lr = lr.to(self.device)
                 hr = hr.to(self.device)
                 
-                # Use mixed precision autocast
                 with torch.amp.autocast("cuda"):
                     sr = self.model(lr)
                 
@@ -127,24 +151,26 @@ class Trainer:
                 total_psnr += psnr
                 total_ssim += ssim
                 
-                if pbar:
-                    pbar.update(1)
-                    pbar.set_postfix({
-                        'current_psnr': f"{psnr:.2f}",
-                        'current_ssim': f"{ssim:.4f}"
-                    })
+                # Update validation progress bar
+                val_pbar.update(1)
+                val_pbar.set_postfix({
+                    'psnr': f"{psnr:.2f}",
+                    'ssim': f"{ssim:.4f}"
+                })
+
+        val_pbar.close()
 
         avg_psnr = total_psnr / len(self.val_loader)
         avg_ssim = total_ssim / len(self.val_loader)
-        
+
         # Log validation metrics
-        self.writer.add_scalar("Validation/PSNR", avg_psnr, self.current_iter)
-        self.writer.add_scalar("Validation/SSIM", avg_ssim, self.current_iter)
+        self.writer.add_scalar("Validation/PSNR", avg_psnr, self.global_step)
+        self.writer.add_scalar("Validation/SSIM", avg_ssim, self.global_step)
         
-        # Log images (only the last batch in this loop)
+        # Log images (for the last batch in this loop)
         self._log_images(lr, sr, hr, tag="val")
         
-        # Save best model
+        # Save the best model if needed
         if avg_psnr > self.best_psnr:
             self.best_psnr = avg_psnr
             self._save_checkpoint(best=True)
@@ -153,9 +179,10 @@ class Trainer:
         return avg_psnr, avg_ssim
 
     def _save_checkpoint(self, best=False, final=False):
-        """Save model checkpoint"""
+        """Save model checkpoint."""
         state = {
-            "iter": self.current_iter,
+            "epoch": self.current_epoch,
+            "global_step": self.global_step,
             "model": self.model.state_dict(),
             "optimizer": self.optimizer.state_dict(),
             "scheduler": self.scheduler.state_dict(),
@@ -185,130 +212,103 @@ class Trainer:
         if not checkpoint_path.exists():
             raise FileNotFoundError(f"Checkpoint file not found: {checkpoint_path}")
 
-        # Load checkpoint
-        checkpoint = torch.load(checkpoint_path, map_location=self.device, weights_only=False)
+        checkpoint = torch.load(checkpoint_path, map_location=self.device)
 
         # Restore training state
         self.model.load_state_dict(checkpoint["model"])
         self.optimizer.load_state_dict(checkpoint["optimizer"])
         self.scheduler.load_state_dict(checkpoint["scheduler"])
         self.best_psnr = checkpoint["best_psnr"]
-        self.current_iter = checkpoint["iter"]  # or checkpoint["iter"] + 1 if you prefer
+        
+        # We can restore epoch/step counters if desired
+        self.current_epoch = checkpoint["epoch"]
+        self.global_step = checkpoint["global_step"]
 
         print(
             f"Checkpoint loaded from '{checkpoint_path}': "
-            f"iteration={self.current_iter}, best_psnr={self.best_psnr:.2f}"
+            f"epoch={self.current_epoch}, best_psnr={self.best_psnr:.2f}"
         )
 
     def _count_parameters(self):
         return sum(p.numel() for p in self.model.parameters() if p.requires_grad)
 
     def train(self):
-        self.model.train()
         print(f"The model has {self._count_parameters()} trainable parameters")
-        
-        # Create main progress bar
-        main_pbar = tqdm(
-            total=self.config.max_iter,
-            desc="[Training]",
-            unit="iter",
-            dynamic_ncols=True,
-            postfix={
-                'loss': 'N/A', 
-                'lr': 'N/A', 
-                'psnr': 'N/A', 
-                'ssim': 'N/A'
-            }
-        )
 
-        # Create an iterator over the training DataLoader
-        data_iter = iter(self.train_loader)
-        
-        try:
-            while self.current_iter <= self.config.max_iter:
-                # If data_iter runs out, re-initialize
-                try:
-                    lr, hr = next(data_iter)
-                except StopIteration:
-                    data_iter = iter(self.train_loader)
-                    lr, hr = next(data_iter)
+        # Loop over epochs
+        for epoch in range(self.current_epoch + 1, self.config.num_epochs + 1):
+            self.current_epoch = epoch
 
+            # Create an epoch-level progress bar
+            epoch_pbar = tqdm(
+                enumerate(self.train_loader, start=1),
+                total=len(self.train_loader),
+                desc=f"Epoch [{epoch}/{self.config.num_epochs}]",
+                dynamic_ncols=True
+            )
+            
+            # Training phase
+            self.model.train()
+            for batch_idx, (lr, hr) in epoch_pbar:
                 lr = lr.to(self.device, non_blocking=True)
                 hr = hr.to(self.device, non_blocking=True)
 
-                # Forward pass with mixed precision
                 with torch.amp.autocast(device_type=self.config.device, dtype=torch.float16):
                     sr = self.model(lr)
                     loss = self.criterion(sr, hr)
 
-                # Backward pass
+                # Backward
                 self.scaler.scale(loss).backward()
-                
+
                 # Gradient clipping
                 self.scaler.unscale_(self.optimizer)
                 torch.nn.utils.clip_grad_norm_(self.model.parameters(), 1.0)
 
-                # Optimizer step
+                # Step optimizer
                 self.scaler.step(self.optimizer)
                 self.scaler.update()
                 self.optimizer.zero_grad(set_to_none=True)
-
-                # Scheduler step
+                
+                # LR scheduler step (if stepping each iteration)
                 self.scheduler.step()
 
                 # Update progress bar
-                main_pbar.set_postfix({
-                    'loss': f"{loss.item():.4f}",
-                    'lr': f"{self.scheduler.get_last_lr()[0]:.2e}"
+                epoch_pbar.set_postfix({
+                    "loss": f"{loss.item():.4f}",
+                    "lr": f"{self.scheduler.get_last_lr()[0]:.2e}"
                 })
-                main_pbar.update(1)
 
                 # TensorBoard logging
-                self.writer.add_scalar("Loss/train", loss.item(), self.current_iter)
-                self.writer.add_scalar("LR", self.scheduler.get_last_lr()[0], self.current_iter)
+                self.global_step += 1
+                self.writer.add_scalar("Loss/train", loss.item(), self.global_step)
+                self.writer.add_scalar("LR", self.scheduler.get_last_lr()[0], self.global_step)
+            
+            # --- End of one epoch ---
+            epoch_pbar.close()
+            
+            # Validate after each epoch
+            avg_psnr, avg_ssim = self._validate()
+            
+            # Log or print epoch-end info
+            tqdm.write(
+                f"Epoch {epoch}/{self.config.num_epochs} - "
+                f"PSNR: {avg_psnr:.2f} dB, SSIM: {avg_ssim:.4f}, Best PSNR: {self.best_psnr:.2f} dB"
+            )
 
-                # Validation and checkpoint saving every `save_interval` iterations
-                if self.current_iter % self.config.save_interval == 0:
-                    # Validation progress bar
-                    val_pbar = tqdm(
-                        total=len(self.val_loader),
-                        desc=f"[Validation @ iter {self.current_iter}]",
-                        unit="img",
-                        position=1,
-                        leave=False,
-                        dynamic_ncols=True
-                    )
-                    avg_psnr, avg_ssim = self._validate(val_pbar)
-                    val_pbar.close()
+            # (Optional) save checkpoint each epoch (or every N epochs)
+            if epoch % self.config.save_interval == 0:
+                self._save_checkpoint()
 
-                    # Update main progress bar with validation metrics
-                    main_pbar.set_postfix({
-                        'loss': f"{loss.item():.4f}",
-                        'lr': f"{self.scheduler.get_last_lr()[0]:.2e}",
-                        'psnr': f"{avg_psnr:.2f}",
-                        'ssim': f"{avg_ssim:.4f}"
-                    })
+        # End of all epochs
+        self._save_checkpoint(final=True)
+        self.writer.close()
+        print(f"Training completed. Best PSNR: {self.best_psnr:.2f} dB")
 
-                    # Save checkpoint
-                    self._save_checkpoint()
-
-                self.current_iter += 1
-
-                # If we've reached max_iter, stop training
-                if self.current_iter > self.config.max_iter:
-                    break
-
-        except KeyboardInterrupt:
-            tqdm.write("\nTraining interrupted! Saving final state...")
-        finally:
-            main_pbar.close()
-            self.writer.close()
-            self._save_checkpoint(final=True)
-            tqdm.write(f"Training completed. Best PSNR: {self.best_psnr:.2f} dB")
 
 if __name__ == "__main__":   
-    # Initialize and run training
     config = Config()
     trainer = Trainer(config)
-    trainer.load_checkpoint(project_root / "FECAN/checkpoints/final.pth")
+
+    # trainer.load_checkpoint(project_root / "FECAN/checkpoints/best.pth")
+
     trainer.train()

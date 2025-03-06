@@ -19,8 +19,8 @@ class Config:
     lr = 1e-4
     min_lr = 1e-7
     betas = (0.9, 0.99)
-    max_iter = 2000
-    save_interval = 100
+    num_epochs = 50
+    save_interval = 5
     
     # Loss weights
     l1_weight = 1.0
