@@ -40,6 +40,8 @@ checkpoints/*
 **/*.safetensors
 **/*.npz
 weights/
+FECAN/checkpoints/
+
 # Results and outputs
 results/figures/*
 results/metrics/*
