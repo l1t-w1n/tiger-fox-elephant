@@ -23,7 +23,7 @@ class Trainer:
     def __init__(self, config):
         self.config = config
         self.device = config.device
-        
+        self.num_val_images = config.num_val_images
         # Initialize model
         self.model = FECAN(upscale_factor=config.scale_factor).to(self.device)
         
@@ -38,8 +38,8 @@ class Trainer:
         self.scaler = torch.amp.GradScaler(device=self.device)
         
         # Datasets and loaders
-        self.train_dataset = SRDataset(config.train_hr_path, scale=config.scale_factor, train=True)
-        self.val_dataset = SRDataset(config.val_hr_path, scale=config.scale_factor, train=False)
+        self.train_dataset = SRDataset(config.train_hr_path_div2k, scale=config.scale_factor, train=True)
+        self.val_dataset = SRDataset(config.val_hr_path_div2k, scale=config.scale_factor, train=False)
         
         self.train_loader = DataLoader(
             self.train_dataset,
@@ -110,66 +110,67 @@ class Trainer:
 
     def _rgb_to_y(self, img):
         """Convert RGB tensor to Y channel (0-255 range)"""
+        img = (img * 0.5) + 0.5  # Denormalize to [0,1]
         img_np = img.squeeze(0).cpu().numpy().transpose(1, 2, 0)
         img_np = (img_np * 255).clip(0, 255).astype(np.uint8)  # Denormalize
         ycbcr = cv2.cvtColor(img_np, cv2.COLOR_RGB2YCrCb)
         return ycbcr[:, :, 0].astype(np.float32)  # Keep as float32 for calculations
 
     def _validate(self):
-        """Run validation on the entire val_loader."""
+        """Run validation on a subset of validation images."""
         self.model.eval()
         total_psnr = 0.0
         total_ssim = 0.0
+        num_val_images = self.config.num_val_images
         
-        # Create a small TQDM for validation
-        val_pbar = tqdm(
-            total=len(self.val_loader),
-            desc=f"[Validation @ epoch {self.current_epoch}]",
-            unit="img",
-            leave=False,
-            dynamic_ncols=True
-        )
+        total_val_batches = min(num_val_images, len(self.val_loader))
+        if total_val_batches == 0:
+            return 0.0, 0.0
+
+        val_pbar = tqdm(total=total_val_batches, desc=f"[Validation]", leave=False)
         
+        # Use first batch for logging example images (optional)
+        example_logged = False
+
         with torch.inference_mode():
-            for (lr, hr) in self.val_loader:
+            for i, (lr, hr) in enumerate(self.val_loader):
+                if i >= num_val_images:
+                    break
+                    
                 lr = lr.to(self.device)
                 hr = hr.to(self.device)
                 
                 with torch.amp.autocast("cuda"):
                     sr = self.model(lr)
                 
-                # Calculate metrics
                 psnr, ssim = self._calculate_psnr_ssim(sr, hr)
                 total_psnr += psnr
                 total_ssim += ssim
                 
-                # Update validation progress bar
+                # Log example images from the first batch only (optional)
+                if not example_logged:
+                    self._log_images(lr, sr, hr, tag="val")
+                    example_logged = True
+                
                 val_pbar.update(1)
-                val_pbar.set_postfix({
-                    'psnr': f"{psnr:.2f}",
-                    'ssim': f"{ssim:.4f}"
-                })
+                val_pbar.set_postfix({'psnr': f"{psnr:.2f}", 'ssim': f"{ssim:.4f}"})
 
         val_pbar.close()
 
-        avg_psnr = total_psnr / len(self.val_loader)
-        avg_ssim = total_ssim / len(self.val_loader)
+        avg_psnr = float(total_psnr / total_val_batches)
+        avg_ssim = float(total_ssim / total_val_batches)
 
-        # Log validation metrics
-        self.writer.add_scalar("Validation/PSNR", avg_psnr, self.global_step)
-        self.writer.add_scalar("Validation/SSIM", avg_ssim, self.global_step)
-        
-        # Log images (for the last batch in this loop)
-        self._log_images(lr, sr, hr, tag="val")
-        
-        # Save the best model if needed
+        # Update best metric with native float
         if avg_psnr > self.best_psnr:
             self.best_psnr = avg_psnr
-            self._save_checkpoint(best=True)
-        
-        self.model.train()
+
+        # Log validation metrics to TensorBoard
+        self.writer.add_scalar("PSNR/val", avg_psnr, self.global_step)
+        self.writer.add_scalar("SSIM/val", avg_ssim, self.global_step)
+
         return avg_psnr, avg_ssim
 
+    
     def _save_checkpoint(self, best=False, final=False):
         """Save model checkpoint."""
         state = {
@@ -204,15 +205,20 @@ class Trainer:
         if not checkpoint_path.exists():
             raise FileNotFoundError(f"Checkpoint file not found: {checkpoint_path}")
 
-        checkpoint = torch.load(checkpoint_path, map_location=self.device)
+        # Load with weights_only=True and allow necessary globals
+        with torch.serialization.safe_globals([np._core.multiarray.scalar]):
+            checkpoint = torch.load(
+                checkpoint_path,
+                map_location=self.device,
+                weights_only=True
+            )
 
         # Restore training state
         self.model.load_state_dict(checkpoint["model"])
         self.optimizer.load_state_dict(checkpoint["optimizer"])
         self.scheduler.load_state_dict(checkpoint["scheduler"])
-        self.best_psnr = checkpoint["best_psnr"]
+        self.best_psnr = float(checkpoint["best_psnr"])  # Ensure float conversion
         
-        # We can restore epoch/step counters if desired
         self.current_epoch = checkpoint["epoch"]
         self.global_step = checkpoint["global_step"]
 
@@ -225,7 +231,7 @@ class Trainer:
         return sum(p.numel() for p in self.model.parameters() if p.requires_grad)
 
     def train(self):
-        print(f"The model has {self._count_parameters()} trainable parameters")
+        print(f"The model has {self._count_parameters()} trainable parameters")       
 
         # Loop over epochs
         for epoch in range(self.current_epoch + 1, self.config.num_epochs + 1):
@@ -253,8 +259,8 @@ class Trainer:
                 self.scaler.scale(loss).backward()
 
                 # Gradient clipping
-                self.scaler.unscale_(self.optimizer)
-                torch.nn.utils.clip_grad_norm_(self.model.parameters(), 1.0)
+                #self.scaler.unscale_(self.optimizer)
+                #torch.nn.utils.clip_grad_norm_(self.model.parameters(), 1.0)
 
                 # Step optimizer
                 self.scaler.step(self.optimizer)
@@ -301,6 +307,6 @@ if __name__ == "__main__":
     config = Config()
     trainer = Trainer(config)
 
-    # trainer.load_checkpoint(project_root / "FECAN/checkpoints/best.pth")
+    trainer.load_checkpoint(project_root / "FECAN/checkpoints/checkpoint.pth")
 
     trainer.train()

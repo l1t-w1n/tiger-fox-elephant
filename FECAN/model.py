@@ -75,14 +75,11 @@ class ESA(nn.Module):
         self.gelu = nn.GELU()
 
     def forward(self, x):
-        identity = x  # Preserve original input
-        
-        # First convolution
         x = self.conv1(x)
         
         # Shuffle attention with enhanced residual
         sa_out = self.sa(x)
-        x = sa_out * identity + identity  # Element-wise multiply then add
+        x = sa_out * x + x  # Element-wise multiply then add
         
         # Second convolution
         x = self.conv2(x)
