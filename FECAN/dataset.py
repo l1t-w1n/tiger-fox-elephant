@@ -60,7 +60,7 @@ class SRDataset(Dataset):
         else:
             # For validation: no crop, no random rotation/flip
             self.transform = T.Compose([
-                T.RandomCrop((patch_size, patch_size)),
+                #T.RandomCrop((patch_size, patch_size)),
                 T.ToTensor(),
                 T.Normalize(mean=(0.5, 0.5, 0.5),
                             std=(0.5, 0.5, 0.5))

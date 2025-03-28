@@ -38,8 +38,8 @@ class Trainer:
         self.scaler = torch.amp.GradScaler(device=self.device)
         
         # Datasets and loaders
-        self.train_dataset = SRDataset(config.train_hr_path_div2k, scale=config.scale_factor, train=True)
-        self.val_dataset = SRDataset(config.val_hr_path_div2k, scale=config.scale_factor, train=False)
+        self.train_dataset = SRDataset(config.train_hr_path_flickr2k, scale=config.scale_factor, train=True)
+        self.val_dataset = SRDataset(config.val_hr_path_flickr2k, scale=config.scale_factor, train=False)
         
         self.train_loader = DataLoader(
             self.train_dataset,

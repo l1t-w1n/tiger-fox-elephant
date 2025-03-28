@@ -23,14 +23,14 @@ class Config:
     
     batch_size = 32
     num_workers = 20
-    num_val_images = 32
+    num_val_images = 2
     
     # Training
     scale_factor = 4
-    lr = 5e-4
+    lr = 1e-4
     min_lr = 1e-7
     betas = (0.9, 0.99)
-    num_epochs = 200
+    num_epochs = 100
     save_interval = 5
     
     # Loss weights
@@ -38,7 +38,7 @@ class Config:
     freq_weight = 0.1
     
     # Augmentation
-    patch_size = 64
+    patch_size = 128
     rot_angles = [0, 90, 180, 270]
     hflip_prob = 0.5
     
