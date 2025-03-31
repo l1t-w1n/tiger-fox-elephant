@@ -35,7 +35,7 @@ class Config:
     Path(output_dir).mkdir(parents=True, exist_ok=True)
     
     image_size = 128 
-    train_batch_size = 48
+    train_batch_size = 128
     eval_batch_size = 16 
     num_epochs = 300
     gradient_accumulation_steps = 1
@@ -150,7 +150,7 @@ def train_loop(config, model, noise_scheduler, optimizer, train_dataloader, lr_s
     )
 
     global_step = 0
-    for epoch in range(125, config.num_epochs):
+    for epoch in range(75, config.num_epochs):
         progress_bar = tqdm(total=len(train_dataloader), disable=not accelerator.is_local_main_process)
         progress_bar.set_description(f"Epoch {epoch}")
 
@@ -279,6 +279,6 @@ def accelerated_inference(config, num_iters=5):
             image_grid.save(f"{config.output_dir}/inference_{iter}.png")
     
 if __name__ == "__main__":
-    main(load_checkpoint = False)
+    main(load_checkpoint = True)
     config = Config()
     accelerated_inference(config, num_iters=5)

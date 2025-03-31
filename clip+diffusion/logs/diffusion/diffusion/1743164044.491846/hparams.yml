@@ -1,0 +1,9 @@
+gradient_accumulation_steps: 1
+image_size: 128
+learning_rate: 1.0e-05
+lr_warmup_steps: 500
+mixed_precision: fp16
+num_epochs: 300
+scheduler_timesteps: 1000
+seed: 42
+train_batch_size: 48
