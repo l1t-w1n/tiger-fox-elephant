@@ -37,7 +37,7 @@ class Config:
     image_size = 128 
     train_batch_size = 64
     eval_batch_size = 16 
-    num_epochs = 450
+    num_epochs = 400
     gradient_accumulation_steps = 1
     learning_rate = 1e-5
     lr_warmup_steps = 500
@@ -150,7 +150,7 @@ def train_loop(config, model, noise_scheduler, optimizer, train_dataloader, lr_s
     )
 
     global_step = 0
-    for epoch in range(300, config.num_epochs):
+    for epoch in range(350, config.num_epochs):
         progress_bar = tqdm(total=len(train_dataloader), disable=not accelerator.is_local_main_process)
         progress_bar.set_description(f"Epoch {epoch}")
 
