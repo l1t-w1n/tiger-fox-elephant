@@ -19,7 +19,7 @@ from diffusion import Config
 from transformers import CLIPModel, CLIPTokenizer
 
 
-def clip_guided_inference(config, prompt, guidance_scale=3.0, num_iters=5):
+def clip_guided_inference(config, prompt, guidance_scale=3.0, num_iters=2):
     """
     Generate images from an unconditional diffusion model, guided by CLIP (Hugging Face)
     to match `prompt`.
@@ -124,5 +124,5 @@ def clip_guided_inference(config, prompt, guidance_scale=3.0, num_iters=5):
 
 if __name__ == "__main__":
     config = Config()
-    clip_guided_inference(config, prompt="a photo of a cat", guidance_scale=3.0)
-    clip_guided_inference(config, prompt="a photo of a dog", guidance_scale=3.0)
+   #clip_guided_inference(config, prompt="a photo of a cat", guidance_scale=3.0)
+    clip_guided_inference(config, prompt="a photo of a dog", guidance_scale=8.0)
