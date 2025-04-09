@@ -41,7 +41,7 @@ def clip_guided_inference(config, prompt, guidance_scale=3.0, num_iters=5):
 
     # Tokenize the text prompt
     text_inputs = clip_tokenizer([prompt], return_tensors="pt").to(device)
-    with torch.inference_mode():
+    with torch.no_grad():
         text_embeds = clip_model.get_text_features(**text_inputs)
         text_embeds = text_embeds / text_embeds.norm(dim=-1, keepdim=True)
 
@@ -66,7 +66,7 @@ def clip_guided_inference(config, prompt, guidance_scale=3.0, num_iters=5):
         # 3b) Denoising loop
         for t in tqdm(scheduler.timesteps, desc=f"Inference run {iter_idx+1}"):
             # (i) UNet forward (no gradient needed)
-            with torch.inference_mode():
+            with torch.no_grad():
                 noise_pred = unet(sample, t).sample
 
             # (ii) Scheduler step => partial denoise
@@ -99,7 +99,7 @@ def clip_guided_inference(config, prompt, guidance_scale=3.0, num_iters=5):
 
             grad = torch.autograd.grad(loss, sample)[0]
 
-            with torch.inference_mode():
+            with torch.no_grad():
                 sample = sample - guidance_scale * grad
                 sample = sample.clamp(-1, 1)
 
