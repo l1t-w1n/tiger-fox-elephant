@@ -46,7 +46,7 @@ class CFG:
     dropout: float = 0.1
 
     # optimisation
-    batch: int = 512  # must be even (half cat / half dog)
+    batch: int = 128  # must be even (half cat / half dog)
     epochs: int = 30
     lr: float = 1e-4
     wd: float = 1e-2
@@ -196,7 +196,7 @@ class CLIP(nn.Module):
     def __init__(self, cfg: CFG, tokenizer):
         super().__init__()
         # vision
-        self.vision_backbone = models.resnet50(weights=None)
+        self.vision_backbone = models.resnet50(weights='IMAGENET1K_V1')
         vis_out = self.vision_backbone.fc.in_features
         self.vision_backbone.fc = nn.Identity()
         self.img_proj = nn.Linear(vis_out, cfg.proj_dim)
