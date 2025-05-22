@@ -331,6 +331,9 @@ def main():
             print(f"  ✔ new best cls_acc {best_cls:.3f} → {save_dir}")
 
     writer.close()
+    save_dir = cfg.out_dir / "final"
+    model.save_pretrained(save_dir)
+    print("✔ model saved to", save_dir)
     print("done | best class accuracy", best_cls)
 
 
