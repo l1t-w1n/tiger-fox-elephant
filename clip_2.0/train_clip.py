@@ -1,12 +1,19 @@
 from __future__ import annotations
 
-import argparse
+"""Train a tiny CLIP-style model that distinguishes cat vs. dog images.
+Final version with all stability tweaks applied:
+  • **dropout = 0.0** (very small corpus)
+  • **batch = 64** as requested
+  • **freeze ResNet-50** for the first 5 epochs, then unfreeze with a ×10 lower LR
+  • two param-groups in the optimiser (backbone vs. rest)
+  • correct use of `torch.cuda.amp` with auto-CUDA detection
+"""
+
 import math
 import os
 import random
 import time
-import sys
-from dataclasses import dataclass, asdict
+from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import List, Tuple
 
@@ -18,54 +25,52 @@ import torch.utils.data as data
 from PIL import Image
 from torch.optim import AdamW
 from torch.utils.data.sampler import Sampler
+from torch.utils.tensorboard import SummaryWriter
 from torchvision import models, transforms
 from tqdm import tqdm
-from torch.utils.tensorboard import SummaryWriter
-
-os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
 # -----------------------------------------------------------------------------
-# 1. Hyper‑parameter container -------------------------------------------------
+# 1. Hyper-parameter container -------------------------------------------------
 # -----------------------------------------------------------------------------
 
 project_root = Path.cwd()
-sys.path.append(str(project_root))
+
 
 @dataclass
 class CFG:
     # data
-    img_root: int = project_root / "data/diffusion/cat_and_dog_face"
+    img_root: Path = project_root / "data/diffusion/cat_and_dog_face"
     img_size: int = 224
 
     # model
-    device = torch.device("cuda")
     proj_dim: int = 256
     txt_width: int = 256
     txt_layers: int = 4
     txt_heads: int = 8
-    dropout: float = 0.1
+    dropout: float = 0.0  # <– zero dropout
 
     # optimisation
-    batch: int = 128  # must be even (half cat / half dog)
+    batch: int = 64  # even – half cats / half dogs
     epochs: int = 30
     lr: float = 1e-4
     wd: float = 1e-2
+    freeze_epochs: int = 5  # how long ResNet stays frozen
 
     # misc
     out_dir: Path = project_root / "clip_2.0/out"
     seed: int = 42
 
-    # templates
+    # caption templates
     cat_templates: Tuple[str, ...] = (
         "a photo of a cat",
-        "a close‑up photo of a cat face",
+        "a close-up photo of a cat face",
         "a studio portrait of a cat",
         "a cute domestic cat",
         "an image of a feline",
     )
     dog_templates: Tuple[str, ...] = (
         "a photo of a dog",
-        "a close‑up photo of a dog face",
+        "a close-up photo of a dog face",
         "a studio portrait of a dog",
         "a cute domestic dog",
         "an image of a canine",
@@ -86,283 +91,262 @@ class CFG:
 # 2. Dataset + balanced sampler ------------------------------------------------
 # -----------------------------------------------------------------------------
 
+
 class CatDogDataset(data.Dataset):
-    """Loads images from a single folder and makes synthetic captions."""
+    """Loads cat_####/dog_#### images and synthesises captions."""
 
     def __init__(self, cfg: CFG, train: bool, split: float = 0.8):
         self.cfg = cfg
         self.train = train
 
-        # discover files – expect cat_#### and dog_#### patterns
-        all_files = [p for p in cfg.img_root.iterdir() if p.is_file() and p.suffix.lower() in {".jpg", ".jpeg", ".png"}]
-        cats = sorted([p for p in all_files if p.stem.lower().startswith("cat_")])
-        dogs = sorted([p for p in all_files if p.stem.lower().startswith("dog_")])
-        assert cats and dogs, "No cat_* or dog_* images found in img_root"
+        files = [p for p in cfg.img_root.iterdir() if p.suffix.lower() in {".jpg", ".jpeg", ".png"}]
+        cats = sorted([p for p in files if p.stem.lower().startswith("cat_")])
+        dogs = sorted([p for p in files if p.stem.lower().startswith("dog_")])
+        if not cats or not dogs:
+            raise RuntimeError("No cat_* or dog_* images found in img_root")
 
-        # 80/20 stratified split
         split_c = int(len(cats) * split)
         split_d = int(len(dogs) * split)
-        if train:
-            self.samples = [(p, 0) for p in cats[:split_c]] + [(p, 1) for p in dogs[:split_d]]
-        else:
-            self.samples = [(p, 0) for p in cats[split_c:]] + [(p, 1) for p in dogs[split_d:]]
+        self.samples = (
+            [(p, 0) for p in cats[:split_c]] + [(p, 1) for p in dogs[:split_d]] if train else
+            [(p, 0) for p in cats[split_c:]] + [(p, 1) for p in dogs[split_d:]]
+        )
 
-        tfs = [
-            transforms.Resize(cfg.img_size + 16)
-        ]
-        
+        tf = [transforms.Resize(cfg.img_size + 16)]
         if train:
-            tfs += [
-                transforms.RandomCrop(cfg.img_size),
-                transforms.RandomHorizontalFlip(0.5),
-                transforms.ColorJitter(0.4, 0.4, 0.4, 0.1)
-            ]
+            tf += [transforms.RandomCrop(cfg.img_size),
+                   transforms.RandomHorizontalFlip(0.5),
+                   transforms.ColorJitter(0.4, 0.4, 0.4, 0.1)]
         else:
-            tfs += [
-                transforms.CenterCrop(cfg.img_size)
-            ]
-            
-        tfs += [
-            transforms.ToTensor(),
-            transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
-        ]
-        self.transform = transforms.Compose(tfs)
+            tf += [transforms.CenterCrop(cfg.img_size)]
+        tf += [transforms.ToTensor(),
+               transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])]
+        self.transform = transforms.Compose(tf)
 
     def __len__(self):
         return len(self.samples)
 
     def _make_caption(self, label: int) -> str:
-        template = random.choice(self.cfg.cat_templates if label == 0 else self.cfg.dog_templates)
+        tmpl = random.choice(self.cfg.cat_templates if label == 0 else self.cfg.dog_templates)
         adj = random.choice(self.cfg.adjectives)
-        return template.replace("a ", f"a {adj} ", 1)
+        return tmpl.replace("a ", f"a {adj} ", 1)
 
     def __getitem__(self, idx: int):
         path, label = self.samples[idx]
         img = Image.open(path).convert("RGB")
-        img = self.transform(img)
-        caption = self._make_caption(label)
-        return img, caption, label
+        return self.transform(img), self._make_caption(label), label
 
 
 class BalancedBatchSampler(Sampler[List[int]]):
-    """Ensures each batch has equal cat & dog images."""
+    """Produces equal cat/dog batches."""
 
     def __init__(self, labels: List[int], batch_size: int):
+        if batch_size % 2:
+            raise ValueError("batch size must be even")
+        self.batch = batch_size
         self.cat_idx = [i for i, y in enumerate(labels) if y == 0]
         self.dog_idx = [i for i, y in enumerate(labels) if y == 1]
-        self.batch = batch_size
-        assert self.batch % 2 == 0, "batch size must be even"
-        self.num_batches = min(len(self.cat_idx), len(self.dog_idx)) // (self.batch // 2)
+        self.num_batches = min(len(self.cat_idx), len(self.dog_idx)) // (batch_size // 2)
 
     def __len__(self):
         return self.num_batches
 
     def __iter__(self):
-        # reshuffle every epoch
         cat_perm = np.random.permutation(self.cat_idx)
         dog_perm = np.random.permutation(self.dog_idx)
         half = self.batch // 2
         for i in range(self.num_batches):
-            yield list(cat_perm[i * half:(i + 1) * half]) + list(dog_perm[i * half:(i + 1) * half])
+            yield list(cat_perm[i*half:(i+1)*half]) + list(dog_perm[i*half:(i+1)*half])
 
 
 # -----------------------------------------------------------------------------
 # 3. Model ---------------------------------------------------------------------
 # -----------------------------------------------------------------------------
 
+
 class TextEncoder(nn.Module):
-    """Tiny Transformer encoder for caption templates."""
-
-    def __init__(self, vocab_size: int, width: int, layers: int, heads: int, dropout: float):
+    def __init__(self, vocab: int, width: int, layers: int, heads: int, dropout: float, eos_id: int):
         super().__init__()
-        self.token_emb = nn.Embedding(vocab_size, width)
-        self.pos_emb = nn.Parameter(torch.randn(77, width) * 0.01)  # 77 tokens max as in CLIP
-        enc_layer = nn.TransformerEncoderLayer(d_model=width, nhead=heads, dropout=dropout, batch_first=True)
-        self.transformer = nn.TransformerEncoder(enc_layer, num_layers=layers)
-        self.ln_final = nn.LayerNorm(width)
+        self.eos_id = eos_id
+        self.token_emb = nn.Embedding(vocab, width)
+        self.pos_emb = nn.Parameter(torch.randn(77, width) * 0.01)
+        block = nn.TransformerEncoderLayer(width, heads, dropout=dropout, batch_first=True)
+        self.transformer = nn.TransformerEncoder(block, layers)
+        self.ln = nn.LayerNorm(width)
 
-    def forward(self, token_ids: torch.Tensor):
-        x = self.token_emb(token_ids) + self.pos_emb[: token_ids.size(1)]
-        x = self.transformer(x)
-        x = self.ln_final(x)
-
-        # first (left-most) occurrence of eos_token_id in each row
-        eos_id = self.token_emb.weight.size(0) - 1          # = tokenizer.eos_token_id
-        eos_pos = (token_ids == eos_id).float().argmax(dim=1)
-        return x[torch.arange(x.size(0)), eos_pos]
+    def forward(self, ids: torch.Tensor, mask: torch.Tensor):
+        x = self.token_emb(ids) + self.pos_emb[: ids.size(1)]
+        x = self.transformer(x, src_key_padding_mask=~mask.bool())
+        x = self.ln(x)
+        eos_pos = (ids == self.eos_id).float().argmax(1)
+        return x[torch.arange(x.size(0), device=x.device), eos_pos]
 
 
 class CLIP(nn.Module):
-    def __init__(self, cfg: CFG, tokenizer):
+    def __init__(self, cfg: CFG, tok):
         super().__init__()
         # vision
-        self.vision_backbone = models.resnet50(weights='IMAGENET1K_V1')
-        vis_out = self.vision_backbone.fc.in_features
-        self.vision_backbone.fc = nn.Identity()
+        self.backbone = models.resnet50(weights="IMAGENET1K_V1")
+        vis_out = self.backbone.fc.in_features
+        self.backbone.fc = nn.Identity()
         self.img_proj = nn.Linear(vis_out, cfg.proj_dim)
         # text
-        self.text_encoder = TextEncoder(tokenizer.vocab_size, cfg.txt_width, cfg.txt_layers, cfg.txt_heads, cfg.dropout)
+        self.text = TextEncoder(tok.vocab_size, cfg.txt_width, cfg.txt_layers, cfg.txt_heads, cfg.dropout, tok.eos_token_id)
         self.txt_proj = nn.Linear(cfg.txt_width, cfg.proj_dim)
-        # temperature parameter
-        self.logit_scale = nn.Parameter(torch.tensor(math.log(1 / 0.07)))
-        self.tokenizer = tokenizer
+        # temperature
+        self.logit_scale = nn.Parameter(torch.tensor(math.log(1/0.07)))
+        self.tok = tok
 
     def encode_image(self, img):
-        x = self.vision_backbone(img)
-        x = self.img_proj(x)
-        return F.normalize(x, dim=-1)
+        return F.normalize(self.img_proj(self.backbone(img)), dim=-1)
 
-    def encode_text(self, captions: List[str]):
-        tokens = self.tokenizer(captions, padding="max_length", max_length=77, truncation=True, return_tensors="pt")
-        token_ids = tokens["input_ids"].to(next(self.parameters()).device)
-        x = self.text_encoder(token_ids)
-        x = self.txt_proj(x)
-        return F.normalize(x, dim=-1)
+    def encode_text(self, caps: List[str]):
+        t = self.tok(caps, padding="max_length", max_length=77, truncation=True, return_tensors="pt").to(next(self.parameters()).device)
+        return F.normalize(self.txt_proj(self.text(t["input_ids"], t["attention_mask"])), dim=-1)
 
-    def forward(self, img, captions):
-        img_emb = self.encode_image(img)
-        txt_emb = self.encode_text(captions)
+    def forward(self, img, caps):
+        im, tx = self.encode_image(img), self.encode_text(caps)
         scale = self.logit_scale.exp()
-        logits_img = scale * img_emb @ txt_emb.t()
-        return logits_img, logits_img.t()
+        logits = scale * im @ tx.t()
+        return logits, logits.t()
 
 
 # -----------------------------------------------------------------------------
 # 4. Tokeniser helper ----------------------------------------------------------
 # -----------------------------------------------------------------------------
 
-try:
-    from transformers import AutoTokenizer  # type: ignore
-except ImportError:
-    AutoTokenizer = None
-
+from transformers import AutoTokenizer  # throws if missing – clear message
 
 def get_tokenizer():
     tok = AutoTokenizer.from_pretrained("openai/clip-vit-base-patch32")
-    if tok.pad_token is None:                       # add new [PAD] = id 0
-        tok.add_special_tokens({'pad_token': '[PAD]'})
+    if tok.pad_token is None:
+        tok.add_special_tokens({"pad_token": "[PAD]"})
     tok.padding_side = "right"
     return tok
 
 
+# -----------------------------------------------------------------------------
+# 5. Loss & metrics ------------------------------------------------------------
+# -----------------------------------------------------------------------------
+
+def clip_loss(l_i, l_t):
+    gt = torch.arange(l_i.size(0), device=l_i.device)
+    return (F.cross_entropy(l_i, gt) + F.cross_entropy(l_t, gt)) / 2
+
+
+def accuracy(l_i, l_t):
+    gt = torch.arange(l_i.size(0), device=l_i.device)
+    return ((l_i.argmax(1) == gt).float().mean() + (l_t.argmax(1) == gt).float().mean()).item() / 2
+
 
 # -----------------------------------------------------------------------------
-# 5. Loss, accuracy, train & eval ---------------------------------------------
+# 6. Training helpers ----------------------------------------------------------
 # -----------------------------------------------------------------------------
 
-def clip_loss(img_logits, txt_logits):
-    gt = torch.arange(img_logits.size(0), device=img_logits.device)
-    return (F.cross_entropy(img_logits, gt) + F.cross_entropy(txt_logits, gt)) / 2
-
-
-def accuracy(img_logits, txt_logits):
-    gt = torch.arange(img_logits.size(0), device=img_logits.device)
-    acc = (img_logits.argmax(1) == gt).float().mean()
-    acc += (txt_logits.argmax(1) == gt).float().mean()
-    return (acc / 2).item()
-
-
-# batch‑level training loop (logs every `log_interval` batches)
-
-def train_epoch(model, loader, opt, scaler, device, writer, epoch: int, log_interval: int = 50, global_step: int = 0):
+def train_epoch(model, loader, opt, scaler, device, writer, epoch, gstep):
     model.train()
-    tot_loss = tot_acc = 0.0
-    for batch_idx, (imgs, caps, _) in enumerate(tqdm(loader, leave=False)):
-        imgs = imgs.to(device, non_blocking=True)
+    tl = ta = 0.0
+    for bi, (imgs, caps, _) in enumerate(tqdm(loader, leave=False)):
+        imgs = imgs.to(device)
         opt.zero_grad(set_to_none=True)
-        with torch.autocast("cuda" if device.type == "cuda" else "cpu", dtype=torch.float16):
-            l_img, l_txt = model(imgs, caps)
-            loss = clip_loss(l_img, l_txt)
+        with torch.cuda.amp.autocast(enabled=device.type=="cuda", dtype=torch.float16):
+            li, lt = model(imgs, caps)
+            loss = clip_loss(li, lt)
         scaler.scale(loss).backward()
         scaler.step(opt)
         scaler.update()
-
-        batch_acc = accuracy(l_img.detach(), l_txt.detach())
-        tot_loss += loss.item() * imgs.size(0)
-        tot_acc += batch_acc * imgs.size(0)
-
-        # --- TensorBoard batch logging -------------------------------------
-        writer.add_scalar("Batch/Loss", loss.item(), global_step)
-        writer.add_scalar("Batch/Accuracy", batch_acc, global_step)
-        global_step += 1
-
-        if batch_idx % log_interval == 0:
-            tqdm.write(f"Epoch {epoch} | Batch {batch_idx}/{len(loader)} | loss {loss.item():.4f} | acc {batch_acc:.4f}")
-
+        ba = accuracy(li.detach(), lt.detach())
+        tl += loss.item() * imgs.size(0)
+        ta += ba * imgs.size(0)
+        writer.add_scalar("Batch/Loss", loss.item(), gstep)
+        writer.add_scalar("Batch/Acc", ba, gstep)
+        gstep += 1
     n = len(loader.dataset)
-    return (tot_loss / n, tot_acc / n, global_step)
+    return tl/n, ta/n, gstep
 
 
 @torch.inference_mode()
 def eval_epoch(model, loader, device):
     model.eval()
-    tot_acc = 0.0
+    acc = 0.0
     for imgs, caps, _ in tqdm(loader, leave=False):
-        imgs = imgs.to(device, non_blocking=True)
-        l_img, l_txt = model(imgs, caps)
-        tot_acc += accuracy(l_img, l_txt) * imgs.size(0)
-    return tot_acc / len(loader.dataset)
+        imgs = imgs.to(device)
+        li, lt = model(imgs, caps)
+        acc += accuracy(li, lt) * imgs.size(0)
+    return acc / len(loader.dataset)
 
 
 # -----------------------------------------------------------------------------
-# 6. Entry‑point ---------------------------------------------------------------
+# 7. Entry-point ---------------------------------------------------------------
 # -----------------------------------------------------------------------------
-
 
 def main():
     cfg = CFG()
     cfg.out_dir.mkdir(parents=True, exist_ok=True)
 
-    # reproducibility
+    # reproducibility ---------------------------------------------------------
     torch.manual_seed(cfg.seed)
     np.random.seed(cfg.seed)
     random.seed(cfg.seed)
 
-    device = CFG.device
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     writer = SummaryWriter(cfg.out_dir / "tb")
 
-    # datasets & loaders
-    train_ds = CatDogDataset(cfg, train=True)
-    val_ds   = CatDogDataset(cfg, train=False)
-    train_sampler = BalancedBatchSampler([lbl for _, lbl in train_ds.samples], cfg.batch)
-    train_loader  = data.DataLoader(train_ds, batch_sampler=train_sampler, num_workers=os.cpu_count(), pin_memory=True)
-    val_loader    = data.DataLoader(val_ds, batch_size=cfg.batch, shuffle=False, num_workers=os.cpu_count(), pin_memory=True)
+    # data --------------------------------------------------------------------
+    train_ds = CatDogDataset(cfg, True)
+    val_ds   = CatDogDataset(cfg, False)
+    train_loader = data.DataLoader(
+        train_ds,
+        batch_sampler=BalancedBatchSampler([y for _,_,y in train_ds.samples], cfg.batch),
+        num_workers=os.cpu_count(), pin_memory=True,
+    )
+    val_loader = data.DataLoader(
+        val_ds, batch_size=cfg.batch, shuffle=False,
+        num_workers=os.cpu_count(), pin_memory=True,
+    )
 
-    tokenizer = get_tokenizer()
-    model = CLIP(cfg, tokenizer).to(device)
+    # model -------------------------------------------------------------------
+    tok = get_tokenizer()
+    model = CLIP(cfg, tok).to(device)
 
-    opt = AdamW(model.parameters(), lr=cfg.lr, weight_decay=cfg.wd)
-    scaler = torch.amp.GradScaler("cuda") if device.type == "cuda" else torch.amp.GradScaler("cuda", enabled=False)
+    # freeze backbone initially ----------------------------------------------
+    for p in model.backbone.parameters():
+        p.requires_grad_(False)
 
-    global_step = 0
-    best_val_acc = 0.0
+    rest_params = [p for n,p in model.named_parameters() if not n.startswith("backbone.")]
+    opt = AdamW([
+        {"params": model.backbone.parameters(), "lr": cfg.lr * 0.1},  # will be enabled later
+        {"params": rest_params,              "lr": cfg.lr},
+    ], weight_decay=cfg.wd)
 
+    scaler = torch.cuda.amp.GradScaler(enabled=device.type=="cuda")
+
+    gstep = 0
+    best = 0.0
     for epoch in range(cfg.epochs):
-        start = time.time()
-        train_loss, train_acc, global_step = train_epoch(model, train_loader, opt, scaler, device, writer, epoch, global_step=global_step)
+        # unfreeze at the chosen epoch ---------------------------------------
+        if epoch == cfg.freeze_epochs:
+            for p in model.backbone.parameters():
+                p.requires_grad_(True)
+            print("🔓  Unfroze ResNet backbone")
+
+        t0 = time.time()
+        tr_loss, tr_acc, gstep = train_epoch(model, train_loader, opt, scaler, device, writer, epoch, gstep)
         val_acc = eval_epoch(model, val_loader, device)
-        duration = time.time() - start
-
-        # epoch‑level logging --------------------------------------------------
-        writer.add_scalar("Epoch/Loss", train_loss, epoch)
-        writer.add_scalar("Epoch/Train_Accuracy", train_acc, epoch)
-        writer.add_scalar("Epoch/Val_Accuracy", val_acc, epoch)
+        dt = (time.time()-t0)/60
+        writer.add_scalar("Epoch/Loss", tr_loss, epoch)
+        writer.add_scalar("Epoch/TrainAcc", tr_acc, epoch)
+        writer.add_scalar("Epoch/ValAcc", val_acc, epoch)
         writer.add_scalar("Epoch/LR", opt.param_groups[0]["lr"], epoch)
-
-        tqdm.write(f"Epoch {epoch:02d} | train_loss {train_loss:.4f} | train_acc {train_acc:.4f} | val_acc {val_acc:.4f} | {duration/60:.1f} min")
-
-        if val_acc > best_val_acc:
-            best_val_acc = val_acc
-            ckpt_path = cfg.out_dir / "best.pt"
-            torch.save({
-                "model": model.state_dict(),
-                "epoch": epoch,
-                "val_acc": val_acc,
-            }, ckpt_path)
-            tqdm.write(f"✔ Saved best checkpoint to {ckpt_path} (val_acc {val_acc:.4f})")
+        tqdm.write(f"Ep {epoch:02d} | train_loss {tr_loss:.4f} | train_acc {tr_acc:.4f} | val_acc {val_acc:.4f} | {dt:.1f} min")
+        if val_acc>best:
+            best=val_acc
+            ck=cfg.out_dir/"best.pt"
+            torch.save({"model":model.state_dict(),"epoch":epoch,"val_acc":val_acc}, ck)
+            tqdm.write(f"✔ Saved best ckpt to {ck} (val_acc {val_acc:.4f})")
 
     writer.close()
-    print("Training complete! Best val_acc:", best_val_acc)
+    print("Training complete! Best val_acc:", best)
 
 
 if __name__ == "__main__":
