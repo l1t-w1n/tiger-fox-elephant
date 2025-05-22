@@ -22,6 +22,7 @@ from torchvision import models, transforms
 from tqdm import tqdm
 from torch.utils.tensorboard import SummaryWriter
 
+os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
 # -----------------------------------------------------------------------------
 # 1. Hyper‑parameter container -------------------------------------------------
@@ -45,7 +46,7 @@ class CFG:
     dropout: float = 0.1
 
     # optimisation
-    batch: int = 32  # must be even (half cat / half dog)
+    batch: int = 512  # must be even (half cat / half dog)
     epochs: int = 30
     lr: float = 1e-4
     wd: float = 1e-2
