@@ -276,9 +276,9 @@ def accelerated_inference(config, num_iters=5):
             
             # Create and save grid
             image_grid = diffusers.utils.make_image_grid(pil_images, rows=4, cols=4)
-            image_grid.save(f"{config.output_dir}/inference_00{iter}.png")
+            image_grid.save(f"{config.output_dir}/inference_0{iter}.png")
     
 if __name__ == "__main__":
     #main(load_checkpoint = True)
     config = Config()
-    accelerated_inference(config, num_iters=2)
+    accelerated_inference(config, num_iters=50)
