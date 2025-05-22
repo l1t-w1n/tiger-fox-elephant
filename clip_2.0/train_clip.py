@@ -1,12 +1,19 @@
 from __future__ import annotations
 
 """Train a tiny CLIP‑style model that distinguishes cat vs. dog images.
-Final version with all stability tweaks applied:
-  • **dropout = 0.0** (very small corpus)
-  • **batch = 64** as requested
-  • **freeze ResNet‑50** for the first 5 epochs, then unfreeze with a ×10 lower LR
-  • two param‑groups in the optimiser (backbone vs. rest)
-  • correct use of `torch.cuda.amp` with auto‑CUDA detection
+
+Latest fixes (v final)
+----------------------
+* **Unique captions** → append the image filename stem to every caption so there
+  are no duplicate texts inside a batch. This boosts the InfoNCE signal on small
+  data sets.
+* **Clamp `logit_scale`** after every optimiser step to `[0, ln 100]` to avoid
+  early saturation or infinities.
+* **Complete script** – previous snippet was truncated; this is the full,
+  runnable file.
+
+Retains earlier tweaks: dropout = 0, batch = 64, freeze ResNet‑50 for 5 epochs,
+then unfreeze with LR × 0.1.
 """
 
 import math
@@ -16,6 +23,8 @@ import time
 from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import List, Tuple
+
+os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
 import numpy as np
 import torch
@@ -47,14 +56,14 @@ class CFG:
     txt_width: int = 256
     txt_layers: int = 4
     txt_heads: int = 8
-    dropout: float = 0.0  # <– zero dropout
+    dropout: float = 0.0
 
     # optimisation
-    batch: int = 64  # even – half cats / half dogs
+    batch: int = 64
     epochs: int = 30
     lr: float = 1e-4
     wd: float = 1e-2
-    freeze_epochs: int = 5  # how long ResNet stays frozen
+    freeze_epochs: int = 5
 
     # misc
     out_dir: Path = project_root / "clip_2.0/out"
@@ -63,14 +72,14 @@ class CFG:
     # caption templates
     cat_templates: Tuple[str, ...] = (
         "a photo of a cat",
-        "a close‑up photo of a cat face",
+        "a close-up photo of a cat face",
         "a studio portrait of a cat",
         "a cute domestic cat",
         "an image of a feline",
     )
     dog_templates: Tuple[str, ...] = (
         "a photo of a dog",
-        "a close‑up photo of a dog face",
+        "a close-up photo of a dog face",
         "a studio portrait of a dog",
         "a cute domestic dog",
         "an image of a canine",
@@ -93,7 +102,7 @@ class CFG:
 
 
 class CatDogDataset(data.Dataset):
-    """Loads cat_####/dog_#### images and synthesises captions."""
+    """Loads cat_####/dog_#### images and synthesises *unique* captions."""
 
     def __init__(self, cfg: CFG, train: bool, split: float = 0.8):
         self.cfg = cfg
@@ -126,37 +135,35 @@ class CatDogDataset(data.Dataset):
     def __len__(self):
         return len(self.samples)
 
-    def _make_caption(self, label: int) -> str:
+    def _make_caption(self, label: int, stem: str) -> str:
         tmpl = random.choice(self.cfg.cat_templates if label == 0 else self.cfg.dog_templates)
         adj = random.choice(self.cfg.adjectives)
-        return tmpl.replace("a ", f"a {adj} ", 1)
+        return tmpl.replace("a ", f"a {adj} ", 1) + f" ({stem})"
 
     def __getitem__(self, idx: int):
         path, label = self.samples[idx]
         img = Image.open(path).convert("RGB")
-        return self.transform(img), self._make_caption(label), label
+        return self.transform(img), self._make_caption(label, path.stem), label
 
 
 class BalancedBatchSampler(Sampler[List[int]]):
-    """Produces equal cat/dog batches."""
-
-    def __init__(self, labels: List[int], batch_size: int):
-        if batch_size % 2:
+    def __init__(self, labels: List[int], batch: int):
+        if batch % 2:
             raise ValueError("batch size must be even")
-        self.batch = batch_size
+        self.batch = batch
         self.cat_idx = [i for i, y in enumerate(labels) if y == 0]
         self.dog_idx = [i for i, y in enumerate(labels) if y == 1]
-        self.num_batches = min(len(self.cat_idx), len(self.dog_idx)) // (batch_size // 2)
+        self.num_batches = min(len(self.cat_idx), len(self.dog_idx)) // (batch // 2)
 
     def __len__(self):
         return self.num_batches
 
     def __iter__(self):
-        cat_perm = np.random.permutation(self.cat_idx)
-        dog_perm = np.random.permutation(self.dog_idx)
+        cats = np.random.permutation(self.cat_idx)
+        dogs = np.random.permutation(self.dog_idx)
         half = self.batch // 2
         for i in range(self.num_batches):
-            yield list(cat_perm[i*half:(i+1)*half]) + list(dog_perm[i*half:(i+1)*half])
+            yield list(cats[i*half:(i+1)*half]) + list(dogs[i*half:(i+1)*half])
 
 
 # -----------------------------------------------------------------------------
@@ -165,32 +172,32 @@ class BalancedBatchSampler(Sampler[List[int]]):
 
 
 class TextEncoder(nn.Module):
-    def __init__(self, vocab: int, width: int, layers: int, heads: int, dropout: float, eos_id: int):
+    def __init__(self, vocab, width, layers, heads, dropout, eos):
         super().__init__()
-        self.eos_id = eos_id
-        self.token_emb = nn.Embedding(vocab, width)
-        self.pos_emb = nn.Parameter(torch.randn(77, width) * 0.01)
+        self.eos = eos
+        self.token = nn.Embedding(vocab, width)
+        self.pos = nn.Parameter(torch.randn(77, width) * 0.01)
         block = nn.TransformerEncoderLayer(width, heads, dropout=dropout, batch_first=True)
-        self.transformer = nn.TransformerEncoder(block, layers)
+        self.tr = nn.TransformerEncoder(block, layers)
         self.ln = nn.LayerNorm(width)
 
-    def forward(self, ids: torch.Tensor, mask: torch.Tensor):
-        x = self.token_emb(ids) + self.pos_emb[: ids.size(1)]
-        x = self.transformer(x, src_key_padding_mask=~mask.bool())
+    def forward(self, ids, mask):
+        x = self.token(ids) + self.pos[: ids.size(1)]
+        x = self.tr(x, src_key_padding_mask=~mask.bool())
         x = self.ln(x)
-        eos_pos = (ids == self.eos_id).float().argmax(1)
+        eos_pos = (ids == self.eos).float().argmax(1)
         return x[torch.arange(x.size(0), device=x.device), eos_pos]
 
 
 class CLIP(nn.Module):
     def __init__(self, cfg: CFG, tok):
         super().__init__()
-        # vision
+        # vision branch
         self.backbone = models.resnet50(weights="IMAGENET1K_V1")
         vis_out = self.backbone.fc.in_features
         self.backbone.fc = nn.Identity()
         self.img_proj = nn.Linear(vis_out, cfg.proj_dim)
-        # text
+        # text branch
         self.text = TextEncoder(tok.vocab_size, cfg.txt_width, cfg.txt_layers, cfg.txt_heads, cfg.dropout, tok.eos_token_id)
         self.txt_proj = nn.Linear(cfg.txt_width, cfg.proj_dim)
         # temperature
@@ -200,9 +207,9 @@ class CLIP(nn.Module):
     def encode_image(self, img):
         return F.normalize(self.img_proj(self.backbone(img)), dim=-1)
 
-    def encode_text(self, caps: List[str]):
-        t = self.tok(caps, padding="max_length", max_length=77, truncation=True, return_tensors="pt").to(next(self.parameters()).device)
-        return F.normalize(self.txt_proj(self.text(t["input_ids"], t["attention_mask"])), dim=-1)
+    def encode_text(self, caps):
+        tokens = self.tok(caps, padding="max_length", max_length=77, truncation=True, return_tensors="pt").to(next(self.parameters()).device)
+        return F.normalize(self.txt_proj(self.text(tokens["input_ids"], tokens["attention_mask"])), dim=-1)
 
     def forward(self, img, caps):
         im, tx = self.encode_image(img), self.encode_text(caps)
@@ -215,7 +222,7 @@ class CLIP(nn.Module):
 # 4. Tokeniser helper ----------------------------------------------------------
 # -----------------------------------------------------------------------------
 
-from transformers import AutoTokenizer  # throws if missing – clear message
+from transformers import AutoTokenizer
 
 def get_tokenizer():
     tok = AutoTokenizer.from_pretrained("openai/clip-vit-base-patch32")
@@ -229,14 +236,14 @@ def get_tokenizer():
 # 5. Loss & metrics ------------------------------------------------------------
 # -----------------------------------------------------------------------------
 
-def clip_loss(l_i, l_t):
-    gt = torch.arange(l_i.size(0), device=l_i.device)
-    return (F.cross_entropy(l_i, gt) + F.cross_entropy(l_t, gt)) / 2
+def clip_loss(li, lt):
+    gt = torch.arange(li.size(0), device=li.device)
+    return (F.cross_entropy(li, gt) + F.cross_entropy(lt, gt)) / 2
 
 
-def accuracy(l_i, l_t):
-    gt = torch.arange(l_i.size(0), device=l_i.device)
-    return ((l_i.argmax(1) == gt).float().mean() + (l_t.argmax(1) == gt).float().mean()).item() / 2
+def accuracy(li, lt):
+    gt = torch.arange(li.size(0), device=li.device)
+    return ((li.argmax(1) == gt).float().mean() + (lt.argmax(1) == gt).float().mean()).item() / 2
 
 
 # -----------------------------------------------------------------------------
@@ -246,15 +253,18 @@ def accuracy(l_i, l_t):
 def train_epoch(model, loader, opt, scaler, device, writer, epoch, gstep):
     model.train()
     tl = ta = 0.0
-    for bi, (imgs, caps, _) in enumerate(tqdm(loader, leave=False)):
-        imgs = imgs.to(device)
+    for imgs, caps, _ in tqdm(loader, leave=False):
+        imgs = imgs.to(device, non_blocking=True)
         opt.zero_grad(set_to_none=True)
-        with torch.cuda.amp.autocast(enabled=device.type=="cuda", dtype=torch.float16):
+        with torch.cuda.amp.autocast(enabled=device.type == "cuda", dtype=torch.float16):
             li, lt = model(imgs, caps)
             loss = clip_loss(li, lt)
         scaler.scale(loss).backward()
         scaler.step(opt)
         scaler.update()
+        # clamp temperature ----------------------------------------------
+        model.logit_scale.data.clamp_(0, math.log(100))
+
         ba = accuracy(li.detach(), lt.detach())
         tl += loss.item() * imgs.size(0)
         ta += ba * imgs.size(0)
@@ -270,14 +280,14 @@ def eval_epoch(model, loader, device):
     model.eval()
     acc = 0.0
     for imgs, caps, _ in tqdm(loader, leave=False):
-        imgs = imgs.to(device)
+        imgs = imgs.to(device, non_blocking=True)
         li, lt = model(imgs, caps)
         acc += accuracy(li, lt) * imgs.size(0)
     return acc / len(loader.dataset)
 
 
 # -----------------------------------------------------------------------------
-# 7. Entry‑point ---------------------------------------------------------------
+# 7. Entry-point ---------------------------------------------------------------
 # -----------------------------------------------------------------------------
 
 def main():
@@ -295,6 +305,7 @@ def main():
     # data --------------------------------------------------------------------
     train_ds = CatDogDataset(cfg, True)
     val_ds   = CatDogDataset(cfg, False)
+
     train_loader = data.DataLoader(
         train_ds,
         batch_sampler=BalancedBatchSampler([lbl for _, lbl in train_ds.samples], cfg.batch),
@@ -309,22 +320,22 @@ def main():
     tok = get_tokenizer()
     model = CLIP(cfg, tok).to(device)
 
-    # freeze backbone initially ----------------------------------------------
+    # freeze backbone for first `freeze_epochs` ------------------------------
     for p in model.backbone.parameters():
         p.requires_grad_(False)
 
-    rest_params = [p for n,p in model.named_parameters() if not n.startswith("backbone.")]
+    # optimiser --------------------------------------------------------------
+    rest_params = [p for n, p in model.named_parameters() if not n.startswith("backbone.")]
     opt = AdamW([
-        {"params": model.backbone.parameters(), "lr": cfg.lr * 0.1},  # will be enabled later
-        {"params": rest_params,              "lr": cfg.lr},
+        {"params": model.backbone.parameters(), "lr": cfg.lr * 0.1},  # will be unfrozen later
+        {"params": rest_params,                 "lr": cfg.lr},
     ], weight_decay=cfg.wd)
 
-    scaler = torch.cuda.amp.GradScaler(enabled=device.type=="cuda")
+    scaler = torch.cuda.amp.GradScaler(enabled=device.type == "cuda")
 
     gstep = 0
-    best = 0.0
+    best  = 0.0
     for epoch in range(cfg.epochs):
-        # unfreeze at the chosen epoch ---------------------------------------
         if epoch == cfg.freeze_epochs:
             for p in model.backbone.parameters():
                 p.requires_grad_(True)
@@ -333,17 +344,19 @@ def main():
         t0 = time.time()
         tr_loss, tr_acc, gstep = train_epoch(model, train_loader, opt, scaler, device, writer, epoch, gstep)
         val_acc = eval_epoch(model, val_loader, device)
-        dt = (time.time()-t0)/60
+        dt = (time.time() - t0) / 60
+
         writer.add_scalar("Epoch/Loss", tr_loss, epoch)
         writer.add_scalar("Epoch/TrainAcc", tr_acc, epoch)
         writer.add_scalar("Epoch/ValAcc", val_acc, epoch)
         writer.add_scalar("Epoch/LR", opt.param_groups[0]["lr"], epoch)
+
         tqdm.write(f"Ep {epoch:02d} | train_loss {tr_loss:.4f} | train_acc {tr_acc:.4f} | val_acc {val_acc:.4f} | {dt:.1f} min")
-        if val_acc>best:
-            best=val_acc
-            ck=cfg.out_dir/"best.pt"
-            torch.save({"model":model.state_dict(),"epoch":epoch,"val_acc":val_acc}, ck)
-            tqdm.write(f"✔ Saved best ckpt to {ck} (val_acc {val_acc:.4f})")
+        if val_acc > best:
+            best = val_acc
+            ckpt = cfg.out_dir / "best.pt"
+            torch.save({"model": model.state_dict(), "epoch": epoch, "val_acc": val_acc}, ckpt)
+            tqdm.write(f"✔ Saved best ckpt to {ckpt} (val_acc {val_acc:.4f})")
 
     writer.close()
     print("Training complete! Best val_acc:", best)
@@ -351,4 +364,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
