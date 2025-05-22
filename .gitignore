@@ -37,6 +37,7 @@ data/
 checkpoints/*
 !checkpoints/.gitkeep
 **/*.pth
+**/*.pt
 **/*.safetensors
 **/*.npz
 weights/

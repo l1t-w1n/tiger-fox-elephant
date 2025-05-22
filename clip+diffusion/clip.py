@@ -15,7 +15,6 @@ project_root = Path.cwd()
 sys.path.append(str(project_root))
 from diffusion import Config
 
-# [!] NEW IMPORTS FROM transformers
 from transformers import CLIPModel, CLIPTokenizer
 
 
