@@ -234,8 +234,10 @@ def main():
             p.requires_grad_(True)
 
     # Sanity-check
-    n_trainable = sum(p.requires_grad for p in model.parameters())
-    print(f"✔ {n_trainable:,} parameters trainable")
+    n_train_elems   = sum(p.numel() for p in model.parameters() if p.requires_grad)
+    n_train_tensors = sum(p.requires_grad for p in model.parameters())
+    print(f"✔ {n_train_elems:,} parameters in {n_train_tensors} tensors are trainable")
+
 
     # ── Data ─────────────────────────────────────────────────────────────
     train_ds = CatDogDataset(cfg, train=True)
