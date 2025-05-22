@@ -73,8 +73,7 @@ class CFG:
     adjectives: Tuple[str, ...] = (
         "happy",
         "sleepy",
-        "brown",
-        "black‑and‑white",
+        "fluffy",
         "outdoor",
         "indoor",
     )
@@ -182,13 +181,15 @@ class TextEncoder(nn.Module):
         self.transformer = nn.TransformerEncoder(enc_layer, num_layers=layers)
         self.ln_final = nn.LayerNorm(width)
 
-    def forward(self, token_ids: torch.Tensor):  # (B, T)
+    def forward(self, token_ids: torch.Tensor):
         x = self.token_emb(token_ids) + self.pos_emb[: token_ids.size(1)]
         x = self.transformer(x)
         x = self.ln_final(x)
-        # embedding of last non‑pad token
-        eos = (token_ids != 0).sum(dim=1) - 1
-        return x[torch.arange(x.size(0)), eos]
+
+        # first (left-most) occurrence of eos_token_id in each row
+        eos_id = self.token_emb.weight.size(0) - 1          # = tokenizer.eos_token_id
+        eos_pos = (token_ids == eos_id).float().argmax(dim=1)
+        return x[torch.arange(x.size(0)), eos_pos]
 
 
 class CLIP(nn.Module):
@@ -237,12 +238,12 @@ except ImportError:
 
 
 def get_tokenizer():
-    if AutoTokenizer is None:
-        raise ImportError("Install transformers to use the BPE tokenizer")
     tok = AutoTokenizer.from_pretrained("openai/clip-vit-base-patch32")
-    tok.pad_token = tok.eos_token
+    if tok.pad_token is None:                       # add new [PAD] = id 0
+        tok.add_special_tokens({'pad_token': '[PAD]'})
     tok.padding_side = "right"
     return tok
+
 
 
 # -----------------------------------------------------------------------------
