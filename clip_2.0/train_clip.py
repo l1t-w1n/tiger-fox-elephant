@@ -1,12 +1,12 @@
 from __future__ import annotations
 
-"""Train a tiny CLIP-style model that distinguishes cat vs. dog images.
+"""Train a tiny CLIP‑style model that distinguishes cat vs. dog images.
 Final version with all stability tweaks applied:
   • **dropout = 0.0** (very small corpus)
   • **batch = 64** as requested
-  • **freeze ResNet-50** for the first 5 epochs, then unfreeze with a ×10 lower LR
-  • two param-groups in the optimiser (backbone vs. rest)
-  • correct use of `torch.cuda.amp` with auto-CUDA detection
+  • **freeze ResNet‑50** for the first 5 epochs, then unfreeze with a ×10 lower LR
+  • two param‑groups in the optimiser (backbone vs. rest)
+  • correct use of `torch.cuda.amp` with auto‑CUDA detection
 """
 
 import math
@@ -30,7 +30,7 @@ from torchvision import models, transforms
 from tqdm import tqdm
 
 # -----------------------------------------------------------------------------
-# 1. Hyper-parameter container -------------------------------------------------
+# 1. Hyper‑parameter container -------------------------------------------------
 # -----------------------------------------------------------------------------
 
 project_root = Path.cwd()
@@ -63,14 +63,14 @@ class CFG:
     # caption templates
     cat_templates: Tuple[str, ...] = (
         "a photo of a cat",
-        "a close-up photo of a cat face",
+        "a close‑up photo of a cat face",
         "a studio portrait of a cat",
         "a cute domestic cat",
         "an image of a feline",
     )
     dog_templates: Tuple[str, ...] = (
         "a photo of a dog",
-        "a close-up photo of a dog face",
+        "a close‑up photo of a dog face",
         "a studio portrait of a dog",
         "a cute domestic dog",
         "an image of a canine",
@@ -277,7 +277,7 @@ def eval_epoch(model, loader, device):
 
 
 # -----------------------------------------------------------------------------
-# 7. Entry-point ---------------------------------------------------------------
+# 7. Entry‑point ---------------------------------------------------------------
 # -----------------------------------------------------------------------------
 
 def main():
@@ -297,7 +297,7 @@ def main():
     val_ds   = CatDogDataset(cfg, False)
     train_loader = data.DataLoader(
         train_ds,
-        batch_sampler=BalancedBatchSampler([y for _,_,y in train_ds.samples], cfg.batch),
+        batch_sampler=BalancedBatchSampler([lbl for _, lbl in train_ds.samples], cfg.batch),
         num_workers=os.cpu_count(), pin_memory=True,
     )
     val_loader = data.DataLoader(
@@ -351,3 +351,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
