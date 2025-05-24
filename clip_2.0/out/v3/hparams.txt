@@ -1,0 +1,13 @@
+img_root=/home/l1t-w1n/tiger-fox-elephant/data/diffusion/cat_and_dog_face
+out_dir=/home/l1t-w1n/tiger-fox-elephant/clip_2.0/out/v3
+img_size=224
+batch=256
+accum=2
+epochs=6
+lr=4e-05
+wd=0.0001
+warmup_steps=500
+seed=42
+bf16=True
+cat_templates=('a photo of a cat', 'a close‑up photo of a cat face', 'a portrait of a cat', 'a headshot of a cat', 'a cat face', 'a cute feline closeup')
+dog_templates=('a photo of a dog', 'a close‑up photo of a dog face', 'a portrait of a dog', 'a headshot of a dog', 'a dog face', 'a cute canine closeup')
