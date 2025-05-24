@@ -59,20 +59,27 @@ def clip_guided(prompt: str):
         generator=g, device=DEVICE, dtype=torch.float16
     )
 
-    pipe.scheduler.set_timesteps(STEPS, DEVICE)
-    for i, t in enumerate(pipe.scheduler.timesteps):
+    N_STEPS = 50
+    pipe.scheduler.set_timesteps(N_STEPS, DEVICE)
+    timesteps = pipe.scheduler.timesteps
+
+    for i, t in enumerate(timesteps):
         lat_in = pipe.scheduler.scale_model_input(lat, t)
 
-        # --- UNet denoise prediction (no grad) ---
+        # ---- UNet prediction ----
         with torch.no_grad():
             noise_pred = pipe.unet(lat_in, t, encoder_hidden_states=sd_e).sample
             lat = pipe.scheduler.step(noise_pred, t, lat).prev_sample
 
-        # --- VAE decode + CLIP loss (with grad) ---
-        lat.requires_grad_(True)                       # attach graph
-        img = pipe.vae.decode(1/0.18215 * lat).sample  # [-1,1]
-        img_clip = (img / 2 + 0.5).clamp(0, 1)
-        img_224  = T.Resize((224,224))(img_clip)
+        # ---- CLIP guidance only on the last 60 % steps ----
+        pct = i / (N_STEPS - 1)
+        if pct < 0.4:
+            continue                        # skip early, let UNet do the heavy lift
+
+        lat.requires_grad_(True)
+        img = pipe.vae.decode(1/0.18215 * lat).sample
+        img_clamp = (img / 2 + 0.5).clamp(0, 1)
+        img_224   = T.Resize((224,224))(img_clamp)
 
         img_f = clip.get_image_features(pixel_values=img_224)
         img_f = torch.nn.functional.normalize(img_f, dim=-1)
@@ -80,14 +87,16 @@ def clip_guided(prompt: str):
         loss = -torch.cosine_similarity(img_f, clip_e).mean()
         grad = torch.autograd.grad(loss, lat)[0]
 
-        lat = (lat - GUIDE * grad).detach()            # gradient step
-        print(f"step {i+1:02d}/{STEPS}  clip-loss {loss.item():.4f}")
+        # σ-scaled step (smaller as noise level drops)
+        sigma = pipe.scheduler.sigmas[i]
+        lat = (lat - 10.0 * (sigma**2) * grad).detach()   # 10 = guidance strength
 
-    # final decode (no grad needed)
+        print(f"{i+1:02d}/{N_STEPS}  σ={sigma:.3f}  loss={loss.item():.4f}")
+
     with torch.no_grad():
         final = pipe.vae.decode(1/0.18215 * lat).sample[0]
-    final = (final / 2 + 0.5).clamp(0,1).cpu()
-    return T.ToPILImage()(final)
+    return T.ToPILImage()((final / 2 + 0.5).clamp(0,1).cpu())
+
 
 # ─────────────────── generate two images ───────────────────
 prompts = {
