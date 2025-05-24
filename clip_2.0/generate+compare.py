@@ -2,6 +2,7 @@
 # compare_guidance_no_cli.py
 # ----------------------------------------------------------
 import pathlib, os, torch, random, math, time
+import torchvision.transforms as T
 from tqdm.auto import tqdm
 from PIL import Image
 from diffusers import StableDiffusionPipeline, EulerAncestralDiscreteScheduler
@@ -46,13 +47,17 @@ if cache.exists():
     feats_ds = torch.load(cache)
 else:
     print("• encoding dataset images once (this may take a minute)")
-    tf224 = lambda im: resize((torch.tensor(im).float()/255).permute(2,0,1)/255, (224,224))
+    tf224 = T.Compose([
+        T.Resize(224, interpolation=T.InterpolationMode.BICUBIC),
+        T.CenterCrop(224),
+        T.ToTensor(),                # gives 0-1 float tensor C×H×W
+    ])
     feats = []
-    for img_path in tqdm(sorted(DATASET_DIR.glob("*.[jp][pn]*g"))):
-        im = Image.open(img_path).convert("RGB")
-        ten = tf224(im).unsqueeze(0).to(DEVICE)
-        f   = metric_clip.get_image_features(pixel_values=ten)
-        feats.append(torch.nn.functional.normalize(f, dim=-1).cpu())
+    img_paths = sorted(DATASET_DIR.glob("*.[jp][pn]*g"))
+    for pth in tqdm(img_paths, desc="embed-dataset"):
+        ten = tf224(Image.open(pth).convert("RGB")).unsqueeze(0).to(DEVICE)
+        feat = metric_clip.get_image_features(pixel_values=ten)
+        feats.append(torch.nn.functional.normalize(feat, dim=-1).cpu())
     feats_ds = torch.cat(feats)
     torch.save(feats_ds, cache)
 
