@@ -42,10 +42,10 @@ def rgb_to_y(img_tensor):
 
 class Trainer:
     def __init__(self, cfg: Config):
-        self.cfg   = cfg
-        self.step  = 0
+        self.cfg       = cfg
+        self.step      = 0
         self.best_psnr = 0.0
-        self.device = torch.device(cfg.device)
+        self.device    = torch.device(cfg.device)
 
         # ─ model ─
         self.model = FECAN(upscale_factor=cfg.scale_factor).to(self.device)
@@ -54,32 +54,31 @@ class Trainer:
         self.crit = Loss(cfg.l1_weight, cfg.freq_weight)
 
         # ─ optim/sched ─
-        self.opt = optim.Adam(self.model.parameters(), lr=cfg.lr, betas=cfg.betas)
-        self.sched = CosineAnnealingLR(self.opt,
-                                       T_max=cfg.total_iters,
-                                       eta_min=cfg.min_lr)
+        self.opt    = optim.Adam(self.model.parameters(), lr=cfg.lr, betas=cfg.betas)
+        self.sched  = CosineAnnealingLR(self.opt,
+                                        T_max=cfg.total_iters,
+                                        eta_min=cfg.min_lr)
         self.scaler = torch.amp.GradScaler("cuda")
 
         # ───── dataset split (single folder) ─────
-        full_ds = SRDataset(cfg.data, scale=cfg.scale_factor, train=True)
+        full_ds = SRDataset(cfg.hr_path, scale=cfg.scale_factor, train=True)
         all_idx = list(range(len(full_ds)))
         random.shuffle(all_idx)
 
-        val_idx   = all_idx[:cfg.val_subset]          # fixed 100-image subset
+        val_idx   = all_idx[:cfg.val_subset]    # fixed 100-image subset
         train_idx = all_idx[cfg.val_subset:]
 
         self.train_loader = DataLoader(
             Subset(full_ds, train_idx),
             batch_size=cfg.batch_size,
-            sampler=None,              # shuffle already done above
             shuffle=True,
             num_workers=cfg.num_workers,
             pin_memory=True,
             drop_last=True
         )
 
-        # validation dataset uses *full-image* transform (train=False)
-        val_ds_full = SRDataset(cfg.data, scale=cfg.scale_factor, train=False)
+        # validation dataset uses *full-image* transform
+        val_ds_full = SRDataset(cfg.hr_path, scale=cfg.scale_factor, train=False)
         self.val_loader = DataLoader(
             Subset(val_ds_full, val_idx),
             batch_size=1,
@@ -129,10 +128,15 @@ class Trainer:
 
     # ─────────────── training loop ─────────────── #
     def train(self):
-        cfg = self.cfg
+        cfg    = self.cfg
         loader = iter(self.train_loader)
 
-        pbar = tqdm(total=cfg.total_iters, dynamic_ncols=True, colour="cyan")
+        pbar = tqdm(
+            total=cfg.total_iters,
+            initial=self.step,              # resume progress bar
+            dynamic_ncols=True,
+            colour="cyan"
+        )
         while self.step < cfg.total_iters:
             try:
                 lr, hr = next(loader)
@@ -147,11 +151,12 @@ class Trainer:
                 sr   = self.model(lr)
                 loss = self.crit(sr, hr)
 
-            self.opt.zero_grad(set_to_none=True)
+            # AMP + correct update order
             self.scaler.scale(loss).backward()
-            self.scaler.step(self.opt)
-            self.scaler.update()
-            self.sched.step()
+            self.scaler.step(self.opt)                     # optimizer step
+            self.opt.zero_grad(set_to_none=True)           # clear grads
+            self.scaler.update()                           # scaler book-keeping
+            self.sched.step()                              # LR scheduler
 
             # ─ log scalars ─
             self.step += 1
@@ -203,16 +208,15 @@ class Trainer:
         torch.save(state, self.ckpt_dir / f"iter_{self.step:07}.pth")
         if best:
             torch.save(state, self.ckpt_dir / "best.pth")
-        
+
+    # ─────────────── resume from checkpoint ─────────────── #
     def load_checkpoint(self, ckpt_path: str):
         """
         Load training state from a checkpoint and resume.
         """
         ckpt = torch.load(ckpt_path, map_location=self.device)
-        # restore step & best PSNR
-        self.step       = ckpt['step']
-        self.best_psnr  = ckpt['best_psnr']
-        # restore model, optimizer, scheduler, scaler
+        self.step      = ckpt['step']
+        self.best_psnr = ckpt['best_psnr']
         self.model.load_state_dict( ckpt['model'] )
         self.opt.load_state_dict(   ckpt['opt']   )
         self.sched.load_state_dict( ckpt['sched'] )
@@ -227,6 +231,7 @@ if __name__ == "__main__":
 
     trainer = Trainer(Config())
 
+    # ← path to your last checkpoint (update as needed)
     ckpt_path = "FECAN/checkpoints/iter_0010000.pth"
     if Path(ckpt_path).exists():
         trainer.load_checkpoint(ckpt_path)
