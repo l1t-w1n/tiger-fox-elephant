@@ -15,6 +15,7 @@ import cv2
 import numpy as np
 import random
 import torch
+import torch.nn.functional as F
 import torch.optim as optim
 from torch.optim.lr_scheduler import CosineAnnealingLR
 from torch.utils.data import DataLoader, Subset
@@ -96,12 +97,27 @@ class Trainer:
 
     # ──────────────── helper: TensorBoard images ──────────────── #
     def _log_images(self, lr, sr, hr):
-        lr = (lr.clamp(-1, 1) + 1) / 2
-        sr = (sr.clamp(-1, 1) + 1) / 2
-        hr = (hr.clamp(-1, 1) + 1) / 2
-        self.tb.add_images("LR", lr, self.step)
-        self.tb.add_images("SR", sr, self.step)
-        self.tb.add_images("HR", hr, self.step)
+        with torch.no_grad():
+            # 1) Upsample LR back to HR resolution
+            lr_up = F.interpolate(
+                lr,
+                scale_factor=self.cfg.scale_factor,
+                mode='bicubic',
+                align_corners=False
+            )
+
+            # 2) Normalize [-1,1] → [0,1]
+            def norm(x):
+                return (x.clamp(-1, 1) + 1) * 0.5
+
+            lr_vis = norm(lr_up).cpu()
+            sr_vis = norm(sr).cpu()
+            hr_vis = norm(hr).cpu()
+
+            # 3) Log under flat tags
+            self.tb.add_images("LR", lr_vis, self.step, dataformats='NCHW')
+            self.tb.add_images("SR", sr_vis, self.step, dataformats='NCHW')
+            self.tb.add_images("HR", hr_vis, self.step, dataformats='NCHW')
 
     # ──────────────── validation ──────────────── #
     @torch.inference_mode()
@@ -227,7 +243,7 @@ class Trainer:
 # ──────────────────── entry ──────────────────── #
 
 if __name__ == "__main__":
-    torch.backends.cudnn.benchmark = True
+    #torch.backends.cudnn.benchmark = True
 
     trainer = Trainer(Config())
 
