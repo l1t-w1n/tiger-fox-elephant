@@ -203,10 +203,32 @@ class Trainer:
         torch.save(state, self.ckpt_dir / f"iter_{self.step:07}.pth")
         if best:
             torch.save(state, self.ckpt_dir / "best.pth")
+        
+    def load_checkpoint(self, ckpt_path: str):
+        """
+        Load training state from a checkpoint and resume.
+        """
+        ckpt = torch.load(ckpt_path, map_location=self.device)
+        # restore step & best PSNR
+        self.step       = ckpt['step']
+        self.best_psnr  = ckpt['best_psnr']
+        # restore model, optimizer, scheduler, scaler
+        self.model.load_state_dict( ckpt['model'] )
+        self.opt.load_state_dict(   ckpt['opt']   )
+        self.sched.load_state_dict( ckpt['sched'] )
+        self.scaler.load_state_dict(ckpt['scaler'])
+        print(f"Loaded checkpoint '{ckpt_path}' at step {self.step} (best PSNR={self.best_psnr:.2f})")
 
 
 # ──────────────────── entry ──────────────────── #
 
 if __name__ == "__main__":
     torch.backends.cudnn.benchmark = True
-    Trainer(Config()).train()
+
+    trainer = Trainer(Config())
+
+    ckpt_path = "FECAN/checkpoints/iter_0010000.pth"
+    if Path(ckpt_path).exists():
+        trainer.load_checkpoint(ckpt_path)
+
+    trainer.train()
