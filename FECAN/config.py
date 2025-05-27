@@ -26,7 +26,7 @@ class Config:
     min_lr = 1e-7
     betas = (0.9, 0.99)
     total_iters = 1_600_000
-    ckpt_every = 5_000
+    ckpt_every = 2_000
           
     tb_img_every   = 1_000   # log LR/SR/HR image triplet every N steps
     tb_hist_every  = 5_000   # log weight / grad histograms every N steps

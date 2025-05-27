@@ -104,7 +104,7 @@ class Trainer:
         self.tb.add_images("HR", hr, self.step)
 
     # ──────────────── validation ──────────────── #
-    @torch.no_grad()
+    @torch.inference_mode()
     def _validate(self):
         self.model.eval()
         psnr_tot = ssim_tot = 0.0
