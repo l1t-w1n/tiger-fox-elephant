@@ -62,7 +62,7 @@ class Trainer:
         self.scaler = torch.amp.GradScaler("cuda")
 
         # ───── dataset split (single folder) ─────
-        full_ds = SRDataset(cfg.hr_path, scale=cfg.scale_factor, train=True)
+        full_ds = SRDataset(cfg.data, scale=cfg.scale_factor, train=True)
         all_idx = list(range(len(full_ds)))
         random.shuffle(all_idx)
 
@@ -79,7 +79,7 @@ class Trainer:
         )
 
         # validation dataset uses *full-image* transform
-        val_ds_full = SRDataset(cfg.hr_path, scale=cfg.scale_factor, train=False)
+        val_ds_full = SRDataset(cfg.data, scale=cfg.scale_factor, train=False)
         self.val_loader = DataLoader(
             Subset(val_ds_full, val_idx),
             batch_size=1,
