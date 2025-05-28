@@ -104,3 +104,6 @@ wheels/
 .Trashes
 ehthumbs.db
 Thumbs.db
+# TensorBoard logs
+FECAN/logs/
+*.tfevents.*

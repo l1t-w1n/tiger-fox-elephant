@@ -248,7 +248,7 @@ if __name__ == "__main__":
     trainer = Trainer(Config())
 
     # ← path to your last checkpoint (update as needed)
-    ckpt_path = "FECAN/checkpoints/iter_0020000.pth"
+    ckpt_path = "FECAN/checkpoints/iter_0043500.pth"
     if Path(ckpt_path).exists():
         trainer.load_checkpoint(ckpt_path)
 
